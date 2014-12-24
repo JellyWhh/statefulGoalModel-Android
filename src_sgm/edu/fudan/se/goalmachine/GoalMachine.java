@@ -16,7 +16,7 @@ import edu.fudan.se.log.Log;
  * 它与<code>TaskMachine</code>的区别是， <code>TaskMachine</code>不能够再有subElement
  * 
  * @author whh
- *
+ * 
  */
 public abstract class GoalMachine extends ElementMachine {
 
@@ -39,8 +39,8 @@ public abstract class GoalMachine extends ElementMachine {
 	 *            当前目标的父目标，如果当前目标是root goal，这个值可以设置为null
 	 */
 	public GoalMachine(String name, int decomposition, int schedulerMethod,
-			ElementMachine parentGoal) {
-		super(name, parentGoal);
+			ElementMachine parentGoal, int level) {
+		super(name, parentGoal, level);
 		this.decomposition = decomposition;
 		this.schedulerMethod = schedulerMethod;
 		this.setDefaultPreCondition(new Condition("DEFAULTPRE"));

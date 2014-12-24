@@ -1,7 +1,7 @@
-package edu.fudan.se.app.maincontainer;
+package edu.fudan.se.maincontainer;
 
 import edu.fudan.se.R;
-import edu.fudan.se.app.mainfragments.MainFragment;
+import edu.fudan.se.mainfragments.MainFragment;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;

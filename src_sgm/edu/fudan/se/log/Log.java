@@ -132,6 +132,16 @@ public class Log {
 
 	}
 
+	/**
+	 * 往安卓的sd卡上写日志文件
+	 * 
+	 * @param fileName
+	 *            日志名字
+	 * @param content
+	 *            日志内容
+	 * @throws IOException
+	 *             异常
+	 */
 	private static void writeAndroidLog(String fileName, String content)
 			throws IOException {
 

@@ -4,8 +4,10 @@
 package edu.fudan.se.goalmodeldetails;
 
 import edu.fudan.se.R;
+import edu.fudan.se.goalmodel.GoalModel;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.Gravity;
@@ -14,18 +16,26 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 /**
  * @author whh
- *
+ * 
  */
 public class GoalModelDetailsFragment extends Fragment {
-	
+
+	private GoalModel goalModel; // 要显示详情的Goal Model
+
 	private SelectOrderPopupWindow popupWindow;
 	private ViewPager mPager;
 	private ImageView iv_gmdetails_back, iv_gmdetails_refresh,
 			iv_gmdetails_orders;
+	private TextView tv_gmdetails_name;
+
+	public GoalModelDetailsFragment(GoalModel goalModel) {
+		this.goalModel = goalModel;
+	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -36,7 +46,8 @@ public class GoalModelDetailsFragment extends Fragment {
 	@Override
 	public View onCreateView(final LayoutInflater inflater,
 			ViewGroup container, Bundle savedInstanceState) {
-		final View view = inflater.inflate(R.layout.fragment_goalmodeldetails, null);
+		final View view = inflater.inflate(R.layout.fragment_goalmodeldetails,
+				null);
 		iv_gmdetails_back = (ImageView) view
 				.findViewById(R.id.iv_gmdetails_back); // 返回按钮
 		iv_gmdetails_refresh = (ImageView) view
@@ -44,26 +55,35 @@ public class GoalModelDetailsFragment extends Fragment {
 		iv_gmdetails_orders = (ImageView) view
 				.findViewById(R.id.iv_gmdetails_orders); // 底部的显示命令按钮
 
+		tv_gmdetails_name = (TextView) view
+				.findViewById(R.id.tv_gmdetails_name); // goal model名字
+		tv_gmdetails_name.setText(this.goalModel.getName()); // 显示goal model的名字
+
 		mPager = (ViewPager) view
 				.findViewById(R.id.view_pager_goalmodeldetails);
-		mPager.setAdapter(new FragmentPagerAdapter(getChildFragmentManager()) {
-			Fragment goalTreeFragment = new GoalTreeFragment();
-
-			@Override
-			public int getCount() {
-				// TODO Auto-generated method stub
-				return 1;
-			}
-
-			@Override
-			public Fragment getItem(int arg0) {
-				// TODO Auto-generated method stub
-				return goalTreeFragment;
-			}
-		});
+		mPager.setAdapter(new MyFragmentPagerAdapter(this.goalModel,
+				getChildFragmentManager()));
 		mPager.setCurrentItem(0);
 
-		// 为显示命令按钮添加监听器
+		// 为按钮添加监听器
+		iv_gmdetails_back.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Toast.makeText(getActivity(), "back pressed", 2000).show();
+
+			}
+		});
+
+		iv_gmdetails_refresh.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Toast.makeText(getActivity(), "refresh pressed", 2000).show();
+
+			}
+		});
+
 		iv_gmdetails_orders.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -123,4 +143,31 @@ public class GoalModelDetailsFragment extends Fragment {
 
 		}
 	};
+
+	/**
+	 * 内部类，为了把GoalModel参数传进来
+	 * 
+	 * @author whh
+	 * 
+	 */
+	class MyFragmentPagerAdapter extends FragmentPagerAdapter {
+
+		Fragment goalTreeFragment;
+
+		public MyFragmentPagerAdapter(GoalModel goalModel, FragmentManager fm) {
+			super(fm);
+			goalTreeFragment = new GoalTreeFragment(goalModel);
+		}
+
+		@Override
+		public Fragment getItem(int arg0) {
+			return goalTreeFragment;
+		}
+
+		@Override
+		public int getCount() {
+			return 1;
+		}
+
+	}
 }

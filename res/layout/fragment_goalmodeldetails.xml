@@ -5,33 +5,45 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <GridLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:background="#eee"
-        android:padding="3dp" >
+        android:padding="5dp" >
 
         <ImageView
             android:id="@+id/iv_gmdetails_back"
             android:layout_width="60dp"
             android:layout_height="30dp"
             android:layout_gravity="left"
+            android:contentDescription="@string/app_name"
             android:src="@drawable/back" />
+
+        <TextView
+            android:id="@+id/tv_gmdetails_name"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_gravity="center"
+            android:gravity="center_vertical"
+            android:textAppearance="?android:textAppearanceMedium"
+            android:textColor="#333"
+            android:textStyle="bold" />
 
         <ImageView
             android:id="@+id/iv_gmdetails_refresh"
             android:layout_width="60dp"
             android:layout_height="30dp"
             android:layout_gravity="right"
+            android:contentDescription="@string/app_name"
             android:src="@drawable/refresh" />
-    </GridLayout>
+    </FrameLayout>
 
     <android.support.v4.view.ViewPager
         android:id="@+id/view_pager_goalmodeldetails"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:layout_gravity="center"
-        android:layout_margin="10dp"
+        android:layout_margin="5dp"
         android:layout_weight="1.0"
         android:background="#fff"
         android:flipInterval="30"
@@ -41,13 +53,14 @@
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:background="#eee"
-        android:padding="3dp" >
+        android:padding="5dp" >
 
         <ImageView
             android:id="@+id/iv_gmdetails_orders"
             android:layout_width="60dp"
             android:layout_height="30dp"
             android:layout_gravity="center"
+            android:contentDescription="@string/app_name"
             android:src="@drawable/order" />
     </GridLayout>
 

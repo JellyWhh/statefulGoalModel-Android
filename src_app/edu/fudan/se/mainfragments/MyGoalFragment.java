@@ -1,7 +1,7 @@
 /**
  * 
  */
-package edu.fudan.se.app.mainfragments;
+package edu.fudan.se.mainfragments;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +17,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import edu.fudan.se.goalmodel.GoalModel;
 import edu.fudan.se.goalmodeldetails.GoalModelDetailsActivity;
 import edu.fudan.se.R;
 
@@ -70,8 +71,10 @@ public class MyGoalFragment extends ListFragment {
 		if (this.goalmodels.get(position).equals("goalmodel1")) {
 //			FragmentTransaction transaction = getFragmentManager().beginTransaction();
 //			transaction.replace(R.id.fragment_main_container, new GoalTreeFragment()).commit();
+			GoalModel goalModel = new GoalModel("test");1
 			Intent intent = new Intent();
 			intent.setClass(getActivity(), GoalModelDetailsActivity.class);
+			intent.putExtra("goalmodel", goalModel);
 			startActivity(intent);
 		}
 	}

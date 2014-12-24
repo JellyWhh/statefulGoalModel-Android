@@ -3,26 +3,35 @@
  */
 package edu.fudan.se.goalmodeldetails;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.view.Menu;
 import android.view.MenuItem;
 import edu.fudan.se.R;
+import edu.fudan.se.goalmodel.GoalModel;
 
 /**
  * @author whh
  *
  */
 public class GoalModelDetailsActivity extends FragmentActivity {
+	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_goalmodeldetails);
+		
+		//获取传递过来的intent中的goal model
+		Intent intent = getIntent();
+		GoalModel goalModel = (GoalModel) intent.getSerializableExtra("goalmodel");
+		
+		
 		if (savedInstanceState == null) {
 			FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-			transaction.add(R.id.container, new GoalModelDetailsFragment()).commit();
+			transaction.add(R.id.container, new GoalModelDetailsFragment(goalModel)).commit();
 //			getFragmentManager().beginTransaction()
 //					.add(R.id.container, new MainFragment()).commit();
 		}

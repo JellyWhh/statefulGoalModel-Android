@@ -1,7 +1,7 @@
 /**
  * 
  */
-package edu.fudan.se.app.mainfragments;
+package edu.fudan.se.mainfragments;
 
 import edu.fudan.se.R;
 import android.support.v4.app.Fragment;
@@ -11,15 +11,15 @@ import android.view.View;
 import android.view.ViewGroup;
 
 /**
- * home标签页
+ * setting标签页
  * @author whh
  *
  */
-public class HomeFragment extends Fragment {
+public class SettingFragment extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		View rootView = inflater.inflate(R.layout.fragment_home, container,
+		View rootView = inflater.inflate(R.layout.fragment_setting, container,
 				false);
 		return rootView;
 	}

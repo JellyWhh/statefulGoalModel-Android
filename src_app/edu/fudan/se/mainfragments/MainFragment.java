@@ -1,7 +1,7 @@
 /**
  * 
  */
-package edu.fudan.se.app.mainfragments;
+package edu.fudan.se.mainfragments;
 
 import java.util.ArrayList;
 

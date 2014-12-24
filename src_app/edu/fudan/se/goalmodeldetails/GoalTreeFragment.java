@@ -7,7 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.fudan.se.R;
-
+import edu.fudan.se.goalmachine.ElementMachine;
+import edu.fudan.se.goalmachine.GoalMachine;
+import edu.fudan.se.goalmachine.State;
+import edu.fudan.se.goalmachine.TaskMachine;
+import edu.fudan.se.goalmodel.GoalModel;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -18,6 +22,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -25,71 +30,34 @@ import android.widget.Toast;
 
 /**
  * @author whh
- *
+ * 
  */
 public class GoalTreeFragment extends ListFragment {
-	
-	private ArrayList<TreeElement> allTreeElements = new ArrayList<TreeElement>();	//所有的tree节点
+
+	private GoalModel goalModel; // 要显示目标树的goal model
+
+	private ArrayList<ElementMachine> allTreeElements = new ArrayList<ElementMachine>(); // 所有的tree节点
 	private TreeViewAdapter treeViewAdapter = null;
-	
+
+	public GoalTreeFragment(GoalModel goalModel) {
+		this.goalModel = goalModel;
+	}
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		initialData();
-		treeViewAdapter = new TreeViewAdapter(getActivity(), R.layout.tree_view_item_layout,
-				allTreeElements);
-//		setListAdapter(treeViewAdapter);
-//		registerForContextMenu(getListView());
+		treeViewAdapter = new TreeViewAdapter(getActivity(),
+				R.layout.tree_view_item_layout, allTreeElements);
+		// setListAdapter(treeViewAdapter);
+		// registerForContextMenu(getListView());
 	}
-	
-	private void initialData(){
-		TreeElement TreeElement1=new TreeElement("01", "关键类", false	, false, "00", 0,false);
-		TreeElement TreeElement2=new TreeElement("02", "应用程序组件", false	, true, "00", 0,false);
-		TreeElement TreeElement3=new TreeElement("03", "Activity和任务", false	, true, "00", 0,false);
-		TreeElement TreeElement4=new TreeElement("04", "激活组件：intent", true	, false, "02", 1,false);
-		TreeElement TreeElement5=new TreeElement("05", "关闭组件", true	, false, "02", 1,false);
-		TreeElement TreeElement6=new TreeElement("06", "manifest文件", true	, false, "02", 1,false);
-		TreeElement TreeElement7=new TreeElement("07", "Intent过滤器", true	, false, "02", 1,false);
-		TreeElement TreeElement8=new TreeElement("08", "Affinity（吸引力）和新任务", true	, false, "03", 1,false);
-		TreeElement TreeElement9=new TreeElement("09", "加载模式", true	, true, "03", 1,false);
-		TreeElement TreeElement10=new TreeElement("10", "加载模式孩子1", true	, true, "09", 2,false);
-		TreeElement TreeElement11=new TreeElement("11", "加载模式孩子2", true	, true, "09", 2,false);
-		TreeElement TreeElement12=new TreeElement("12", "加载模式孩子2的孩子1", true	, false, "11", 3,false);
-		TreeElement TreeElement13=new TreeElement("13", "加载模式孩子2的孩子2", true	, false, "11", 3,false);
-		TreeElement TreeElement14=new TreeElement("14", "加载模式孩子1的孩子1", true	, false, "10", 3,false);
-		TreeElement TreeElement15=new TreeElement("15", "加载模式孩子1的孩子2", true	, false, "10", 3,false);
-		TreeElement TreeElement16=new TreeElement("16", "加载模式孩子1的孩子3", true	, false, "10", 3,false);
-		TreeElement TreeElement17=new TreeElement("17", "加载模式孩子1的孩子4", true	, false, "10", 3,false);
-		TreeElement TreeElement18=new TreeElement("18", "加载模式孩子1的孩子5", true	, false, "10", 3,false);
-		TreeElement TreeElement19=new TreeElement("19", "加载模式孩子1的孩子6", true	, false, "10", 3,false);
-//		visibleTreeElements.add(TreeElement1);
-//		visibleTreeElements.add(TreeElement2);
-//		visibleTreeElements.add(TreeElement3);
-	
-		
-		allTreeElements.add(TreeElement1);
-		allTreeElements.add(TreeElement2);
-		allTreeElements.add(TreeElement4);
-		allTreeElements.add(TreeElement5);
-		allTreeElements.add(TreeElement6);
-		allTreeElements.add(TreeElement7);
-		allTreeElements.add(TreeElement3);
-		allTreeElements.add(TreeElement8);
-		allTreeElements.add(TreeElement9);
-		allTreeElements.add(TreeElement10);
-		allTreeElements.add(TreeElement11);
-		allTreeElements.add(TreeElement12);
-		allTreeElements.add(TreeElement13);
-		allTreeElements.add(TreeElement14);
-		allTreeElements.add(TreeElement15);
-		allTreeElements.add(TreeElement16);
-		allTreeElements.add(TreeElement17);
-		allTreeElements.add(TreeElement18);
-		allTreeElements.add(TreeElement19);
+
+	private void initialData() {
+		allTreeElements = this.goalModel.getElementMachines();
 	}
-	
-	
+
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
@@ -99,39 +67,38 @@ public class GoalTreeFragment extends ListFragment {
 		getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 		// showDetails(mCurCheckPosition);
 	}
-	
-	
+
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
-		if (!allTreeElements.get(position).isHasChild()) {	//没有子节点
-			Toast.makeText(getActivity().getApplicationContext() , allTreeElements.get(position).getTitle(), 2000).show();
-			return;
-		}
+		Toast.makeText(getActivity().getApplicationContext(),
+				"clicked " + allTreeElements.get(position).getName(), 2000)
+				.show();
 	}
 }
 
 /**
  * 内部类，adapter
+ * 
  * @author whh
- *
+ * 
  */
-class TreeViewAdapter extends ArrayAdapter<TreeElement> {
+class TreeViewAdapter extends ArrayAdapter<ElementMachine> {
 
 	private LayoutInflater mInflater;
-	private List<TreeElement> treeElements;
-	private Bitmap mIconUnFold; // 展开
-	private Bitmap mIconFold; // 折叠
+	private List<ElementMachine> treeElements;
+	private Bitmap iconAND; // and分解
+	private Bitmap iconOR; // or分解
 
 	public TreeViewAdapter(Context context, int textViewResourceId,
-			List<TreeElement> treeElements) {
+			List<ElementMachine> treeElements) {
 		super(context, textViewResourceId, treeElements);
 		this.mInflater = LayoutInflater.from(context);
 		this.treeElements = treeElements;
-		this.mIconUnFold = BitmapFactory.decodeResource(context.getResources(),
-				R.drawable.tree_view_icon_unfold);
-		this.mIconFold = BitmapFactory.decodeResource(context.getResources(),
-				R.drawable.tree_view_icon_fold);
+		this.iconAND = BitmapFactory.decodeResource(context.getResources(),
+				R.drawable.tree_view_icon_and);
+		this.iconOR = BitmapFactory.decodeResource(context.getResources(),
+				R.drawable.tree_view_icon_or);
 	}
 
 	@Override
@@ -140,7 +107,7 @@ class TreeViewAdapter extends ArrayAdapter<TreeElement> {
 	}
 
 	@Override
-	public TreeElement getItem(int position) {
+	public ElementMachine getItem(int position) {
 		return this.treeElements.get(position);
 	}
 
@@ -156,10 +123,14 @@ class TreeViewAdapter extends ArrayAdapter<TreeElement> {
 			convertView = mInflater.inflate(R.layout.tree_view_item_layout,
 					null);
 			holder = new ViewHolder();
-			holder.text = (TextView) convertView
-					.findViewById(R.id.tree_view_item_title);
 			holder.icon = (ImageView) convertView
-					.findViewById(R.id.tree_view_item_icon);
+					.findViewById(R.id.tree_iv_goal_icon);
+			holder.name = (TextView) convertView
+					.findViewById(R.id.tree_tv_goal_name);
+			holder.state = (TextView) convertView
+					.findViewById(R.id.tree_tv_goal_state);
+			holder.end = (Button) convertView
+					.findViewById(R.id.tree_bt_goal_end);
 			convertView.setTag(holder);
 		} else {
 			holder = (ViewHolder) convertView.getTag();
@@ -168,29 +139,40 @@ class TreeViewAdapter extends ArrayAdapter<TreeElement> {
 		int level = treeElements.get(position).getLevel();
 		holder.icon.setPadding(25 * (level + 1), holder.icon.getPaddingTop(),
 				0, holder.icon.getPaddingBottom());
-		holder.text.setText(treeElements.get(position).getTitle());
-		
-		if (treeElements.get(position).isHasChild()) { // 有子节点
-			if (treeElements.get(position).isFold()) {	//折叠
-				holder.icon.setImageBitmap(mIconFold);
-			}else {	//展开
-				holder.icon.setImageBitmap(mIconUnFold);
+		holder.name.setText(treeElements.get(position).getName());
+		holder.state.setText(treeElements.get(position).getCurrentState()
+				.toString());
+
+		// 如果这个ElementMachine是一个GoalMachine
+		if (treeElements.get(position) instanceof GoalMachine) {
+			if (((GoalMachine) treeElements.get(position)).getDecomposition() == 0) { // AND分解
+				holder.icon.setImageBitmap(iconAND);
+			} else if (((GoalMachine) treeElements.get(position))
+					.getDecomposition() == 1) { // OR分解
+				holder.icon.setImageBitmap(iconOR);
 			}
 			holder.icon.setVisibility(View.VISIBLE);
-		}else {// 没有子节点
-			holder.icon.setImageBitmap(mIconFold);
-			holder.icon.setVisibility(View.INVISIBLE);
 		}
-
+		// 如果这个ElementMachine是一个TaskMachine
+		else if (treeElements.get(position) instanceof TaskMachine) {
+			holder.icon.setImageBitmap(iconOR);
+			holder.icon.setVisibility(View.INVISIBLE); // 图标隐藏
+			// 再设置是否显示end按钮
+			if (treeElements.get(position).getCurrentState() == State.Executing) {
+				holder.end.setVisibility(View.VISIBLE);
+			} else {
+				holder.end.setVisibility(View.INVISIBLE);
+			}
+		}
 
 		return convertView;
 	}
 
 	class ViewHolder {
-		TextView text;
 		ImageView icon;
+		TextView name;
+		TextView state;
+		Button end;
 	}
 
 }
-
-

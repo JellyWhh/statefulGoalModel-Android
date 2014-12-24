@@ -10,7 +10,7 @@ import edu.fudan.se.log.Log;
  * Task Machine，继承自<code>ElementMachine</code>
  * 
  * @author whh
- *
+ * 
  */
 public abstract class TaskMachine extends ElementMachine {
 
@@ -27,8 +27,8 @@ public abstract class TaskMachine extends ElementMachine {
 	 * @param parentGoal
 	 *            父目标
 	 */
-	public TaskMachine(String name, ElementMachine parentGoal) {
-		super(name, parentGoal);
+	public TaskMachine(String name, ElementMachine parentGoal, int level) {
+		super(name, parentGoal, level);
 	}
 
 	/**
@@ -59,11 +59,10 @@ public abstract class TaskMachine extends ElementMachine {
 	public void activateDo(SGMMessage msg) {
 		Log.logDebug(this.getName(), "activateDo()", "init.");
 
-		//SGMMessage msg = this.getMsgPool().poll(); // 每次拿出一条消息
+		// SGMMessage msg = this.getMsgPool().poll(); // 每次拿出一条消息
 		if (msg != null) {
-			Log.logDebug(this.getName(), "activateDo()",
-					"get a message from " + msg.getSender() + "; body is: "
-							+ msg.getBody());
+			Log.logDebug(this.getName(), "activateDo()", "get a message from "
+					+ msg.getSender() + "; body is: " + msg.getBody());
 
 			// 消息内容是START，表示父目标让当前目标开始状态转换
 			if (msg.getBody().equals("START")) {
@@ -74,8 +73,6 @@ public abstract class TaskMachine extends ElementMachine {
 
 		}
 	}
-
-	
 
 	/**
 	 * executing状态中do所做的action：这个需要根据具体的task有不同的具体执行行为，所以这个是抽象方法，在实例化时具体实现
@@ -90,17 +87,17 @@ public abstract class TaskMachine extends ElementMachine {
 	public void executingDo_waitingEnd(SGMMessage msg) {
 		Log.logDebug(this.getName(), "executingDo_waitingEnd()", "init.");
 
-		//SGMMessage msg = this.getMsgPool().poll(); // 拿出一条消息
+		// SGMMessage msg = this.getMsgPool().poll(); // 拿出一条消息
 		if (msg != null) {
 			Log.logDebug(this.getName(), "executingDo_waitingEnd()",
 					"get a message from " + msg.getSender() + "; body is: "
 							+ msg.getBody());
 
-			if (msg.getBody().equals("END")) {	//收到外部UI的END消息
+			if (msg.getBody().equals("END")) { // 收到外部UI的END消息
 				this.getMsgPool().poll();
 				this.setCurrentState(this.transition(State.Executing,
 						this.getPostCondition()));
-			}else if (msg.getBody().equals("SUSPEND")) {	//收到父目标的SUSPEND消息
+			} else if (msg.getBody().equals("SUSPEND")) { // 收到父目标的SUSPEND消息
 				this.getMsgPool().poll();
 				this.setCurrentState(State.Suspended);
 			}
@@ -114,7 +111,7 @@ public abstract class TaskMachine extends ElementMachine {
 	@Override
 	public void suspendedDo(SGMMessage msg) {
 		Log.logDebug(this.getName(), "suspendedDo()", "init.");
-	//	SGMMessage msg = this.getMsgPool().poll(); // 每次拿出一条消息
+		// SGMMessage msg = this.getMsgPool().poll(); // 每次拿出一条消息
 		if (msg != null) {
 			Log.logDebug(this.getName(), "suspendedDo()", "get a message from "
 					+ msg.getSender() + "; body is: " + msg.getBody());

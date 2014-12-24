@@ -16,15 +16,17 @@ import edu.fudan.se.log.Log;
  * 元素状态机，GoalMachine和TaskMachine继承此抽象类
  * 
  * @author whh
- *
+ * 
  */
 public abstract class ElementMachine implements Runnable {
 
-	protected String name; // element的名字
+	private int level; // 这个主要是在安卓界面显示目标树的时候用的，指这个element处在第几层，root goal为0层
+
+	private String name; // element的名字
 	private ElementMachine parentGoal; // 当前element的父目标，除root
 										// goal外每个element都有parentGoal
 
-	private State currentState; // element目前所处的状态
+	private State currentState = State.Initial; // element目前所处的状态
 
 	private BlockingQueue<SGMMessage> msgPool; // 消息队列，即消息池，可以直观理解为当前element的个人信箱
 
@@ -68,9 +70,10 @@ public abstract class ElementMachine implements Runnable {
 	 * @param parentGoal
 	 *            当前element的父目标，如果当前目标是root goal，这个值可以设置为null
 	 */
-	public ElementMachine(String name, ElementMachine parentGoal) {
+	public ElementMachine(String name, ElementMachine parentGoal, int level) {
 		this.name = name;
 		this.parentGoal = parentGoal;
+		this.level = level;
 		this.msgPool = new LinkedBlockingQueue<SGMMessage>();
 	}
 
@@ -180,7 +183,7 @@ public abstract class ElementMachine implements Runnable {
 				}
 				break;
 			case Repairing: // repairing
-					repairingDo();
+				repairingDo();
 				break;
 			case ProgressChecking: // progressChecking
 				progressCheckingDo();
@@ -357,7 +360,6 @@ public abstract class ElementMachine implements Runnable {
 
 	}
 
-
 	/**
 	 * repairing状态中do所做的action：尝试从Repairing状态跳转到修复后的状态，
 	 * 修复后的状态在transiton中会通过调用doRepairing(condition)得到
@@ -445,7 +447,7 @@ public abstract class ElementMachine implements Runnable {
 	private boolean checkIfStop(SGMMessage msg) {
 		if (msg != null) {
 
-			// 消息内容是SUSPEND，表示父目标让当前目标进入挂起
+			// 消息内容是STOP，表示父目标让当前目标stop
 			if (msg.getBody().equals("STOP")) {
 				this.getMsgPool().poll(); // 如果消息真的是STOP，那么就把它拿出来
 				Log.logDebug(this.getName(), "checkIfStop()",
@@ -713,6 +715,14 @@ public abstract class ElementMachine implements Runnable {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public int getLevel() {
+		return level;
+	}
+
+	public void setLevel(int level) {
+		this.level = level;
 	}
 
 	public State getCurrentState() {
