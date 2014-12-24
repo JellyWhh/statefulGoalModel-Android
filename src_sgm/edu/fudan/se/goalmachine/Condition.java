@@ -3,14 +3,18 @@
  */
 package edu.fudan.se.goalmachine;
 
+import java.io.Serializable;
+
 /**
  * 状态机中需要检查的条件Condition,具体类型有：CONTEXT,PRE,POST,COMMITMENT,INVARIANT
  * 
  * @author whh
  *
  */
-public class Condition {
+public class Condition implements Serializable{
 
+	private static final long serialVersionUID = 1L;
+	
 	private String type; // 条件类型，具体有CONTEXT,PRE,POST,COMMITMENT,INVARIANT
 	private boolean satisfied = true; // 条件是否被满足，true为被满足
 	private boolean canRepairing; // 标志这个条件是否可通过主动做一些事来修复，使之满足，只针对PreCondition

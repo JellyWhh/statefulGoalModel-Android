@@ -3,6 +3,7 @@
  */
 package edu.fudan.se.goalmachine;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -18,7 +19,9 @@ import edu.fudan.se.log.Log;
  * @author whh
  * 
  */
-public abstract class ElementMachine implements Runnable {
+public abstract class ElementMachine implements Runnable, Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	private int level; // 这个主要是在安卓界面显示目标树的时候用的，指这个element处在第几层，root goal为0层
 
@@ -97,6 +100,7 @@ public abstract class ElementMachine implements Runnable {
 		}
 		Log.logDebug(this.getName(), "run()",
 				"ElementMachine stop while cycling!");
+		
 	}
 
 	/**
@@ -674,6 +678,13 @@ public abstract class ElementMachine implements Runnable {
 
 		Log.logDebug(this.getName(), "stopMachine()",
 				"It begins to stop its machine");
+	}
+	
+	/**
+	 * 重新设置当前machine，即把状态设置为初始化状态
+	 */
+	public void resetMachine(){
+		this.setCurrentState(State.Initial);
 	}
 
 	/**

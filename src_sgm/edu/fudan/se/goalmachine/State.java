@@ -3,13 +3,15 @@
  */
 package edu.fudan.se.goalmachine;
 
+import java.io.Serializable;
+
 /**
  * <code>ElementMachine中用到的状态</code>
  * 
  * @author whh
  *
  */
-public enum State {
+public enum State implements Serializable{
 	Initial(0), Activated(1), Executing(2), Waiting(3), Suspended(4), Repairing(
 			5), ProgressChecking(6), Failed(7), Achieved(8);
 

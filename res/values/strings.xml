@@ -13,7 +13,7 @@
     <string name="dialog_suspend">Suspend</string>
     <string name="dialog_resume">Resume</string>
     <string name="dialog_stop">Stop</string>
-    <string name="dialog_refresh">Refresh</string>
+    <string name="dialog_reset">Reset</string>
     <string name="dialog_cancel">Cancel</string>
     
     <string name="gm_back">Back</string>

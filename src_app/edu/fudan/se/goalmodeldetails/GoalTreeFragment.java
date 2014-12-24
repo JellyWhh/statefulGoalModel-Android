@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -49,7 +50,7 @@ public class GoalTreeFragment extends ListFragment {
 
 		initialData();
 		treeViewAdapter = new TreeViewAdapter(getActivity(),
-				R.layout.tree_view_item_layout, allTreeElements);
+				R.layout.tree_view_item_layout, allTreeElements,goalModel);
 		// setListAdapter(treeViewAdapter);
 		// registerForContextMenu(getListView());
 	}
@@ -86,15 +87,17 @@ public class GoalTreeFragment extends ListFragment {
 class TreeViewAdapter extends ArrayAdapter<ElementMachine> {
 
 	private LayoutInflater mInflater;
+	private GoalModel goalModel;
 	private List<ElementMachine> treeElements;
 	private Bitmap iconAND; // and分解
 	private Bitmap iconOR; // or分解
 
 	public TreeViewAdapter(Context context, int textViewResourceId,
-			List<ElementMachine> treeElements) {
+			List<ElementMachine> treeElements,GoalModel goalModel) {
 		super(context, textViewResourceId, treeElements);
 		this.mInflater = LayoutInflater.from(context);
 		this.treeElements = treeElements;
+		this.goalModel = goalModel;
 		this.iconAND = BitmapFactory.decodeResource(context.getResources(),
 				R.drawable.tree_view_icon_and);
 		this.iconOR = BitmapFactory.decodeResource(context.getResources(),
@@ -117,7 +120,7 @@ class TreeViewAdapter extends ArrayAdapter<ElementMachine> {
 	}
 
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
+	public View getView(final int position, View convertView, ViewGroup parent) {
 		ViewHolder holder;
 		if (convertView == null) {
 			convertView = mInflater.inflate(R.layout.tree_view_item_layout,
@@ -143,23 +146,42 @@ class TreeViewAdapter extends ArrayAdapter<ElementMachine> {
 		holder.state.setText(treeElements.get(position).getCurrentState()
 				.toString());
 
-		// 如果这个ElementMachine是一个GoalMachine
-		if (treeElements.get(position) instanceof GoalMachine) {
-			if (((GoalMachine) treeElements.get(position)).getDecomposition() == 0) { // AND分解
+		// 如果是root goal，不用显示图标
+		if (treeElements.get(position).getParentGoal() == null) {
+			holder.icon.setVisibility(View.INVISIBLE);
+		} else {
+			// 如果父目标是AND分解，当前目标显示AND图标
+			if (((GoalMachine) (treeElements.get(position).getParentGoal()))
+					.getDecomposition() == 0) { // AND分解
 				holder.icon.setImageBitmap(iconAND);
-			} else if (((GoalMachine) treeElements.get(position))
+			}
+			// 如果父目标是OR分解，当前目标显示OR图标
+			else if (((GoalMachine) (treeElements.get(position).getParentGoal()))
 					.getDecomposition() == 1) { // OR分解
 				holder.icon.setImageBitmap(iconOR);
 			}
 			holder.icon.setVisibility(View.VISIBLE);
 		}
+
+		// 如果这个ElementMachine是一个GoalMachine
+		if (treeElements.get(position) instanceof GoalMachine) {
+			holder.end.setVisibility(View.INVISIBLE);
+		}
 		// 如果这个ElementMachine是一个TaskMachine
 		else if (treeElements.get(position) instanceof TaskMachine) {
-			holder.icon.setImageBitmap(iconOR);
-			holder.icon.setVisibility(View.INVISIBLE); // 图标隐藏
 			// 再设置是否显示end按钮
 			if (treeElements.get(position).getCurrentState() == State.Executing) {
 				holder.end.setVisibility(View.VISIBLE);
+				//给end按钮添加监听器
+				holder.end.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						//给这个element发送END消息
+						goalModel.endTaskMachine((TaskMachine)treeElements.get(position));
+						
+					}
+				});
 			} else {
 				holder.end.setVisibility(View.INVISIBLE);
 			}

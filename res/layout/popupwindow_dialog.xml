@@ -47,10 +47,10 @@
             android:textStyle="bold" />
 
         <Button
-            android:id="@+id/bt_dialog_refresh"
+            android:id="@+id/bt_dialog_reset"
             android:layout_width="100dp"
             android:background="@drawable/btn_style_alert_dialog_button"
-            android:text="@string/dialog_refresh"
+            android:text="@string/dialog_reset"
             android:textStyle="bold" />
 
         <Button

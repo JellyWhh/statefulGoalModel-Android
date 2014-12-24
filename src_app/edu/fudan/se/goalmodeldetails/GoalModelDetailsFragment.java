@@ -71,6 +71,8 @@ public class GoalModelDetailsFragment extends Fragment {
 			@Override
 			public void onClick(View v) {
 				Toast.makeText(getActivity(), "back pressed", 2000).show();
+				// TODO 安卓的回收机制！！！！！目前返回后activity会销毁，于是goal
+				// model里面开启的进程都会关闭，下次点击进来后又重新初始化了goal model
 
 			}
 		});
@@ -79,8 +81,7 @@ public class GoalModelDetailsFragment extends Fragment {
 
 			@Override
 			public void onClick(View v) {
-				Toast.makeText(getActivity(), "refresh pressed", 2000).show();
-
+				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 			}
 		});
 
@@ -88,27 +89,19 @@ public class GoalModelDetailsFragment extends Fragment {
 
 			@Override
 			public void onClick(View v) {
-				Toast.makeText(getActivity(), "order pressed", 2000).show();
 
-				popupWindow = new SelectOrderPopupWindow(inflater, itemsOnClick);
+				popupWindow = new SelectOrderPopupWindow(inflater,
+						itemsOnClick, goalModel.getState(), getResources());
 				// 显示窗口
 				popupWindow.showAtLocation(
 						view.findViewById(R.id.linearLayout_main),
 						Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 240);
+
 			}
 		});
 
 		return view;
 	}
-
-	// @Override
-	// public void onCreate(Bundle savedInstanceState) {
-	// super.onCreate(savedInstanceState);
-	// setContentView(R.layout.goalmodel_details);
-	//
-	//
-	//
-	// }
 
 	// 为弹出窗口实现监听类
 	private OnClickListener itemsOnClick = new OnClickListener() {
@@ -118,19 +111,19 @@ public class GoalModelDetailsFragment extends Fragment {
 			popupWindow.dismiss();
 			switch (v.getId()) {
 			case R.id.bt_dialog_start:
-				Toast.makeText(getActivity(), "start pressed", 2000).show();
+				goalModel.start();
 				break;
 			case R.id.bt_dialog_suspend:
-				Toast.makeText(getActivity(), "suspend pressed", 2000).show();
+				goalModel.suspend();
 				break;
 			case R.id.bt_dialog_resume:
-				Toast.makeText(getActivity(), "resume pressed", 2000).show();
+				goalModel.resume();
 				break;
 			case R.id.bt_dialog_stop:
-				Toast.makeText(getActivity(), "stop pressed", 2000).show();
+				goalModel.stop();
 				break;
-			case R.id.bt_dialog_refresh:
-				Toast.makeText(getActivity(), "refresh pressed", 2000).show();
+			case R.id.bt_dialog_reset:
+				goalModel.reset();
 				break;
 			case R.id.bt_dialog_cancel:
 				// 销毁弹出框
@@ -167,6 +160,11 @@ public class GoalModelDetailsFragment extends Fragment {
 		@Override
 		public int getCount() {
 			return 1;
+		}
+
+		@Override
+		public int getItemPosition(Object object) {
+			return POSITION_NONE; // To make notifyDataSetChanged() do something
 		}
 
 	}

@@ -20,6 +20,8 @@ import edu.fudan.se.log.Log;
  */
 public abstract class GoalMachine extends ElementMachine {
 
+	private static final long serialVersionUID = 1L;
+
 	private ArrayList<ElementMachine> subElements = new ArrayList<ElementMachine>(); // subElements
 
 	private int decomposition; // 分解，0表示AND分解，1表示OR分解

@@ -4,6 +4,7 @@
 package edu.fudan.se.goalmodeldetails;
 
 import edu.fudan.se.R;
+import android.content.res.Resources;
 import android.graphics.drawable.ColorDrawable;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -15,14 +16,15 @@ import android.widget.Button;
 import android.widget.PopupWindow;
 
 /**
- *  实现目标模型详细情况页面，点击下面的order按钮时的弹出框样式
+ * 实现目标模型详细情况页面，点击下面的order按钮时的弹出框样式
+ * 
  * @author whh
- *
+ * 
  */
 public class SelectOrderPopupWindow extends PopupWindow {
 
 	private Button bt_dialog_start, bt_dialog_suspend, bt_dialog_resume,
-			bt_dialog_stop, bt_dialog_refresh, bt_dialog_cancel;
+			bt_dialog_stop, bt_dialog_reset, bt_dialog_cancel;
 	private View mMenuView;
 
 	/**
@@ -32,12 +34,15 @@ public class SelectOrderPopupWindow extends PopupWindow {
 	 *            activity上下文
 	 * @param itemsOnClick
 	 *            为弹出框里面的按钮添加的点击事件监听器
+	 * @param state
+	 *            goal model的状态，根据这个状态来设置不同按钮是否可点击
 	 */
 	public SelectOrderPopupWindow(LayoutInflater mInflater,
-			OnClickListener itemsOnClick) {
+			OnClickListener itemsOnClick, String state, Resources resources) {
 		super();
-//		LayoutInflater mInflater = (LayoutInflater) context
-//				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+		// LayoutInflater mInflater = (LayoutInflater) context
+		// .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mMenuView = mInflater.inflate(R.layout.popupwindow_dialog, null);
 
 		bt_dialog_start = (Button) mMenuView.findViewById(R.id.bt_dialog_start);
@@ -46,8 +51,7 @@ public class SelectOrderPopupWindow extends PopupWindow {
 		bt_dialog_resume = (Button) mMenuView
 				.findViewById(R.id.bt_dialog_resume);
 		bt_dialog_stop = (Button) mMenuView.findViewById(R.id.bt_dialog_stop);
-		bt_dialog_refresh = (Button) mMenuView
-				.findViewById(R.id.bt_dialog_refresh);
+		bt_dialog_reset = (Button) mMenuView.findViewById(R.id.bt_dialog_reset);
 		bt_dialog_cancel = (Button) mMenuView
 				.findViewById(R.id.bt_dialog_cancel);
 
@@ -56,7 +60,7 @@ public class SelectOrderPopupWindow extends PopupWindow {
 		bt_dialog_suspend.setOnClickListener(itemsOnClick);
 		bt_dialog_resume.setOnClickListener(itemsOnClick);
 		bt_dialog_stop.setOnClickListener(itemsOnClick);
-		bt_dialog_refresh.setOnClickListener(itemsOnClick);
+		bt_dialog_reset.setOnClickListener(itemsOnClick);
 		bt_dialog_cancel.setOnClickListener(itemsOnClick);
 
 		// 设置SelectPicPopupWindow的View
@@ -73,7 +77,6 @@ public class SelectOrderPopupWindow extends PopupWindow {
 		ColorDrawable dw = new ColorDrawable(0xb0000000);
 		// 设置SelectPicPopupWindow弹出窗体的背景
 		this.setBackgroundDrawable(dw);
-
 
 		// mMenuView添加OnTouchListener监听判断获取触屏位置如果在选择框外面则销毁弹出框
 		mMenuView.setOnTouchListener(new OnTouchListener() {
@@ -92,7 +95,66 @@ public class SelectOrderPopupWindow extends PopupWindow {
 			}
 		});
 
-	}
+		switch (state) {
+		case "INITIAL":
+		case "STOPED":
+			bt_dialog_start.setClickable(true);
+			bt_dialog_start.setTextColor(resources
+					.getColor(R.color.clickable_black));
+			bt_dialog_resume.setClickable(false);
+			bt_dialog_resume.setTextColor(resources
+					.getColor(R.color.unclickable_grey));
+			bt_dialog_stop.setClickable(false);
+			bt_dialog_stop.setTextColor(resources
+					.getColor(R.color.unclickable_grey));
+			bt_dialog_suspend.setClickable(false);
+			bt_dialog_suspend.setTextColor(resources
+					.getColor(R.color.unclickable_grey));
+			bt_dialog_reset.setClickable(true);
+			bt_dialog_reset.setTextColor(resources
+					.getColor(R.color.clickable_black));
+			break;
+		case "STARTED":
+		case "RESUMED":
+			bt_dialog_start.setClickable(false);
+			bt_dialog_start.setTextColor(resources
+					.getColor(R.color.unclickable_grey));
+			bt_dialog_resume.setClickable(false);
+			bt_dialog_resume.setTextColor(resources
+					.getColor(R.color.unclickable_grey));
+			bt_dialog_stop.setClickable(true);
+			bt_dialog_stop.setTextColor(resources
+					.getColor(R.color.clickable_black));
+			bt_dialog_suspend.setClickable(true);
+			bt_dialog_suspend.setTextColor(resources
+					.getColor(R.color.clickable_black));
+			bt_dialog_reset.setClickable(false);
+			bt_dialog_reset.setTextColor(resources
+					.getColor(R.color.unclickable_grey));
+			break;
 
+		case "SUSPENDED":
+			bt_dialog_start.setClickable(false);
+			bt_dialog_start.setTextColor(resources
+					.getColor(R.color.unclickable_grey));
+			bt_dialog_resume.setClickable(true);
+			bt_dialog_resume.setTextColor(resources
+					.getColor(R.color.clickable_black));
+			bt_dialog_stop.setClickable(true);
+			bt_dialog_stop.setTextColor(resources
+					.getColor(R.color.clickable_black));
+			bt_dialog_suspend.setClickable(false);
+			bt_dialog_suspend.setTextColor(resources
+					.getColor(R.color.unclickable_grey));
+			bt_dialog_reset.setClickable(false);
+			bt_dialog_reset.setTextColor(resources
+					.getColor(R.color.unclickable_grey));
+			break;
+
+		default:
+			break;
+		}
+
+	}
 
 }

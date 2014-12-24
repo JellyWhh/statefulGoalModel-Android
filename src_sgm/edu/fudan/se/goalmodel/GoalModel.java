@@ -17,11 +17,13 @@ import edu.fudan.se.log.Log;
  * @author whh
  * 
  */
-public class GoalModel implements Serializable{
+public class GoalModel implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	private String name; // goal model的名字
+	private String state = "INITIAL"; // 整个goal
+										// model的state，取值有INITIAL,STARTED,STOPED,SUSPENDED,RESUMED
 
 	private ArrayList<ElementMachine> elementMachines; // goal
 														// model里面所有的ElementMachine
@@ -50,10 +52,29 @@ public class GoalModel implements Serializable{
 				Thread thread = new Thread(elementMachine);
 				thread.start();
 			}
+			// 然后给root goal发送激活消息
+			SGMMessage msg = new SGMMessage("TOROOT", "UI",
+					this.rootGoal.getName(), "ACTIVATE");
+			if (this.rootGoal.getMsgPool().offer(msg)) {
+				Log.logMessage(msg, true);
+				Log.logDebug(
+						"goal model:" + this.getName(),
+						"start()",
+						"UI thread send a ACTIVATE msg to "
+								+ this.rootGoal.getName() + " succeed!");
+			} else {
+				Log.logMessage(msg, false);
+				Log.logError(
+						"goal model:" + this.getName(),
+						"start()",
+						"UI thread send a ACTIVATE msg to "
+								+ this.rootGoal.getName() + " error!");
+			}
 		} else {
 			Log.logError("goal model:" + this.getName(), "start()",
 					"elementMachines is null or its size is 0!");
 		}
+		this.state = "STARTED";
 	}
 
 	/**
@@ -84,6 +105,25 @@ public class GoalModel implements Serializable{
 			Log.logError("goal model:" + this.getName(), "stop()",
 					"rootGoal is null!");
 		}
+		this.state = "STOPED";
+	}
+
+	/**
+	 * suspend这个goal model，只需要给这个goal model里面的root goal发送SUSPEND消息即可
+	 */
+	public void suspend() {
+		Log.logDebug("goal model:" + this.getName(), "suspend()", "init.");
+		// TODO
+		this.state = "SUSPENDED";
+	}
+
+	/**
+	 * resume这个goal model，只需要给这个goal model里面的root goal发送RESUME消息即可
+	 */
+	public void resume() {
+		Log.logDebug("goal model:" + this.getName(), "resume()", "init.");
+		// TODO
+		this.state = "RESUMED";
 	}
 
 	/**
@@ -110,9 +150,25 @@ public class GoalModel implements Serializable{
 		}
 
 	}
-	
-	private void sortElementMachines(){
-		
+
+	/**
+	 * 重新把所有ElementMachine的状态设置为initial
+	 */
+	public void reset() {
+		Log.logDebug("goal model:" + this.getName(), "reset()", "init.");
+		if (this.elementMachines != null && this.elementMachines.size() != 0) {
+			for (ElementMachine elementMachine : this.elementMachines) {
+				elementMachine.resetMachine();
+			}
+		} else {
+			Log.logError("goal model:" + this.getName(), "reset()",
+					"elementMachines is null or its size is 0!");
+		}
+		this.state = "INITIAL";
+	}
+
+	private void sortElementMachines() {
+
 	}
 
 	public String getName() {
@@ -143,5 +199,13 @@ public class GoalModel implements Serializable{
 
 	public void setRootGoal(ElementMachine rootGoal) {
 		this.rootGoal = rootGoal;
+	}
+
+	public String getState() {
+		return state;
+	}
+
+	public void setState(String state) {
+		this.state = state;
 	}
 }

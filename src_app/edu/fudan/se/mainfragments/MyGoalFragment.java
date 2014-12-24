@@ -19,6 +19,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import edu.fudan.se.goalmodel.GoalModel;
 import edu.fudan.se.goalmodeldetails.GoalModelDetailsActivity;
+import edu.fudan.se.initial.SGMApplication;
 import edu.fudan.se.R;
 
 /**
@@ -28,17 +29,20 @@ import edu.fudan.se.R;
  * 
  */
 public class MyGoalFragment extends ListFragment {
+	
+	private SGMApplication application;	//获取应用程序，以得到里面的全局变量
 
-	private MyGoalListAdapter<String> adapter;
-	private ArrayList<String> goalmodels = new ArrayList<>();
+	private MyGoalListAdapter<GoalModel> adapter;
+//	private ArrayList<String> goalmodels = new ArrayList<>();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		application = (SGMApplication) getActivity().getApplication();
 
-		initData();
 		adapter = new MyGoalListAdapter(getActivity(),
-				R.layout.goalmodel_list_item, goalmodels);
+				R.layout.goalmodel_list_item, application.getGoalModelList());
 //		setListAdapter(adapter);
 //		registerForContextMenu(getListView());
 	}
@@ -53,30 +57,20 @@ public class MyGoalFragment extends ListFragment {
 		getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 		// showDetails(mCurCheckPosition);
 	}
-	/**
-	 * list里面显示的数据
-	 * 
-	 */
-	private void initData() {
-		String s1 = "goalmodel1";
-		String s2 = "goalmodel2";
-
-		this.goalmodels.add(s1);
-		this.goalmodels.add(s2);
-	}
+	
 	
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
-		if (this.goalmodels.get(position).equals("goalmodel1")) {
+//		if (this.goalmodels.get(position).equals("goalmodel1")) {
 //			FragmentTransaction transaction = getFragmentManager().beginTransaction();
 //			transaction.replace(R.id.fragment_main_container, new GoalTreeFragment()).commit();
-			GoalModel goalModel = new GoalModel("test");1
+//			GoalModel goalModel = new GoalModel("test");1
 			Intent intent = new Intent();
 			intent.setClass(getActivity(), GoalModelDetailsActivity.class);
-			intent.putExtra("goalmodel", goalModel);
+			intent.putExtra("goalmodel", application.getGoalModelList().get(position));
 			startActivity(intent);
-		}
+//		}
 	}
 
 }
@@ -151,8 +145,8 @@ class MyGoalListAdapter<T> extends ArrayAdapter<T> {
 		
 		//下面部分不可缺少，是设置每个item具体显示的地方！
 		T item = getItem(position);
-		if (item instanceof String) {
-			holder.text.setText((String)item);
+		if (item instanceof GoalModel) {
+			holder.text.setText(((GoalModel)item).getName());
 		}
 		holder.icon.setImageResource(R.drawable.goal_set_image);
 		

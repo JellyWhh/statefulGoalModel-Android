@@ -14,6 +14,8 @@ import edu.fudan.se.log.Log;
  */
 public abstract class TaskMachine extends ElementMachine {
 
+	private static final long serialVersionUID = 1L;
+	
 	/* 标记各种状态的entry动作是否完成 */
 	boolean isInitialEntryDone = false;
 	boolean isActivatedEntryDone = false;
