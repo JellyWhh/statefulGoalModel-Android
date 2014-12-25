@@ -33,6 +33,7 @@ public class MainFragment extends Fragment {
 	private ViewPager mPager;
 	private ArrayList<Fragment> fragmentsList;
 	private LinearLayout ll_tab_home, ll_tab_mygoal, ll_tab_setting;
+	private ImageView iv_tab_home, iv_tab_mygoal, iv_tab_setting;
 
 	private ImageView iv_bottom_line;
 
@@ -68,6 +69,10 @@ public class MainFragment extends Fragment {
 		ll_tab_home.setOnClickListener(new MyOnClickListener(0));
 		ll_tab_mygoal.setOnClickListener(new MyOnClickListener(1));
 		ll_tab_setting.setOnClickListener(new MyOnClickListener(2));
+
+		iv_tab_home = (ImageView) rootView.findViewById(R.id.iv_tab_home);
+		iv_tab_mygoal = (ImageView) rootView.findViewById(R.id.iv_tab_mygoal);
+		iv_tab_setting = (ImageView) rootView.findViewById(R.id.iv_tab_setting);
 
 		initWidth(rootView);
 
@@ -162,25 +167,47 @@ public class MainFragment extends Fragment {
 
 		@Override
 		public void onPageSelected(int arg0) {
-			//
-			// //设置按钮的显示
-			// switch (arg0) {
-			// case 0:
-			// ll_tab_home.setBackgroundResource(R.drawable.home_btn_bg);
-			// break;
-			// case 1:
-			// ll_tab_today.setBackgroundResource(R.drawable.home_btn_bg);
-			// break;
-			// case 2:
-			// ll_tab_mygoal.setBackgroundResource(R.drawable.home_btn_bg);
-			// break;
-			// case 3:
-			// ll_tab_setting.setBackgroundResource(R.drawable.home_btn_bg);
-			// break;
-			//
-			// default:
-			// break;
-			// }
+
+			// 设置按钮的显示
+			switch (arg0) {
+			case 0:
+				ll_tab_home.setBackgroundResource(R.drawable.home_btn_bg);
+				ll_tab_mygoal
+						.setBackgroundResource(R.drawable.maintab_toolbar_bg);
+				ll_tab_setting
+						.setBackgroundResource(R.drawable.maintab_toolbar_bg);
+				iv_tab_home.setBackgroundResource(R.drawable.icon_home_sel);
+				iv_tab_mygoal.setBackgroundResource(R.drawable.icon_mygoal_nor);
+				iv_tab_setting
+						.setBackgroundResource(R.drawable.icon_setting_nor);
+				break;
+
+			case 1:
+				ll_tab_home
+						.setBackgroundResource(R.drawable.maintab_toolbar_bg);
+				ll_tab_mygoal.setBackgroundResource(R.drawable.home_btn_bg);
+				ll_tab_setting
+						.setBackgroundResource(R.drawable.maintab_toolbar_bg);
+				iv_tab_home.setBackgroundResource(R.drawable.icon_home_nor);
+				iv_tab_mygoal.setBackgroundResource(R.drawable.icon_mygoal_sel);
+				iv_tab_setting
+						.setBackgroundResource(R.drawable.icon_setting_nor);
+				break;
+			case 2:
+				ll_tab_home
+						.setBackgroundResource(R.drawable.maintab_toolbar_bg);
+				ll_tab_mygoal
+						.setBackgroundResource(R.drawable.maintab_toolbar_bg);
+				ll_tab_setting.setBackgroundResource(R.drawable.home_btn_bg);
+				iv_tab_home.setBackgroundResource(R.drawable.icon_home_nor);
+				iv_tab_mygoal.setBackgroundResource(R.drawable.icon_mygoal_nor);
+				iv_tab_setting
+						.setBackgroundResource(R.drawable.icon_setting_sel);
+				break;
+
+			default:
+				break;
+			}
 
 			Animation animation = new TranslateAnimation(currIndex * one, arg0
 					* one, 0, 0);// 平移动画

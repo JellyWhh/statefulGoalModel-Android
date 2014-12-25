@@ -21,10 +21,10 @@ import android.app.Application;
  * @author whh
  * 
  */
-public class SGMApplication extends Application implements Serializable{
+public class SGMApplication extends Application implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	private ArrayList<GoalModel> goalModelList;
 
 	@Override
@@ -388,7 +388,8 @@ public class SGMApplication extends Application implements Serializable{
 		bob.addSubElement(bobChild_1, 1);
 		bob.addSubElement(bobChild_2, 2);
 		bob.addSubElement(bobChild_3, 3);
-		
+
+		goalModel.setDescription("This is the description of the goal model!");
 		goalModel.setRootGoal(root);
 		goalModel.addElementMachine(root);
 		goalModel.addElementMachine(alice);

@@ -2,8 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/fragment_main_container"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    >
+    android:layout_height="match_parent" >
 
     <android.support.v4.view.ViewPager
         android:id="@+id/vp_main"
@@ -29,7 +28,7 @@
 
             <ImageView
                 android:id="@+id/iv_bottom_line"
-                android:layout_width="105dp"
+                android:layout_width="110dp"
                 android:layout_height="1dp"
                 android:contentDescription="@string/app_name"
                 android:scaleType="matrix"
@@ -48,20 +47,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1.0"
-                android:background="@drawable/selector_tab_background"
+                android:background="@drawable/home_btn_bg"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:paddingBottom="3dp"
-                android:paddingTop="3dp" >
+                android:padding="5dp" >
 
                 <ImageView
                     android:id="@+id/iv_tab_home"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:background="@drawable/icon_home_sel"
                     android:contentDescription="@string/app_name"
                     android:focusable="false"
-                    android:padding="3dp"
-                    android:src="@drawable/tab_home_btn" >
+                    android:padding="3dp" >
                 </ImageView>
 
                 <TextView
@@ -79,20 +77,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1.0"
-                android:background="@drawable/selector_tab_background"
+                android:background="@drawable/maintab_toolbar_bg"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:paddingBottom="3dp"
-                android:paddingTop="3dp" >
+                android:padding="5dp" >
 
                 <ImageView
                     android:id="@+id/iv_tab_mygoal"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:background="@drawable/icon_mygoal_nor"
                     android:contentDescription="@string/app_name"
                     android:focusable="false"
-                    android:padding="3dp"
-                    android:src="@drawable/tab_mygoal_btn" >
+                    android:padding="3dp" >
                 </ImageView>
 
                 <TextView
@@ -110,20 +107,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1.0"
-                android:background="@drawable/selector_tab_background"
+                android:background="@drawable/maintab_toolbar_bg"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:paddingBottom="3dp"
-                android:paddingTop="3dp" >
+                android:padding="5dp" >
 
                 <ImageView
                     android:id="@+id/iv_tab_setting"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:background="@drawable/icon_setting_nor"
                     android:contentDescription="@string/app_name"
                     android:focusable="false"
-                    android:padding="3dp"
-                    android:src="@drawable/tab_setting_btn" >
+                    android:padding="3dp" >
                 </ImageView>
 
                 <TextView

@@ -5,6 +5,7 @@ package edu.fudan.se.goalmodeldetails;
 
 import edu.fudan.se.R;
 import edu.fudan.se.goalmodel.GoalModel;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -12,10 +13,13 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.widget.ImageView;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -92,7 +96,9 @@ public class GoalModelDetailsFragment extends Fragment {
 
 				popupWindow = new SelectOrderPopupWindow(inflater,
 						itemsOnClick, goalModel.getState(), getResources());
+
 				// 显示窗口
+
 				popupWindow.showAtLocation(
 						view.findViewById(R.id.linearLayout_main),
 						Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 240);
@@ -100,10 +106,64 @@ public class GoalModelDetailsFragment extends Fragment {
 			}
 		});
 
+		// 为goal model name添加监听器，点击后弹出goal model的介绍
+		tv_gmdetails_name.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				showGoalModelDescription(
+						view.findViewById(R.id.linearLayout_main),
+						goalModel.getDescription());
+			}
+		});
+
 		return view;
 	}
 
-	// 为弹出窗口实现监听类
+	/**
+	 * 点击上方的goal model name后弹出goal model的介绍，是一个普通的popupwindow
+	 * 
+	 * @param description
+	 *            goal model的介绍
+	 */
+	private void showGoalModelDescription(View parentView, String description) {
+		final View popupDescriptionView = LayoutInflater.from(getActivity())
+				.inflate(R.layout.popupwindow_description, null);
+		final PopupWindow popupWindow = new PopupWindow(popupDescriptionView,
+				ViewGroup.LayoutParams.WRAP_CONTENT,
+				ViewGroup.LayoutParams.WRAP_CONTENT, true);
+
+		popupWindow.setOutsideTouchable(true);
+		popupWindow.setFocusable(true);
+		TextView tv_gmdetails_description = (TextView) popupDescriptionView
+				.findViewById(R.id.tv_gmdetails_description);
+		tv_gmdetails_description.setText(description);
+
+		ColorDrawable dw = new ColorDrawable(-00000);
+		popupWindow.setBackgroundDrawable(dw);
+
+		// mMenuView添加OnTouchListener监听判断获取触屏位置如果在选择框外面则销毁弹出框
+		popupDescriptionView.setOnTouchListener(new OnTouchListener() {
+
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				int height = popupDescriptionView.findViewById(
+						R.id.tv_gmdetails_description).getTop();
+				int y = (int) event.getY();
+				if (event.getAction() == MotionEvent.ACTION_UP) {
+					if (y < height) {
+						popupWindow.dismiss();
+					}
+				}
+				return true;
+			}
+		});
+
+		popupWindow.showAtLocation(parentView, Gravity.CENTER | Gravity.CENTER,
+				0, 0);
+	}
+
+	// 为命令的弹出窗口实现监听类
 	private OnClickListener itemsOnClick = new OnClickListener() {
 
 		@Override

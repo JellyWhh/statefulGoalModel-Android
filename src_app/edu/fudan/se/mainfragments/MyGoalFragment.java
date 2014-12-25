@@ -29,25 +29,25 @@ import edu.fudan.se.R;
  * 
  */
 public class MyGoalFragment extends ListFragment {
-	
-	private SGMApplication application;	//获取应用程序，以得到里面的全局变量
+
+	private SGMApplication application; // 获取应用程序，以得到里面的全局变量
 
 	private MyGoalListAdapter<GoalModel> adapter;
-//	private ArrayList<String> goalmodels = new ArrayList<>();
+
+	// private ArrayList<String> goalmodels = new ArrayList<>();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		application = (SGMApplication) getActivity().getApplication();
 
 		adapter = new MyGoalListAdapter(getActivity(),
 				R.layout.goalmodel_list_item, application.getGoalModelList());
-//		setListAdapter(adapter);
-//		registerForContextMenu(getListView());
+		// setListAdapter(adapter);
+		// registerForContextMenu(getListView());
 	}
 
-	
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
@@ -57,20 +57,16 @@ public class MyGoalFragment extends ListFragment {
 		getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 		// showDetails(mCurCheckPosition);
 	}
-	
-	
+
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
-//		if (this.goalmodels.get(position).equals("goalmodel1")) {
-//			FragmentTransaction transaction = getFragmentManager().beginTransaction();
-//			transaction.replace(R.id.fragment_main_container, new GoalTreeFragment()).commit();
-//			GoalModel goalModel = new GoalModel("test");1
-			Intent intent = new Intent();
-			intent.setClass(getActivity(), GoalModelDetailsActivity.class);
-			intent.putExtra("goalmodel", application.getGoalModelList().get(position));
-			startActivity(intent);
-//		}
+
+		Intent intent = new Intent();
+		intent.setClass(getActivity(), GoalModelDetailsActivity.class);
+		intent.putExtra("goalmodel",
+				application.getGoalModelList().get(position));
+		startActivity(intent);
 	}
 
 }
@@ -122,7 +118,7 @@ class MyGoalListAdapter<T> extends ArrayAdapter<T> {
 	public View getView(int position, View convertView, ViewGroup parent) {
 		return createViewFromResource(position, convertView, parent, mResource);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private View createViewFromResource(int position, View convertView,
 			ViewGroup parent, int resource) {
@@ -132,25 +128,22 @@ class MyGoalListAdapter<T> extends ArrayAdapter<T> {
 			holder = new ViewHolder();
 			convertView = mInflater.inflate(resource, parent, false);
 
-			holder.text = (TextView) convertView
-					.findViewById(R.id.goal_text);
-			holder.icon = (ImageView) convertView
-					.findViewById(R.id.goal_image);
+			holder.text = (TextView) convertView.findViewById(R.id.goal_text);
+			holder.icon = (ImageView) convertView.findViewById(R.id.goal_image);
 
 			convertView.setTag(holder);
 
 		} else {
 			holder = (ViewHolder) convertView.getTag();
 		}
-		
-		//下面部分不可缺少，是设置每个item具体显示的地方！
+
+		// 下面部分不可缺少，是设置每个item具体显示的地方！
 		T item = getItem(position);
 		if (item instanceof GoalModel) {
-			holder.text.setText(((GoalModel)item).getName());
+			holder.text.setText(((GoalModel) item).getName());
 		}
 		holder.icon.setImageResource(R.drawable.goal_set_image);
-		
-		
+
 		return convertView;
 	}
 

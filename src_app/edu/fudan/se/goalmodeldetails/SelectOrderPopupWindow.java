@@ -43,7 +43,7 @@ public class SelectOrderPopupWindow extends PopupWindow {
 
 		// LayoutInflater mInflater = (LayoutInflater) context
 		// .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		mMenuView = mInflater.inflate(R.layout.popupwindow_dialog, null);
+		mMenuView = mInflater.inflate(R.layout.popupwindow_orders, null);
 
 		bt_dialog_start = (Button) mMenuView.findViewById(R.id.bt_dialog_start);
 		bt_dialog_suspend = (Button) mMenuView

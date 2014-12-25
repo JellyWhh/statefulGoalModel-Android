@@ -39,7 +39,7 @@
             android:layout_centerVertical="true"
             android:layout_gravity="center_vertical"
             android:layout_toRightOf="@id/tree_tv_goal_name"
-            android:background="@drawable/text_view_border"
+            android:background="@drawable/state_text_view_border"
             android:gravity="center_vertical"
             android:padding="3dp"
             android:singleLine="true"

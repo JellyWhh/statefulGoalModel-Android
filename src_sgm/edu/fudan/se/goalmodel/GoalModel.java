@@ -22,6 +22,7 @@ public class GoalModel implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private String name; // goal model的名字
+	private String description; // goal model的描述
 	private String state = "INITIAL"; // 整个goal
 										// model的state，取值有INITIAL,STARTED,STOPED,SUSPENDED,RESUMED
 
@@ -177,6 +178,14 @@ public class GoalModel implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	/**
