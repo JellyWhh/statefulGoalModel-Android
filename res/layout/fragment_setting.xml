@@ -8,9 +8,19 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="edu.fudan.se.mainfragments.SettingFragment" >
 
-    <TextView
+    <Button
+        android:id="@+id/bt_setAgent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="setting" />
+        android:text="@string/bt_setAgent" />
+
+    <Button
+        android:id="@+id/bt_startAgent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/bt_setAgent"
+        android:layout_below="@+id/bt_setAgent"
+        android:layout_marginTop="30dp"
+        android:text="@string/bt_startAgent" />
 
 </RelativeLayout>

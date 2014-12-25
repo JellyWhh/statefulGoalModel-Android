@@ -4,21 +4,40 @@
     <string name="app_name">StatefulGoalModel</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    
+
+    <!-- 标签页内容 -->
     <string name="tab_home">Home</string>
     <string name="tab_mygoal">MyGoal</string>
     <string name="tab_setting">Setting</string>
-    
+
+    <!-- orders弹出框中的按钮内容 -->
     <string name="dialog_start">Start</string>
     <string name="dialog_suspend">Suspend</string>
     <string name="dialog_resume">Resume</string>
     <string name="dialog_stop">Stop</string>
     <string name="dialog_reset">Reset</string>
     <string name="dialog_cancel">Cancel</string>
-    
-    <string name="gm_back">Back</string>
-    <string name="gm_refresh">Refresh</string>
-    <string name="gm_details">Details</string>
-    <string name="gm_orders">Orders</string>
+
+    <!-- setting界面的按钮内容 -->
+    <string name="bt_setAgent">Set Agent</string>
+    <string name="bt_startAgent">Start Agent</string>
+
+    <!-- 下面是郑家欢代码中需要的string -->
+    <string name="label_nick">Enter Nickname</string>
+    <string name="label_host">Host</string>
+    <string name="label_port">Port</string>
+    <string name="button_login"> chat! </string>
+    <string name="button_send">send!</string>
+    <string name="button_use"> use </string>
+    <string name="menu_settings">settings</string>
+    <string name="menu_exit">exit</string>
+    <string name="menu_participants">participants</string>
+    <string name="menu_clear">clear</string>
+    <string name="msg_nickname_in_use">Nickname already in use!</string>
+    <string name="title_activity_selection">SelectionActivity</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_working">WorkingActivity</string>
+    <string name="accept">Accept</string>
+    <string name="reject">Reject</string>
 
 </resources>

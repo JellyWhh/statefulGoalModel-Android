@@ -3,7 +3,6 @@
  */
 package edu.fudan.se.mainfragments;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;

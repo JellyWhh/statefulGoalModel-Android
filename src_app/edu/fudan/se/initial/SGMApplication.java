@@ -3,9 +3,12 @@
  */
 package edu.fudan.se.initial;
 
+import jade.util.Logger;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.logging.Level;
 
 import edu.fudan.se.goalmachine.Condition;
 import edu.fudan.se.goalmachine.GoalMachine;
@@ -14,6 +17,7 @@ import edu.fudan.se.goalmachine.TaskMachine;
 import edu.fudan.se.goalmodel.GoalModel;
 
 import android.app.Application;
+import android.content.SharedPreferences;
 
 /**
  * 重写Application，主要重写里面的onCreate方法，设置并初始化一些全局变量
@@ -25,14 +29,20 @@ public class SGMApplication extends Application implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private ArrayList<GoalModel> goalModelList;
+	private Logger logger = Logger.getJADELogger(this.getClass().getName());
+
+	private ArrayList<GoalModel> goalModelList; // 全局变量，用来保存用户的goal model list
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		initialData();
+		initialJadePreferences();
 	}
 
+	/**
+	 * 把用户的goal model list数据加载进来，如果以后要从xml文件里读取，就是在这里设置
+	 */
 	private void initialData() {
 		this.goalModelList = new ArrayList<>();
 
@@ -40,10 +50,33 @@ public class SGMApplication extends Application implements Serializable {
 
 	}
 
+	/**
+	 * zjh所写代码，把jade需要的相关属性初始化
+	 */
+	private void initialJadePreferences() {
+		SharedPreferences settings = getSharedPreferences("jadeChatPrefsFile",
+				0);
+
+		String defaultHost = settings.getString("defaultHost", "");
+		String defaultPort = settings.getString("defaultPort", "");
+		if (defaultHost.isEmpty() || defaultPort.isEmpty()) {
+			logger.log(Level.INFO, "Create default properties");
+			SharedPreferences.Editor editor = settings.edit();
+			editor.putString("defaultHost", "10.131.253.133"); // 改成jade平台的ip
+			editor.putString("defaultPort", "1099");
+			editor.commit();
+		}
+	}
+
 	public ArrayList<GoalModel> getGoalModelList() {
 		return this.goalModelList;
 	}
 
+	/**
+	 * 目前测试时只用这个方法添加了一个测试用的GoalModel
+	 * 
+	 * @return 测试用的GoalModel
+	 */
 	private GoalModel newGoalModel() {
 
 		GoalModel goalModel = new GoalModel("my goal model");
