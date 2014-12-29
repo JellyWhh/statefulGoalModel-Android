@@ -122,6 +122,12 @@ public class GoalModelDetailsFragment extends Fragment {
 
 		return view;
 	}
+	
+	
+	public Object onRetainNonConfigurationInstance(){
+		return goalModel;
+		
+	}
 
 	/**
 	 * 点击上方的goal model name后弹出goal model的介绍，是一个普通的popupwindow
@@ -174,7 +180,7 @@ public class GoalModelDetailsFragment extends Fragment {
 			popupWindow.dismiss();
 			switch (v.getId()) {
 			case R.id.bt_dialog_start:
-				goalModel.start();
+	//			goalModel.start();
 				break;
 			case R.id.bt_dialog_suspend:
 				goalModel.suspend();
@@ -183,7 +189,7 @@ public class GoalModelDetailsFragment extends Fragment {
 				goalModel.resume();
 				break;
 			case R.id.bt_dialog_stop:
-				goalModel.stop();
+//				goalModel.stop();
 				break;
 			case R.id.bt_dialog_reset:
 				goalModel.reset();

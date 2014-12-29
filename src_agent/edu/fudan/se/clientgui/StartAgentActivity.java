@@ -7,6 +7,7 @@ import java.util.logging.Level;
 
 import edu.fudan.se.R;
 import edu.fudan.se.agent.AideAgent;
+import edu.fudan.se.maincontainer.MainActivity;
 import jade.android.AndroidHelper;
 import jade.android.MicroRuntimeService;
 import jade.android.MicroRuntimeServiceBinder;
@@ -86,8 +87,10 @@ public class StartAgentActivity extends Activity {
 					String host = settings.getString("defaultHost", "");
 					String port = settings.getString("defaultPort", "");
 					startChat(nickname, host, port, agentStartupCallback);
+//					Intent intent = new Intent(StartAgentActivity.this,
+//							WorkingActivity.class);
 					Intent intent = new Intent(StartAgentActivity.this,
-							WorkingActivity.class);
+							MainActivity.class);
 					intent.putExtra("agentname", nickname);
 					startActivity(intent);
 

@@ -40,31 +40,31 @@ public class SettingFragment extends Fragment {
 		View rootView = inflater.inflate(R.layout.fragment_setting, container,
 				false);
 
-		bt_setAgent = (Button) rootView.findViewById(R.id.bt_setAgent);
-		bt_startAgent = (Button) rootView.findViewById(R.id.bt_startAgent);
-
-		bt_setAgent.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				// 跳转到zjh写的设置界面
-				Intent showSettings = new Intent(getActivity(),
-						SettingAgentActivity.class);
-				startActivityForResult(showSettings, SETTINGS_REQUEST);
-			}
-		});
-
-		bt_startAgent.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				// 跳转到zjh写的开始agent界面，也就是他代码中的MainActivity，在这里更名为了StartAgentActivity
-				Intent startAgent = new Intent(getActivity(),
-						StartAgentActivity.class);
-				startActivity(startAgent);
-
-			}
-		});
+//		bt_setAgent = (Button) rootView.findViewById(R.id.bt_setAgent);
+//		bt_startAgent = (Button) rootView.findViewById(R.id.bt_startAgent);
+//
+//		bt_setAgent.setOnClickListener(new OnClickListener() {
+//
+//			@Override
+//			public void onClick(View v) {
+//				// 跳转到zjh写的设置界面
+//				Intent showSettings = new Intent(getActivity(),
+//						SettingAgentActivity.class);
+//				startActivityForResult(showSettings, SETTINGS_REQUEST);
+//			}
+//		});
+//
+//		bt_startAgent.setOnClickListener(new OnClickListener() {
+//
+//			@Override
+//			public void onClick(View v) {
+//				// 跳转到zjh写的开始agent界面，也就是他代码中的MainActivity，在这里更名为了StartAgentActivity
+//				Intent startAgent = new Intent(getActivity(),
+//						StartAgentActivity.class);
+//				startActivity(startAgent);
+//
+//			}
+//		});
 
 		return rootView;
 	}
