@@ -3,7 +3,6 @@
  */
 package edu.fudan.se.goalmodel;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 
 import edu.fudan.se.goalmachine.ElementMachine;
@@ -17,14 +16,9 @@ import edu.fudan.se.log.Log;
  * @author whh
  * 
  */
-public class GoalModel implements Serializable {
+public class GoalModel{
 
-//	private static final long serialVersionUID = 1L;
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 6652672451868565629L;
 	private String name; // goal model的名字
 	private String description; // goal model的描述
 	private String state = "INITIAL"; // 整个goal
@@ -47,89 +41,89 @@ public class GoalModel implements Serializable {
 		this.elementMachines = new ArrayList<>();
 	}
 
-	/**
-	 * start这个goal model里面的所有element machines
-	 */
-	public void start() {
-		Log.logDebug("goal model:" + this.getName(), "start()", "init.");
-		if (this.elementMachines != null && this.elementMachines.size() != 0) {
-			for (ElementMachine elementMachine : this.elementMachines) {
-				Thread thread = new Thread(elementMachine);
-				thread.start();
-			}
-			// 然后给root goal发送激活消息
-			SGMMessage msg = new SGMMessage("TOROOT", "UI",
-					this.rootGoal.getName(), "ACTIVATE");
-			if (this.rootGoal.getMsgPool().offer(msg)) {
-				Log.logMessage(msg, true);
-				Log.logDebug(
-						"goal model:" + this.getName(),
-						"start()",
-						"UI thread send a ACTIVATE msg to "
-								+ this.rootGoal.getName() + " succeed!");
-			} else {
-				Log.logMessage(msg, false);
-				Log.logError(
-						"goal model:" + this.getName(),
-						"start()",
-						"UI thread send a ACTIVATE msg to "
-								+ this.rootGoal.getName() + " error!");
-			}
-		} else {
-			Log.logError("goal model:" + this.getName(), "start()",
-					"elementMachines is null or its size is 0!");
-		}
-		this.state = "STARTED";
-	}
-
-	/**
-	 * stop这个goal model，只需要给这个goal model里面的root goal发送STOP消息即可
-	 */
-	public void stop() {
-		Log.logDebug("goal model:" + this.getName(), "stop()", "init.");
-		if (this.rootGoal != null) {
-			SGMMessage msg = new SGMMessage("TOROOT", "UI",
-					this.rootGoal.getName(), "STOP");
-			if (this.rootGoal.getMsgPool().offer(msg)) {
-				Log.logMessage(msg, true);
-				Log.logDebug(
-						"goal model:" + this.getName(),
-						"stop()",
-						"UI thread send a STOP msg to "
-								+ this.rootGoal.getName() + " succeed!");
-			} else {
-				Log.logMessage(msg, false);
-				Log.logError(
-						"goal model:" + this.getName(),
-						"stop()",
-						"UI thread send a STOP msg to "
-								+ this.rootGoal.getName() + " error!");
-			}
-
-		} else {
-			Log.logError("goal model:" + this.getName(), "stop()",
-					"rootGoal is null!");
-		}
-		this.state = "STOPED";
-	}
-
-	/**
-	 * suspend这个goal model，只需要给这个goal model里面的root goal发送SUSPEND消息即可
-	 */
-	public void suspend() {
-		Log.logDebug("goal model:" + this.getName(), "suspend()", "init.");
-		// TODO
-		this.state = "SUSPENDED";
-	}
-
-	/**
-	 * resume这个goal model，只需要给这个goal model里面的root goal发送RESUME消息即可
-	 */
-	public void resume() {
-		Log.logDebug("goal model:" + this.getName(), "resume()", "init.");
-		// TODO
-		this.state = "RESUMED";
-	}
+//	/**
+//	 * start这个goal model里面的所有element machines
+//	 */
+//	public void start() {
+//		Log.logDebug("goal model:" + this.getName(), "start()", "init.");
+//		if (this.elementMachines != null && this.elementMachines.size() != 0) {
+//			for (ElementMachine elementMachine : this.elementMachines) {
+//				Thread thread = new Thread(elementMachine);
+//				thread.start();
+//			}
+//			// 然后给root goal发送激活消息
+//			SGMMessage msg = new SGMMessage("TOROOT", "UI",
+//					this.rootGoal.getName(), "ACTIVATE");
+//			if (this.rootGoal.getMsgPool().offer(msg)) {
+//				Log.logMessage(msg, true);
+//				Log.logDebug(
+//						"goal model:" + this.getName(),
+//						"start()",
+//						"UI thread send a ACTIVATE msg to "
+//								+ this.rootGoal.getName() + " succeed!");
+//			} else {
+//				Log.logMessage(msg, false);
+//				Log.logError(
+//						"goal model:" + this.getName(),
+//						"start()",
+//						"UI thread send a ACTIVATE msg to "
+//								+ this.rootGoal.getName() + " error!");
+//			}
+//		} else {
+//			Log.logError("goal model:" + this.getName(), "start()",
+//					"elementMachines is null or its size is 0!");
+//		}
+//		this.state = "STARTED";
+//	}
+//
+//	/**
+//	 * stop这个goal model，只需要给这个goal model里面的root goal发送STOP消息即可
+//	 */
+//	public void stop() {
+//		Log.logDebug("goal model:" + this.getName(), "stop()", "init.");
+//		if (this.rootGoal != null) {
+//			SGMMessage msg = new SGMMessage("TOROOT", "UI",
+//					this.rootGoal.getName(), "STOP");
+//			if (this.rootGoal.getMsgPool().offer(msg)) {
+//				Log.logMessage(msg, true);
+//				Log.logDebug(
+//						"goal model:" + this.getName(),
+//						"stop()",
+//						"UI thread send a STOP msg to "
+//								+ this.rootGoal.getName() + " succeed!");
+//			} else {
+//				Log.logMessage(msg, false);
+//				Log.logError(
+//						"goal model:" + this.getName(),
+//						"stop()",
+//						"UI thread send a STOP msg to "
+//								+ this.rootGoal.getName() + " error!");
+//			}
+//
+//		} else {
+//			Log.logError("goal model:" + this.getName(), "stop()",
+//					"rootGoal is null!");
+//		}
+//		this.state = "STOPED";
+//	}
+//
+//	/**
+//	 * suspend这个goal model，只需要给这个goal model里面的root goal发送SUSPEND消息即可
+//	 */
+//	public void suspend() {
+//		Log.logDebug("goal model:" + this.getName(), "suspend()", "init.");
+//		// TODO
+//		this.state = "SUSPENDED";
+//	}
+//
+//	/**
+//	 * resume这个goal model，只需要给这个goal model里面的root goal发送RESUME消息即可
+//	 */
+//	public void resume() {
+//		Log.logDebug("goal model:" + this.getName(), "resume()", "init.");
+//		// TODO
+//		this.state = "RESUMED";
+//	}
 
 	/**
 	 * 给一个task machine发送END消息，这个是在用户完成了某个需要他参与的任务后，在UI上点击这个task后面的end按钮时触发的操作
@@ -156,21 +150,21 @@ public class GoalModel implements Serializable {
 
 	}
 
-	/**
-	 * 重新把所有ElementMachine的状态设置为initial
-	 */
-	public void reset() {
-		Log.logDebug("goal model:" + this.getName(), "reset()", "init.");
-		if (this.elementMachines != null && this.elementMachines.size() != 0) {
-			for (ElementMachine elementMachine : this.elementMachines) {
-				elementMachine.resetMachine();
-			}
-		} else {
-			Log.logError("goal model:" + this.getName(), "reset()",
-					"elementMachines is null or its size is 0!");
-		}
-		this.state = "INITIAL";
-	}
+//	/**
+//	 * 重新把所有ElementMachine的状态设置为initial
+//	 */
+//	public void reset() {
+//		Log.logDebug("goal model:" + this.getName(), "reset()", "init.");
+//		if (this.elementMachines != null && this.elementMachines.size() != 0) {
+//			for (ElementMachine elementMachine : this.elementMachines) {
+//				elementMachine.resetMachine();
+//			}
+//		} else {
+//			Log.logError("goal model:" + this.getName(), "reset()",
+//					"elementMachines is null or its size is 0!");
+//		}
+//		this.state = "INITIAL";
+//	}
 
 	private void sortElementMachines() {
 

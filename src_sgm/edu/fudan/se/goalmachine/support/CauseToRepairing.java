@@ -3,7 +3,6 @@
  */
 package edu.fudan.se.goalmachine.support;
 
-import java.io.Serializable;
 
 /**
  * 导致跳转到repairing状态的原因类型
@@ -11,6 +10,6 @@ import java.io.Serializable;
  * @author whh
  *
  */
-public enum CauseToRepairing implements Serializable{
+public enum CauseToRepairing{
 	InvViolated, CcViolated, SubFail, PreCondition, PostCondition, DefaultPreCondition
 }

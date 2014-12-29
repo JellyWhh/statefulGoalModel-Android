@@ -3,7 +3,6 @@
  */
 package edu.fudan.se.goalmachine;
 
-import java.io.Serializable;
 
 /**
  * 状态机中需要检查的条件Condition,具体类型有：CONTEXT,PRE,POST,COMMITMENT,INVARIANT
@@ -11,9 +10,8 @@ import java.io.Serializable;
  * @author whh
  *
  */
-public class Condition implements Serializable{
+public class Condition{
 
-	private static final long serialVersionUID = 1L;
 	
 	private String type; // 条件类型，具体有CONTEXT,PRE,POST,COMMITMENT,INVARIANT
 	private boolean satisfied = true; // 条件是否被满足，true为被满足

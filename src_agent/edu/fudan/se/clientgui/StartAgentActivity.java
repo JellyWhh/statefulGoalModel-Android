@@ -27,6 +27,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -83,6 +84,8 @@ public class StartAgentActivity extends Activity {
 				logger.log(Level.INFO, "Invalid nickname!");
 			} else {
 				try {
+					((SGMApplication)getApplication()).setAgentNickname(nickname);
+					Log.i("start agent", "agent nickname: " + ((SGMApplication)getApplication()).getAgentNickname());
 					SharedPreferences settings = getSharedPreferences(
 							"jadeChatPrefsFile", 0);
 					String host = settings.getString("defaultHost", "");
@@ -92,7 +95,7 @@ public class StartAgentActivity extends Activity {
 //							WorkingActivity.class);
 					Intent intent = new Intent(StartAgentActivity.this,
 							MainActivity.class);
-					intent.putExtra("agentname", nickname);
+//					intent.putExtra("agentname", nickname);
 					startActivity(intent);
 
 				} catch (Exception ex) {
@@ -238,6 +241,6 @@ public class StartAgentActivity extends Activity {
 			}
 		};
 		microRuntimeServiceBinder.startAgent(nickname,AideAgent.class.getName(),
-				new Object[] { getApplicationContext(), ((SGMApplication)getApplication()).getGoalModelController() }, rc);
+				new Object[] { getApplicationContext() }, rc);
 	}
 }

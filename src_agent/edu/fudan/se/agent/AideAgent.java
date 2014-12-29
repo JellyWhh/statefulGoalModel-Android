@@ -3,12 +3,8 @@
  */
 package edu.fudan.se.agent;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
 import edu.fudan.se.goalmodel.GoalModel;
 import edu.fudan.se.goalmodel.GoalModelController;
@@ -47,10 +43,9 @@ public class AideAgent extends Agent implements AideAgentInterface {
 			if (args[0] instanceof Context) {
 				context = (Context) args[0];
 			}
-			if(args[1] instanceof GoalModelController){
-				goalModelController = (GoalModelController) args[1];
-			}
 		}
+		
+		goalModelController = new GoalModelController();
 		
 		registerO2AInterface(AideAgentInterface.class, this);
 		
@@ -192,31 +187,134 @@ public class AideAgent extends Agent implements AideAgentInterface {
 		}
 	}
 
+	
+	
+	@Override
+	public void startGoalModel(GoalModel goalModel) {
+		this.addBehaviour(new GSMStarter(this, goalModel));
+	}
+
+	@Override
+	public void stopGoalModel(GoalModel goalModel) {
+		this.addBehaviour(new GSMStoper(this, goalModel));
+	}
+
+	@Override
+	public void suspendGoalModel(GoalModel goalModel) {
+		this.addBehaviour(new GSMSuspender(this, goalModel));
+	}
+
+	@Override
+	public void resumeGoalModel(GoalModel goalModel) {
+		this.addBehaviour(new GSMResumer(this, goalModel));
+	}
+
+	@Override
+	public void resetGoalModel(GoalModel goalModel) {
+		this.addBehaviour(new GSMResetter(this, goalModel));
+	}
+	
+	
+	
 	private class GSMStarter extends OneShotBehaviour{
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = 2126730704005002010L;
-		private String goalName;
+		private GoalModel goalModel;
 		
-		private GSMStarter(Agent a, String goalModelName){
+		private GSMStarter(Agent a, GoalModel goalModelName){
 			super(a);
-			goalName = goalModelName;
+			this.goalModel = goalModelName;
 		}
 		
 		@Override
 		public void action() {
 			// TODO Auto-generated method stub
 			Log.i("MY_LOG", "Start Goal Model...");
-			goalModelController.startGoalModel(goalName);
+			goalModelController.start(goalModel);
 		}
 		
 	}
-	
-	@Override
-	public void startGoalModel(String goalModelName) {
-		// TODO Auto-generated method stub
-		this.addBehaviour(new GSMStarter(this, goalModelName));
+	private class GSMStoper extends OneShotBehaviour{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 2126730704005002010L;
+		private GoalModel goalModel;
+		
+		private GSMStoper(Agent a, GoalModel goalModelName){
+			super(a);
+			this.goalModel = goalModelName;
+		}
+		
+		@Override
+		public void action() {
+			// TODO Auto-generated method stub
+			Log.i("MY_LOG", "Start Goal Model...");
+			goalModelController.stop(goalModel);
+		}
+		
+	}
+	private class GSMSuspender extends OneShotBehaviour{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 2126730704005002010L;
+		private GoalModel goalModel;
+		
+		private GSMSuspender(Agent a, GoalModel goalModelName){
+			super(a);
+			this.goalModel = goalModelName;
+		}
+		
+		@Override
+		public void action() {
+			// TODO Auto-generated method stub
+			Log.i("MY_LOG", "Start Goal Model...");
+			goalModelController.suspend(goalModel);
+		}
+		
+	}
+	private class GSMResumer extends OneShotBehaviour{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 2126730704005002010L;
+		private GoalModel goalModel;
+		
+		private GSMResumer(Agent a, GoalModel goalModelName){
+			super(a);
+			this.goalModel = goalModelName;
+		}
+		
+		@Override
+		public void action() {
+			// TODO Auto-generated method stub
+			Log.i("MY_LOG", "Start Goal Model...");
+			goalModelController.resume(goalModel);
+		}
+		
+	}
+	private class GSMResetter extends OneShotBehaviour{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 2126730704005002010L;
+		private GoalModel goalModel;
+		
+		private GSMResetter(Agent a, GoalModel goalModelName){
+			super(a);
+			this.goalModel = goalModelName;
+		}
+		
+		@Override
+		public void action() {
+			// TODO Auto-generated method stub
+			Log.i("MY_LOG", "Start Goal Model...");
+			goalModelController.reset(goalModel);
+		}
+		
 	}
 
 }

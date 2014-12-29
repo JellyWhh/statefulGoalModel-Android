@@ -50,7 +50,7 @@ public class GoalTreeFragment extends ListFragment {
 
 		initialData();
 		treeViewAdapter = new TreeViewAdapter(getActivity(),
-				R.layout.tree_view_item_layout, allTreeElements,goalModel);
+				R.layout.tree_view_item_layout, allTreeElements, goalModel);
 		// setListAdapter(treeViewAdapter);
 		// registerForContextMenu(getListView());
 	}
@@ -93,7 +93,7 @@ class TreeViewAdapter extends ArrayAdapter<ElementMachine> {
 	private Bitmap iconOR; // or分解
 
 	public TreeViewAdapter(Context context, int textViewResourceId,
-			List<ElementMachine> treeElements,GoalModel goalModel) {
+			List<ElementMachine> treeElements, GoalModel goalModel) {
 		super(context, textViewResourceId, treeElements);
 		this.mInflater = LayoutInflater.from(context);
 		this.treeElements = treeElements;
@@ -169,17 +169,20 @@ class TreeViewAdapter extends ArrayAdapter<ElementMachine> {
 		}
 		// 如果这个ElementMachine是一个TaskMachine
 		else if (treeElements.get(position) instanceof TaskMachine) {
-			// 再设置是否显示end按钮
-			if (treeElements.get(position).getCurrentState() == State.Executing) {
+			// 再设置是否显示end按钮，需要人的参与且在执行状态下时显示end按钮
+			if (treeElements.get(position).getCurrentState() == State.Executing
+					&& ((TaskMachine) treeElements.get(position))
+							.isNeedPeopleInteraction()) {
 				holder.end.setVisibility(View.VISIBLE);
-				//给end按钮添加监听器
+				// 给end按钮添加监听器
 				holder.end.setOnClickListener(new OnClickListener() {
-					
+
 					@Override
 					public void onClick(View v) {
-						//给这个element发送END消息
-						goalModel.endTaskMachine((TaskMachine)treeElements.get(position));
-						
+						// 给这个element发送END消息
+						goalModel.endTaskMachine((TaskMachine) treeElements
+								.get(position));
+
 					}
 				});
 			} else {

@@ -3,7 +3,6 @@
  */
 package edu.fudan.se.goalmachine;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -19,9 +18,8 @@ import edu.fudan.se.log.Log;
  * @author whh
  * 
  */
-public abstract class ElementMachine implements Runnable, Serializable {
+public abstract class ElementMachine implements Runnable{
 
-	private static final long serialVersionUID = 1L;
 
 	private int level; // 这个主要是在安卓界面显示目标树的时候用的，指这个element处在第几层，root goal为0层
 

@@ -34,7 +34,9 @@ public class SGMApplication extends Application implements Serializable {
 
 	private ArrayList<GoalModel> goalModelList; // 全局变量，用来保存用户的goal model list
 	
-	private GoalModelController goalModelController;
+	private String agentNickname;
+	
+//	private GoalModelController goalModelController;
 
 	@Override
 	public void onCreate() {
@@ -51,7 +53,7 @@ public class SGMApplication extends Application implements Serializable {
 
 		this.goalModelList.add(newGoalModel());
 		
-		this.goalModelController = new GoalModelController(this.goalModelList);
+//		this.goalModelController = new GoalModelController(this.goalModelList);
 
 	}
 
@@ -77,8 +79,16 @@ public class SGMApplication extends Application implements Serializable {
 		return this.goalModelList;
 	}
 	
-	public GoalModelController getGoalModelController(){
-		return this.goalModelController;
+//	public GoalModelController getGoalModelController(){
+//		return this.goalModelController;
+//	}
+	
+	public String getAgentNickname(){
+		return this.agentNickname;
+	}
+	
+	public void setAgentNickname(String agentNickname){
+		this.agentNickname = agentNickname;
 	}
 
 	/**
@@ -195,7 +205,7 @@ public class SGMApplication extends Application implements Serializable {
 			}
 		};
 
-		TaskMachine aliceChild_1 = new TaskMachine("aliceChild_1", alice, 2) {
+		TaskMachine aliceChild_1 = new TaskMachine("aliceChild_1", alice, 2,true) {
 
 			@Override
 			public void checkPreCondition() {
@@ -229,15 +239,15 @@ public class SGMApplication extends Application implements Serializable {
 
 			}
 
+
 			@Override
-			public void executingDo(SGMMessage msg) {
+			public void executingDo_once() {
 				System.out
-						.println("aliceChild_1 is doing his executingDoAction...");
-				this.executingDo_waitingEnd(msg);
+				.println("aliceChild_1 is doing his executingDoAction...");
 			}
 		};
 
-		TaskMachine aliceChild_2 = new TaskMachine("aliceChild_2", alice, 2) {
+		TaskMachine aliceChild_2 = new TaskMachine("aliceChild_2", alice, 2,true) {
 
 			@Override
 			public void checkPreCondition() {
@@ -270,16 +280,15 @@ public class SGMApplication extends Application implements Serializable {
 
 			}
 
-			@Override
-			public void executingDo(SGMMessage msg) {
-				System.out
-						.println("aliceChild_2 is doing his executingDoAction...");
-				this.executingDo_waitingEnd(msg);
 
+			@Override
+			public void executingDo_once() {
+				System.out
+				.println("aliceChild_2 is doing his executingDoAction...");
 			}
 		};
 
-		TaskMachine bobChild_1 = new TaskMachine("bobChild_1", bob, 2) {
+		TaskMachine bobChild_1 = new TaskMachine("bobChild_1", bob, 2,true) {
 
 			@Override
 			public void checkPreCondition() {
@@ -313,16 +322,15 @@ public class SGMApplication extends Application implements Serializable {
 
 			}
 
-			@Override
-			public void executingDo(SGMMessage msg) {
-				System.out
-						.println("bobChild_1 is doing his executingDoAction...");
-				this.executingDo_waitingEnd(msg);
 
+			@Override
+			public void executingDo_once() {
+				System.out
+				.println("bobChild_1 is doing his executingDoAction...");
 			}
 		};
 
-		TaskMachine bobChild_2 = new TaskMachine("bobChild_2", bob, 2) {
+		TaskMachine bobChild_2 = new TaskMachine("bobChild_2", bob, 2,true) {
 
 			@Override
 			public void checkPreCondition() {
@@ -358,15 +366,15 @@ public class SGMApplication extends Application implements Serializable {
 
 			}
 
-			@Override
-			public void executingDo(SGMMessage msg) {
-				System.out
-						.println("bobChild_2 is doing his executingDoAction...");
-				this.executingDo_waitingEnd(msg);
+			
 
+			@Override
+			public void executingDo_once() {
+				System.out
+				.println("bobChild_2 is doing his executingDoAction...");
 			}
 		};
-		TaskMachine bobChild_3 = new TaskMachine("bobChild_3", bob, 2) {
+		TaskMachine bobChild_3 = new TaskMachine("bobChild_3", bob, 2,true) {
 
 			@Override
 			public void checkPreCondition() {
@@ -403,10 +411,9 @@ public class SGMApplication extends Application implements Serializable {
 			}
 
 			@Override
-			public void executingDo(SGMMessage msg) {
+			public void executingDo_once() {
 				System.out
-						.println("bobChild_3 is doing his executingDoAction...");
-				this.executingDo_waitingEnd(msg);
+				.println("bobChild_3 is doing his executingDoAction...");
 			}
 		};
 		// root.setCommitmentCondition(new Condition("COMMITMENT"));
