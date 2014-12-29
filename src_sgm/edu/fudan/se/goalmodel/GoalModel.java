@@ -43,71 +43,71 @@ public class GoalModel implements Serializable {
 		this.elementMachines = new ArrayList<>();
 	}
 
-//	/**
-//	 * start这个goal model里面的所有element machines
-//	 */
-//	public void start() {
-//		Log.logDebug("goal model:" + this.getName(), "start()", "init.");
-//		if (this.elementMachines != null && this.elementMachines.size() != 0) {
-//			for (ElementMachine elementMachine : this.elementMachines) {
-//				Thread thread = new Thread(elementMachine);
-//				thread.start();
-//			}
-//			// 然后给root goal发送激活消息
-//			SGMMessage msg = new SGMMessage("TOROOT", "UI",
-//					this.rootGoal.getName(), "ACTIVATE");
-//			if (this.rootGoal.getMsgPool().offer(msg)) {
-//				Log.logMessage(msg, true);
-//				Log.logDebug(
-//						"goal model:" + this.getName(),
-//						"start()",
-//						"UI thread send a ACTIVATE msg to "
-//								+ this.rootGoal.getName() + " succeed!");
-//			} else {
-//				Log.logMessage(msg, false);
-//				Log.logError(
-//						"goal model:" + this.getName(),
-//						"start()",
-//						"UI thread send a ACTIVATE msg to "
-//								+ this.rootGoal.getName() + " error!");
-//			}
-//		} else {
-//			Log.logError("goal model:" + this.getName(), "start()",
-//					"elementMachines is null or its size is 0!");
-//		}
-//		this.state = "STARTED";
-//	}
+	/**
+	 * start这个goal model里面的所有element machines
+	 */
+	public void start() {
+		Log.logDebug("goal model:" + this.getName(), "start()", "init.");
+		if (this.elementMachines != null && this.elementMachines.size() != 0) {
+			for (ElementMachine elementMachine : this.elementMachines) {
+				Thread thread = new Thread(elementMachine);
+				thread.start();
+			}
+			// 然后给root goal发送激活消息
+			SGMMessage msg = new SGMMessage("TOROOT", "UI",
+					this.rootGoal.getName(), "ACTIVATE");
+			if (this.rootGoal.getMsgPool().offer(msg)) {
+				Log.logMessage(msg, true);
+				Log.logDebug(
+						"goal model:" + this.getName(),
+						"start()",
+						"UI thread send a ACTIVATE msg to "
+								+ this.rootGoal.getName() + " succeed!");
+			} else {
+				Log.logMessage(msg, false);
+				Log.logError(
+						"goal model:" + this.getName(),
+						"start()",
+						"UI thread send a ACTIVATE msg to "
+								+ this.rootGoal.getName() + " error!");
+			}
+		} else {
+			Log.logError("goal model:" + this.getName(), "start()",
+					"elementMachines is null or its size is 0!");
+		}
+		this.state = "STARTED";
+	}
 
-//	/**
-//	 * stop这个goal model，只需要给这个goal model里面的root goal发送STOP消息即可
-//	 */
-//	public void stop() {
-//		Log.logDebug("goal model:" + this.getName(), "stop()", "init.");
-//		if (this.rootGoal != null) {
-//			SGMMessage msg = new SGMMessage("TOROOT", "UI",
-//					this.rootGoal.getName(), "STOP");
-//			if (this.rootGoal.getMsgPool().offer(msg)) {
-//				Log.logMessage(msg, true);
-//				Log.logDebug(
-//						"goal model:" + this.getName(),
-//						"stop()",
-//						"UI thread send a STOP msg to "
-//								+ this.rootGoal.getName() + " succeed!");
-//			} else {
-//				Log.logMessage(msg, false);
-//				Log.logError(
-//						"goal model:" + this.getName(),
-//						"stop()",
-//						"UI thread send a STOP msg to "
-//								+ this.rootGoal.getName() + " error!");
-//			}
-//
-//		} else {
-//			Log.logError("goal model:" + this.getName(), "stop()",
-//					"rootGoal is null!");
-//		}
-//		this.state = "STOPED";
-//	}
+	/**
+	 * stop这个goal model，只需要给这个goal model里面的root goal发送STOP消息即可
+	 */
+	public void stop() {
+		Log.logDebug("goal model:" + this.getName(), "stop()", "init.");
+		if (this.rootGoal != null) {
+			SGMMessage msg = new SGMMessage("TOROOT", "UI",
+					this.rootGoal.getName(), "STOP");
+			if (this.rootGoal.getMsgPool().offer(msg)) {
+				Log.logMessage(msg, true);
+				Log.logDebug(
+						"goal model:" + this.getName(),
+						"stop()",
+						"UI thread send a STOP msg to "
+								+ this.rootGoal.getName() + " succeed!");
+			} else {
+				Log.logMessage(msg, false);
+				Log.logError(
+						"goal model:" + this.getName(),
+						"stop()",
+						"UI thread send a STOP msg to "
+								+ this.rootGoal.getName() + " error!");
+			}
+
+		} else {
+			Log.logError("goal model:" + this.getName(), "stop()",
+					"rootGoal is null!");
+		}
+		this.state = "STOPED";
+	}
 
 	/**
 	 * suspend这个goal model，只需要给这个goal model里面的root goal发送SUSPEND消息即可
