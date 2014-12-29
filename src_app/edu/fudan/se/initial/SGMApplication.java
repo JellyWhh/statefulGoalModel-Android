@@ -15,6 +15,7 @@ import edu.fudan.se.goalmachine.GoalMachine;
 import edu.fudan.se.goalmachine.SGMMessage;
 import edu.fudan.se.goalmachine.TaskMachine;
 import edu.fudan.se.goalmodel.GoalModel;
+import edu.fudan.se.goalmodel.GoalModelController;
 
 import android.app.Application;
 import android.content.SharedPreferences;
@@ -32,6 +33,8 @@ public class SGMApplication extends Application implements Serializable {
 	private Logger logger = Logger.getJADELogger(this.getClass().getName());
 
 	private ArrayList<GoalModel> goalModelList; // 全局变量，用来保存用户的goal model list
+	
+	private GoalModelController goalModelController;
 
 	@Override
 	public void onCreate() {
@@ -47,6 +50,8 @@ public class SGMApplication extends Application implements Serializable {
 		this.goalModelList = new ArrayList<>();
 
 		this.goalModelList.add(newGoalModel());
+		
+		this.goalModelController = new GoalModelController(this.goalModelList);
 
 	}
 
@@ -70,6 +75,10 @@ public class SGMApplication extends Application implements Serializable {
 
 	public ArrayList<GoalModel> getGoalModelList() {
 		return this.goalModelList;
+	}
+	
+	public GoalModelController getGoalModelController(){
+		return this.goalModelController;
 	}
 
 	/**

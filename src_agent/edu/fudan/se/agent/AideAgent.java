@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 import edu.fudan.se.goalmodel.GoalModel;
+import edu.fudan.se.goalmodel.GoalModelController;
 import edu.fudan.se.pool.Message;
 import edu.fudan.se.pool.Pool;
 import jade.core.Agent;
@@ -33,7 +34,7 @@ public class AideAgent extends Agent implements AideAgentInterface {
 
 	private static final long serialVersionUID = 1L;
 	
-	private ArrayList<GoalModel> goalModelList;
+	private GoalModelController goalModelController;
 	
 	private Context context;
 
@@ -46,8 +47,8 @@ public class AideAgent extends Agent implements AideAgentInterface {
 			if (args[0] instanceof Context) {
 				context = (Context) args[0];
 			}
-			if(args[1] instanceof ArrayList){
-				goalModelList = (ArrayList<GoalModel>) args[1];
+			if(args[1] instanceof GoalModelController){
+				goalModelController = (GoalModelController) args[1];
 			}
 		}
 		
@@ -207,18 +208,7 @@ public class AideAgent extends Agent implements AideAgentInterface {
 		public void action() {
 			// TODO Auto-generated method stub
 			Log.i("MY_LOG", "Start Goal Model...");
-			boolean suc = false;
-			for(GoalModel gm : goalModelList){
-				if(gm.getName().equals(goalName)){
-					suc = true;
-					gm.start();
-					break;
-				}
-			}
-			if(suc)
-				Log.i("MY_LOG", "Start Goal Model Successfully");
-			else
-				Log.i("MY_LOG", "Failed to Start Goal Model");
+			goalModelController.startGoalModel(goalName);
 		}
 		
 	}

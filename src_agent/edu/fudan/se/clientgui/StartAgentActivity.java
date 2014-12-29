@@ -235,6 +235,6 @@ public class StartAgentActivity extends Activity {
 			}
 		};
 		microRuntimeServiceBinder.startAgent(nickname,AideAgent.class.getName(),
-				new Object[] { getApplicationContext(), ((SGMApplication)getApplication()).getGoalModelList() }, rc);
+				new Object[] { getApplicationContext(), ((SGMApplication)getApplication()).getGoalModelController() }, rc);
 	}
 }

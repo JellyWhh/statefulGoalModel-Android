@@ -21,10 +21,11 @@ public class MainActivity extends FragmentActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		if (savedInstanceState == null) {
-			FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+			FragmentTransaction transaction = getSupportFragmentManager()
+					.beginTransaction();
 			transaction.add(R.id.container, new MainFragment()).commit();
-//			getFragmentManager().beginTransaction()
-//					.add(R.id.container, new MainFragment()).commit();
+			// getFragmentManager().beginTransaction()
+			// .add(R.id.container, new MainFragment()).commit();
 		}
 	}
 
@@ -45,6 +46,13 @@ public class MainActivity extends FragmentActivity {
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
+	}
+
+	@Override
+	public void onBackPressed() {
+		// 点击返回键后不会退出程序，也就是再次进来的时候还是原来的运行状态
+		this.moveTaskToBack(true);
+		return;
 	}
 
 }
