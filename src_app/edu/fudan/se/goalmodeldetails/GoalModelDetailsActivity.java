@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import edu.fudan.se.R;
@@ -27,6 +28,7 @@ public class GoalModelDetailsActivity extends FragmentActivity {
 		//获取传递过来的intent中的goal model
 		Intent intent = getIntent();
 		GoalModel goalModel = (GoalModel) intent.getSerializableExtra("goalmodel");
+		Log.i("GoalModelDetailsActivity", goalModel.getName());
 		
 		
 		if (savedInstanceState == null) {

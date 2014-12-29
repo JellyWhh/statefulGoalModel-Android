@@ -176,16 +176,16 @@ public class GoalModelDetailsFragment extends Fragment {
 				goalModel.start();
 				break;
 			case R.id.bt_dialog_suspend:
-				goalModel.suspend();
+//				goalModel.suspend();
 				break;
 			case R.id.bt_dialog_resume:
-				goalModel.resume();
+//				goalModel.resume();
 				break;
 			case R.id.bt_dialog_stop:
 				goalModel.stop();
 				break;
 			case R.id.bt_dialog_reset:
-				goalModel.reset();
+//				goalModel.reset();
 				break;
 			case R.id.bt_dialog_cancel:
 				// 销毁弹出框
