@@ -5,6 +5,7 @@ package edu.fudan.se.goalmodeldetails;
 
 import edu.fudan.se.R;
 import edu.fudan.se.goalmodel.GoalModel;
+import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -77,6 +78,8 @@ public class GoalModelDetailsFragment extends Fragment {
 				Toast.makeText(getActivity(), "back pressed", 2000).show();
 				// TODO 安卓的回收机制！！！！！目前返回后activity会销毁，于是goal
 				// model里面开启的进程都会关闭，下次点击进来后又重新初始化了goal model
+				getActivity().finish();
+				
 
 			}
 		});
