@@ -47,10 +47,9 @@ public class AideAgent extends Agent implements AideAgentInterface {
 			if (args[0] instanceof Context) {
 				context = (Context) args[0];
 			}
-			if(args[1] instanceof GoalModelController){
-				goalModelController = (GoalModelController) args[1];
-			}
 		}
+		
+		goalModelController = new GoalModelController();
 		
 		registerO2AInterface(AideAgentInterface.class, this);
 		
@@ -197,26 +196,26 @@ public class AideAgent extends Agent implements AideAgentInterface {
 		 * 
 		 */
 		private static final long serialVersionUID = 2126730704005002010L;
-		private String goalName;
+		private GoalModel goalModel;
 		
-		private GSMStarter(Agent a, String goalModelName){
+		private GSMStarter(Agent a, GoalModel goalModelName){
 			super(a);
-			goalName = goalModelName;
+			this.goalModel = goalModelName;
 		}
 		
 		@Override
 		public void action() {
 			// TODO Auto-generated method stub
 			Log.i("MY_LOG", "Start Goal Model...");
-			goalModelController.startGoalModel(goalName);
+			goalModelController.start(goalModel);
 		}
 		
 	}
 	
 	@Override
-	public void startGoalModel(String goalModelName) {
+	public void startGoalModel(GoalModel goalModel) {
 		// TODO Auto-generated method stub
-		this.addBehaviour(new GSMStarter(this, goalModelName));
+		this.addBehaviour(new GSMStarter(this, goalModel));
 	}
 
 }

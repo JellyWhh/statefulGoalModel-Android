@@ -12,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import edu.fudan.se.R;
 import edu.fudan.se.goalmodel.GoalModel;
+import edu.fudan.se.initial.SGMApplication;
 
 /**
  * @author whh
@@ -28,12 +29,13 @@ public class GoalModelDetailsActivity extends FragmentActivity {
 		//获取传递过来的intent中的goal model
 		Intent intent = getIntent();
 		GoalModel goalModel = (GoalModel) intent.getSerializableExtra("goalmodel");
-		Log.i("GoalModelDetailsActivity", goalModel.getName());
+		Log.i("GoalModelDetailsActivity", ((SGMApplication)getApplication()).getAgentNickname());
+		String agentNickname = ((SGMApplication)getApplication()).getAgentNickname();
 		
 		
 		if (savedInstanceState == null) {
 			FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-			transaction.add(R.id.container, new GoalModelDetailsFragment(goalModel)).commit();
+			transaction.add(R.id.container, new GoalModelDetailsFragment(goalModel, agentNickname)).commit();
 //			getFragmentManager().beginTransaction()
 //					.add(R.id.container, new MainFragment()).commit();
 		}

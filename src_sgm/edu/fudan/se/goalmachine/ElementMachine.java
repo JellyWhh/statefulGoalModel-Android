@@ -21,7 +21,12 @@ import edu.fudan.se.log.Log;
  */
 public abstract class ElementMachine implements Runnable, Serializable {
 
-	private static final long serialVersionUID = 1L;
+//	private static final long serialVersionUID = 1L;
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6914647528553426194L;
 
 	private int level; // 这个主要是在安卓界面显示目标树的时候用的，指这个element处在第几层，root goal为0层
 

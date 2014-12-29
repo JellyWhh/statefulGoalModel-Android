@@ -1,6 +1,8 @@
 package edu.fudan.se.agent;
 
+import edu.fudan.se.goalmodel.GoalModel;
+
 public interface AideAgentInterface {
 
-	public void startGoalModel(String goalModelName);
+	public void startGoalModel(GoalModel goalModel);
 }

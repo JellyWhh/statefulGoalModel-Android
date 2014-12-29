@@ -3,8 +3,14 @@
  */
 package edu.fudan.se.goalmodeldetails;
 
+import jade.core.MicroRuntime;
+import jade.wrapper.ControllerException;
+import jade.wrapper.StaleProxyException;
 import edu.fudan.se.R;
+import edu.fudan.se.agent.AideAgent;
+import edu.fudan.se.agent.AideAgentInterface;
 import edu.fudan.se.goalmodel.GoalModel;
+import edu.fudan.se.initial.SGMApplication;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -12,6 +18,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -37,9 +44,26 @@ public class GoalModelDetailsFragment extends Fragment {
 	private ImageView iv_gmdetails_back, iv_gmdetails_refresh,
 			iv_gmdetails_orders;
 	private TextView tv_gmdetails_name;
+	private AideAgentInterface aideAgentInterface; //agent interface
+	private String agentNickname;
 
-	public GoalModelDetailsFragment(GoalModel goalModel) {
+	public GoalModelDetailsFragment(GoalModel goalModel, String agentNickname) {
 		this.goalModel = goalModel;
+		this.agentNickname = agentNickname;
+		try {
+			Log.i("GoalModelDetailsFragment", "getting agent interface..." + this.agentNickname);
+			aideAgentInterface = MicroRuntime.getAgent(this.agentNickname)
+					.getO2AInterface(AideAgentInterface.class);
+			Log.i("GoalModelDetailsFragment", "check interface, null?: " + (aideAgentInterface == null));
+		} catch (StaleProxyException e) {
+			// TODO Auto-generated catch block
+			Log.i("GoalModelDetailsFragment", "StaleProxyException");
+			e.printStackTrace();
+		} catch (ControllerException e) {
+			// TODO Auto-generated catch block
+			Log.i("GoalModelDetailsFragment", "ControllerException");
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -181,6 +205,7 @@ public class GoalModelDetailsFragment extends Fragment {
 			switch (v.getId()) {
 			case R.id.bt_dialog_start:
 //				goalModel.start();
+				aideAgentInterface.startGoalModel(goalModel);
 				break;
 			case R.id.bt_dialog_suspend:
 //				goalModel.suspend();

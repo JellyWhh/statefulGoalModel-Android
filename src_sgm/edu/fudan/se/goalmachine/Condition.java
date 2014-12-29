@@ -13,8 +13,12 @@ import java.io.Serializable;
  */
 public class Condition implements Serializable{
 
-	private static final long serialVersionUID = 1L;
+//	private static final long serialVersionUID = 1L;
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7215097300650510281L;
 	private String type; // 条件类型，具体有CONTEXT,PRE,POST,COMMITMENT,INVARIANT
 	private boolean satisfied = true; // 条件是否被满足，true为被满足
 	private boolean canRepairing; // 标志这个条件是否可通过主动做一些事来修复，使之满足，只针对PreCondition

@@ -41,6 +41,7 @@ public class MyGoalFragment extends ListFragment {
 		super.onCreate(savedInstanceState);
 
 		application = (SGMApplication) getActivity().getApplication();
+		
 
 		adapter = new MyGoalListAdapter(getActivity(),
 				R.layout.goalmodel_list_item, application.getGoalModelList());
