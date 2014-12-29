@@ -122,6 +122,12 @@ public class GoalModelDetailsFragment extends Fragment {
 
 		return view;
 	}
+	
+	
+	public Object onRetainNonConfigurationInstance(){
+		return goalModel;
+		
+	}
 
 	/**
 	 * 点击上方的goal model name后弹出goal model的介绍，是一个普通的popupwindow

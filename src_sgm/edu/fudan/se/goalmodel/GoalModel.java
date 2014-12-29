@@ -19,8 +19,12 @@ import edu.fudan.se.log.Log;
  */
 public class GoalModel implements Serializable {
 
-	private static final long serialVersionUID = 1L;
+//	private static final long serialVersionUID = 1L;
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6652672451868565629L;
 	private String name; // goal model的名字
 	private String description; // goal model的描述
 	private String state = "INITIAL"; // 整个goal
