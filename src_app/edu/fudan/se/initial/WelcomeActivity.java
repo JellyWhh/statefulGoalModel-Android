@@ -75,10 +75,10 @@ public class WelcomeActivity extends Activity{
 		return super.onOptionsItemSelected(item);
 	}
 
-	@Override
-	public void onBackPressed() {
-		// 点击返回键后不会退出程序，也就是再次进来的时候还是原来的运行状态
-		this.moveTaskToBack(true);
-		return;
-	}
+//	@Override
+//	public void onBackPressed() {
+//		// 点击返回键后不会退出程序，也就是再次进来的时候还是原来的运行状态
+//		this.moveTaskToBack(true);
+//		return;
+//	}
 }
