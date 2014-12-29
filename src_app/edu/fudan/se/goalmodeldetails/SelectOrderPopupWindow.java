@@ -96,8 +96,7 @@ public class SelectOrderPopupWindow extends PopupWindow {
 		});
 
 		switch (state) {
-		case "INITIAL":
-		case "STOPED":
+		case "Initial": // Initial状态只有start按钮可点击
 			bt_dialog_start.setClickable(true);
 			bt_dialog_start.setTextColor(resources
 					.getColor(R.color.clickable_black));
@@ -110,12 +109,34 @@ public class SelectOrderPopupWindow extends PopupWindow {
 			bt_dialog_suspend.setClickable(false);
 			bt_dialog_suspend.setTextColor(resources
 					.getColor(R.color.unclickable_grey));
-			bt_dialog_reset.setClickable(true);
+			bt_dialog_reset.setClickable(false);
 			bt_dialog_reset.setTextColor(resources
-					.getColor(R.color.clickable_black));
+					.getColor(R.color.unclickable_grey));
 			break;
-		case "STARTED":
-		case "RESUMED":
+
+		case "Activated": // Activated、ProgressChecking、Repairing、Waiting状态只有stop按钮可点击
+		case "ProgressChecking":
+		case "Repairing":
+		case "Waiting":
+			bt_dialog_start.setClickable(false);
+			bt_dialog_start.setTextColor(resources
+					.getColor(R.color.unclickable_grey));
+			bt_dialog_resume.setClickable(false);
+			bt_dialog_resume.setTextColor(resources
+					.getColor(R.color.unclickable_grey));
+			bt_dialog_stop.setClickable(true);
+			bt_dialog_stop.setTextColor(resources
+					.getColor(R.color.clickable_black));
+			bt_dialog_suspend.setClickable(false);
+			bt_dialog_suspend.setTextColor(resources
+					.getColor(R.color.unclickable_grey));
+			bt_dialog_reset.setClickable(false);
+			bt_dialog_reset.setTextColor(resources
+					.getColor(R.color.unclickable_grey));
+
+			break;
+
+		case "Executing": // Executing状态stop、suspend按钮可点击
 			bt_dialog_start.setClickable(false);
 			bt_dialog_start.setTextColor(resources
 					.getColor(R.color.unclickable_grey));
@@ -131,9 +152,10 @@ public class SelectOrderPopupWindow extends PopupWindow {
 			bt_dialog_reset.setClickable(false);
 			bt_dialog_reset.setTextColor(resources
 					.getColor(R.color.unclickable_grey));
+
 			break;
 
-		case "SUSPENDED":
+		case "Suspended": // Suspended状态有stop、resume按钮可点击
 			bt_dialog_start.setClickable(false);
 			bt_dialog_start.setTextColor(resources
 					.getColor(R.color.unclickable_grey));
@@ -149,8 +171,29 @@ public class SelectOrderPopupWindow extends PopupWindow {
 			bt_dialog_reset.setClickable(false);
 			bt_dialog_reset.setTextColor(resources
 					.getColor(R.color.unclickable_grey));
+
 			break;
 
+		case "Failed": // Failed、Achieved、Stop状态只有reset按钮可点击
+		case "Achieved":
+		case "Stop":
+			bt_dialog_start.setClickable(false);
+			bt_dialog_start.setTextColor(resources
+					.getColor(R.color.unclickable_grey));
+			bt_dialog_resume.setClickable(false);
+			bt_dialog_resume.setTextColor(resources
+					.getColor(R.color.unclickable_grey));
+			bt_dialog_stop.setClickable(false);
+			bt_dialog_stop.setTextColor(resources
+					.getColor(R.color.unclickable_grey));
+			bt_dialog_suspend.setClickable(false);
+			bt_dialog_suspend.setTextColor(resources
+					.getColor(R.color.unclickable_grey));
+			bt_dialog_reset.setClickable(true);
+			bt_dialog_reset.setTextColor(resources
+					.getColor(R.color.clickable_black));
+
+			break;
 		default:
 			break;
 		}

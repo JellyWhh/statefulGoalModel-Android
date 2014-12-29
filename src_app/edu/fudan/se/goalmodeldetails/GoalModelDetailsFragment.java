@@ -117,8 +117,9 @@ public class GoalModelDetailsFragment extends Fragment {
 			@Override
 			public void onClick(View v) {
 
+				//弹出窗口的按钮是否可见由goal model的root goal的状态决定
 				popupWindow = new SelectOrderPopupWindow(inflater,
-						itemsOnClick, goalModel.getState(), getResources());
+						itemsOnClick, goalModel.getRootGoal().getCurrentState().toString(), getResources());
 
 				// 显示窗口
 

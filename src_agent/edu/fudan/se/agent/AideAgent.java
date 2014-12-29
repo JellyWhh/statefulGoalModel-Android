@@ -251,7 +251,7 @@ public class AideAgent extends Agent implements AideAgentInterface {
 		@Override
 		public void action() {
 			// TODO Auto-generated method stub
-			Log.i("MY_LOG", "Start Goal Model...");
+			Log.i("MY_LOG", "Stop Goal Model...");
 			goalModelController.stop(goalModel);
 		}
 		
@@ -271,7 +271,7 @@ public class AideAgent extends Agent implements AideAgentInterface {
 		@Override
 		public void action() {
 			// TODO Auto-generated method stub
-			Log.i("MY_LOG", "Start Goal Model...");
+			Log.i("MY_LOG", "Suspend Goal Model...");
 			goalModelController.suspend(goalModel);
 		}
 		
@@ -291,7 +291,7 @@ public class AideAgent extends Agent implements AideAgentInterface {
 		@Override
 		public void action() {
 			// TODO Auto-generated method stub
-			Log.i("MY_LOG", "Start Goal Model...");
+			Log.i("MY_LOG", "Resume Goal Model...");
 			goalModelController.resume(goalModel);
 		}
 		
@@ -311,7 +311,7 @@ public class AideAgent extends Agent implements AideAgentInterface {
 		@Override
 		public void action() {
 			// TODO Auto-generated method stub
-			Log.i("MY_LOG", "Start Goal Model...");
+			Log.i("MY_LOG", "Reset Goal Model...");
 			goalModelController.reset(goalModel);
 		}
 		

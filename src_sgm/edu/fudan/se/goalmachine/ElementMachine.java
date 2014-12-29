@@ -18,8 +18,7 @@ import edu.fudan.se.log.Log;
  * @author whh
  * 
  */
-public abstract class ElementMachine implements Runnable{
-
+public abstract class ElementMachine implements Runnable {
 
 	private int level; // 这个主要是在安卓界面显示目标树的时候用的，指这个element处在第几层，root goal为0层
 
@@ -98,7 +97,7 @@ public abstract class ElementMachine implements Runnable{
 		}
 		Log.logDebug(this.getName(), "run()",
 				"ElementMachine stop while cycling!");
-		
+
 	}
 
 	/**
@@ -455,6 +454,8 @@ public abstract class ElementMachine implements Runnable{
 				Log.logDebug(this.getName(), "checkIfStop()",
 						"get a message from " + msg.getSender() + "; body is: "
 								+ msg.getBody());
+				// 收到STOP消息后把自己状态设置为stop
+				this.setCurrentState(State.Stop);
 				return true;
 			}
 		}
@@ -677,12 +678,23 @@ public abstract class ElementMachine implements Runnable{
 		Log.logDebug(this.getName(), "stopMachine()",
 				"It begins to stop its machine");
 	}
-	
+
 	/**
 	 * 重新设置当前machine，即把状态设置为初始化状态
 	 */
-	public void resetMachine(){
+	public void resetMachine() {
 		this.setCurrentState(State.Initial);
+		// reset之后要把这些变量再次全部初始化，不然thread开始的时候会直接跳过entry动作
+		isInitialEntryDone = false;
+		isActivatedEntryDone = false;
+		isExecutingEntryDone = false;
+		isFailedEntryDone = false;
+		isAchievedEntryDone = false;
+		isWaitingEntryDone = false;
+		isSuspendedEntryDone = false;
+		isRepairingEntryDone = false;
+		
+		recordedState = RecordedState.Initial; // 让父目标用来记录当前element的状态
 	}
 
 	/**
