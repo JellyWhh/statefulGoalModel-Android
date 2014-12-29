@@ -7,6 +7,7 @@ import java.util.logging.Level;
 
 import edu.fudan.se.R;
 import edu.fudan.se.agent.AideAgent;
+import edu.fudan.se.initial.SGMApplication;
 import jade.android.AndroidHelper;
 import jade.android.MicroRuntimeService;
 import jade.android.MicroRuntimeServiceBinder;
@@ -170,6 +171,8 @@ public class StartAgentActivity extends Activity {
 			};
 			logger.log(Level.INFO, "Binding Gateway to MicroRuntimeService...");
 
+//			this.startService(service);
+//			this.bindService(service, conn, flags)
 			bindService(new Intent(getApplicationContext(),
 					MicroRuntimeService.class), serviceConnection,
 					Context.BIND_AUTO_CREATE);
@@ -232,6 +235,6 @@ public class StartAgentActivity extends Activity {
 			}
 		};
 		microRuntimeServiceBinder.startAgent(nickname,AideAgent.class.getName(),
-				new Object[] { getApplicationContext() }, rc);
+				new Object[] { getApplicationContext(), ((SGMApplication)getApplication()).getGoalModelList() }, rc);
 	}
 }

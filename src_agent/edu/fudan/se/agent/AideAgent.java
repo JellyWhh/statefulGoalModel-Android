@@ -3,10 +3,19 @@
  */
 package edu.fudan.se.agent;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
+import edu.fudan.se.goalmodel.GoalModel;
 import edu.fudan.se.pool.Message;
 import edu.fudan.se.pool.Pool;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
@@ -20,14 +29,30 @@ import jade.lang.acl.UnreadableException;
  * @author zjh
  *
  */
-public class AideAgent extends Agent {
+public class AideAgent extends Agent implements AideAgentInterface {
 
 	private static final long serialVersionUID = 1L;
+	
+	private ArrayList<GoalModel> goalModelList;
+	
+	private Context context;
 
 	@Override
 	protected void setup() {
 		// TODO Auto-generated method stub
 		super.setup();
+		Object[] args = getArguments();
+		if (args != null && args.length > 0) {
+			if (args[0] instanceof Context) {
+				context = (Context) args[0];
+			}
+			if(args[1] instanceof ArrayList){
+				goalModelList = (ArrayList<GoalModel>) args[1];
+			}
+		}
+		
+		registerO2AInterface(AideAgentInterface.class, this);
+		
 		DFAgentDescription dfd = new DFAgentDescription();
 		dfd.setName(getAID());
 		ServiceDescription sd = new ServiceDescription();
@@ -41,6 +66,10 @@ public class AideAgent extends Agent {
 			e.printStackTrace();
 		}
 
+		
+		
+		
+		// add different behaviour
 		addBehaviour(new TickerBehaviour(this, 1000) {
 
 			@Override
@@ -160,6 +189,44 @@ public class AideAgent extends Agent {
 		} catch (FIPAException fe) {
 			fe.printStackTrace();
 		}
+	}
+
+	private class GSMStarter extends OneShotBehaviour{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 2126730704005002010L;
+		private String goalName;
+		
+		private GSMStarter(Agent a, String goalModelName){
+			super(a);
+			goalName = goalModelName;
+		}
+		
+		@Override
+		public void action() {
+			// TODO Auto-generated method stub
+			Log.i("MY_LOG", "Start Goal Model...");
+			boolean suc = false;
+			for(GoalModel gm : goalModelList){
+				if(gm.getName().equals(goalName)){
+					suc = true;
+					gm.start();
+					break;
+				}
+			}
+			if(suc)
+				Log.i("MY_LOG", "Start Goal Model Successfully");
+			else
+				Log.i("MY_LOG", "Failed to Start Goal Model");
+		}
+		
+	}
+	
+	@Override
+	public void startGoalModel(String goalModelName) {
+		// TODO Auto-generated method stub
+		this.addBehaviour(new GSMStarter(this, goalModelName));
 	}
 
 }
