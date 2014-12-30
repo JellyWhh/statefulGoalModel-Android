@@ -74,7 +74,7 @@ public abstract class TaskMachine extends ElementMachine {
 		}
 	}
 	
-	private boolean isSendUIMesDone = false;	//标记是否给用户发送提醒完毕
+	boolean isSendUIMesDone = false;	//标记是否给用户发送提醒完毕
 
 	/**
 	 * executing状态中do所做的action：这个需要根据具体的task有不同的具体执行行为，所以这个是抽象方法，在实例化时具体实现
@@ -146,10 +146,18 @@ public abstract class TaskMachine extends ElementMachine {
 					+ msg.getSender() + "; body is: " + msg.getBody());
 			if (msg.getBody().equals("RESUME")) {
 				this.getMsgPool().poll();
-				// 把自己状态设置为executing
+				// 把自己状态设置为executing,同时resetSuspendEntry
 				this.setCurrentState(State.Executing);
+				resetSuspendEntry();
 			}
 		}
+	}
+	
+	/**
+	 * 让TaskMachine重写，用来初始化里面的一个变量
+	 */
+	public void resetTaskMachine(){
+		isSendUIMesDone = false;	//标记是否给用户发送提醒完毕
 	}
 
 	public boolean isNeedPeopleInteraction() {

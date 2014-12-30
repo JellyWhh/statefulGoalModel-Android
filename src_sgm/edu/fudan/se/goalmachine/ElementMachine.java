@@ -108,6 +108,11 @@ public abstract class ElementMachine implements Runnable {
 		// 每次循环拿出一条消息，然后后面有不同的方法来处理这个消息，如果消息被处理了，再从消息队列中把这条消息移除，这样可以保证每条消息都经过了处理，不会漏掉
 		SGMMessage msg = this.getMsgPool().peek();
 
+		if (filterMessage(msg)) {
+			// 过滤之后再拿出新的消息
+			msg = this.getMsgPool().peek();
+		}
+
 		// 每次开始前都先检查是否有STOP消息到来
 		if (checkIfStop(msg)) { // 有STOP消息
 			this.stopMachine();
@@ -683,6 +688,7 @@ public abstract class ElementMachine implements Runnable {
 	 * 重新设置当前machine，即把状态设置为初始化状态
 	 */
 	public void resetMachine() {
+
 		this.setCurrentState(State.Initial);
 		// reset之后要把这些变量再次全部初始化，不然thread开始的时候会直接跳过entry动作
 		isInitialEntryDone = false;
@@ -693,8 +699,59 @@ public abstract class ElementMachine implements Runnable {
 		isWaitingEntryDone = false;
 		isSuspendedEntryDone = false;
 		isRepairingEntryDone = false;
-		
+
 		recordedState = RecordedState.Initial; // 让父目标用来记录当前element的状态
+
+		// 把GoalMachine、TaskMachine里面的变量也设置为初始化
+		resetGoalMachine();
+		resetTaskMachine();
+	}
+
+	/**
+	 * 让GoalMachine重写，用来初始化里面的两个变量
+	 */
+	public void resetGoalMachine() {
+
+	}
+
+	/**
+	 * 让TaskMachine重写，用来初始化里面的一个变量
+	 */
+	public void resetTaskMachine() {
+
+	}
+
+	/**
+	 * 在suspended状态收到RESUME消息后要重新把isSuspendedEntryDone设置为false，以防再次进入suspended状态
+	 */
+	public void resetSuspendEntry() {
+		isSuspendedEntryDone = false;
+	}
+
+	/**
+	 * 消息过滤器，以防在非executing状态收到了suspend消息，这个时候要把这个消息从消息队列中丢弃，不然会影响接收后面的消息
+	 * 
+	 * @return true表示过滤掉了一条信息，需要重新从消息队列里拿出消息；false表示没有过滤信息
+	 */
+	public boolean filterMessage(SGMMessage msg) {
+		if (msg != null) {
+			if (msg.getBody().equals("SUSPEND")
+					&& (this.getCurrentState() != State.Executing)) {
+				this.getMsgPool().poll(); // 把它拿出来
+				Log.logDebug(this.getName(), "filterMessage()",
+						"filter a SUSPEND msg!");
+				return true;
+			}
+			if (msg.getBody().equals("RESUME")
+					&& (this.getCurrentState() != State.Suspended)) {
+				this.getMsgPool().poll(); // 把它拿出来
+				Log.logDebug(this.getName(), "filterMessage()",
+						"filter a RESUME msg!");
+				return true;
+			}
+		}
+		return false;
+
 	}
 
 	/**

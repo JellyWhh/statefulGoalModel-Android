@@ -262,8 +262,9 @@ public abstract class GoalMachine extends ElementMachine {
 						}
 					}
 				}
-				// 把自己状态设置为executing
+				// 把自己状态设置为executing，同时resetSuspendEntry
 				this.setCurrentState(State.Executing);
+				resetSuspendEntry();
 			}
 		}
 	}
@@ -556,6 +557,14 @@ public abstract class GoalMachine extends ElementMachine {
 			Log.logError(this.getName(), "stopMachine()",
 					"getSubElements() == null!");
 		}
+	}
+	
+	/**
+	 * 让GoalMachine重写，用来初始化里面的两个变量
+	 */
+	public void resetGoalMachine(){
+		isActivatedDo_waitingSubReplyDone = false;
+		isSendMesToOneSubDone = false;
 	}
 
 	/**
