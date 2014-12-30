@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.fudan.se.R;
+import edu.fudan.se.agent.AideAgentInterface;
 import edu.fudan.se.goalmachine.ElementMachine;
 import edu.fudan.se.goalmachine.GoalMachine;
 import edu.fudan.se.goalmachine.State;
@@ -36,12 +37,15 @@ import android.widget.Toast;
 public class GoalTreeFragment extends ListFragment {
 
 	private GoalModel goalModel; // 要显示目标树的goal model
+	private AideAgentInterface aideAgentInterface;
 
 	private ArrayList<ElementMachine> allTreeElements = new ArrayList<ElementMachine>(); // 所有的tree节点
 	private TreeViewAdapter treeViewAdapter = null;
 
-	public GoalTreeFragment(GoalModel goalModel) {
+	public GoalTreeFragment(GoalModel goalModel,
+			AideAgentInterface aideAgentInterface) {
 		this.goalModel = goalModel;
+		this.aideAgentInterface = aideAgentInterface;
 	}
 
 	@Override
@@ -50,7 +54,8 @@ public class GoalTreeFragment extends ListFragment {
 
 		initialData();
 		treeViewAdapter = new TreeViewAdapter(getActivity(),
-				R.layout.tree_view_item_layout, allTreeElements, goalModel);
+				R.layout.tree_view_item_layout, allTreeElements, goalModel,
+				aideAgentInterface);
 		// setListAdapter(treeViewAdapter);
 		// registerForContextMenu(getListView());
 	}
@@ -92,8 +97,11 @@ class TreeViewAdapter extends ArrayAdapter<ElementMachine> {
 	private Bitmap iconAND; // and分解
 	private Bitmap iconOR; // or分解
 
+	private AideAgentInterface aideAgentInterface;
+
 	public TreeViewAdapter(Context context, int textViewResourceId,
-			List<ElementMachine> treeElements, GoalModel goalModel) {
+			List<ElementMachine> treeElements, GoalModel goalModel,
+			AideAgentInterface aideAgentInterface) {
 		super(context, textViewResourceId, treeElements);
 		this.mInflater = LayoutInflater.from(context);
 		this.treeElements = treeElements;
@@ -102,6 +110,8 @@ class TreeViewAdapter extends ArrayAdapter<ElementMachine> {
 				R.drawable.tree_view_icon_and);
 		this.iconOR = BitmapFactory.decodeResource(context.getResources(),
 				R.drawable.tree_view_icon_or);
+
+		this.aideAgentInterface = aideAgentInterface;
 	}
 
 	@Override
@@ -179,9 +189,12 @@ class TreeViewAdapter extends ArrayAdapter<ElementMachine> {
 
 					@Override
 					public void onClick(View v) {
-						// 给这个element发送END消息
-						goalModel.endTaskMachine((TaskMachine) treeElements
-								.get(position));
+						// 让agent给这个task machine发送END消息
+						// goalModel.endTaskMachine((TaskMachine) treeElements
+						// .get(position));
+						aideAgentInterface
+								.endTaskMachine((TaskMachine) treeElements
+										.get(position));
 
 					}
 				});

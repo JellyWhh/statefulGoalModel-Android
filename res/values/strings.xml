@@ -17,8 +17,11 @@
     <string name="dialog_stop">Stop</string>
     <string name="dialog_reset">Reset</string>
     <string name="dialog_cancel">Cancel</string>
+    
+    <!-- setting界面的按钮，测试弹出通知用 -->
+    <string name="bt_showNotification">Show Notification</string>
 
-    <!-- setting界面的按钮内容 -->
+    <!-- welcome界面的按钮内容 -->
     <string name="bt_setAgent">Set Agent</string>
     <string name="bt_startAgent">Start Agent</string>
 
@@ -26,7 +29,7 @@
     <string name="label_nick">Enter Nickname</string>
     <string name="label_host">Host</string>
     <string name="label_port">Port</string>
-    <string name="button_login"> chat! </string>
+    <string name="button_login">Connect to JADE</string>
     <string name="button_send">send!</string>
     <string name="button_use"> use </string>
     <string name="menu_settings">settings</string>

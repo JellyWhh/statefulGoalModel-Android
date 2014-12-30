@@ -6,18 +6,14 @@ package edu.fudan.se.goalmodel;
 import java.util.ArrayList;
 
 import edu.fudan.se.goalmachine.ElementMachine;
-import edu.fudan.se.goalmachine.SGMMessage;
-import edu.fudan.se.goalmachine.TaskMachine;
-import edu.fudan.se.log.Log;
 
 /**
- * 表示一个完成的goal model，用来把里面的<code>ElementMachine</code>组织起来
+ * 表示一个完整的goal model，用来把里面的<code>ElementMachine</code>组织起来
  * 
  * @author whh
  * 
  */
-public class GoalModel{
-
+public class GoalModel {
 
 	private String name; // goal model的名字
 	private String description; // goal model的描述
@@ -38,33 +34,6 @@ public class GoalModel{
 		this.name = name;
 		this.elementMachines = new ArrayList<>();
 	}
-
-
-	/**
-	 * 给一个task machine发送END消息，这个是在用户完成了某个需要他参与的任务后，在UI上点击这个task后面的end按钮时触发的操作
-	 * 
-	 * @param taskMachine
-	 *            用户完成的task
-	 */
-	public void endTaskMachine(TaskMachine taskMachine) {
-		Log.logDebug("goal model:" + this.getName(), "endTaskMachine()",
-				"init.");
-		SGMMessage msg = new SGMMessage("TOTASK", "UI", taskMachine.getName(),
-				"END");
-		if (taskMachine.getMsgPool().offer(msg)) {
-			Log.logMessage(msg, true);
-			Log.logDebug("goal model:" + this.getName(), "endTaskMachine()",
-					"UI thread send a END msg to " + taskMachine.getName()
-							+ " succeed!");
-		} else {
-			Log.logMessage(msg, false);
-			Log.logError("goal model:" + this.getName(), "endTaskMachine()",
-					"UI thread send a END msg to " + taskMachine.getName()
-							+ " error!");
-		}
-
-	}
-
 
 	private void sortElementMachines() {
 
@@ -107,5 +76,5 @@ public class GoalModel{
 	public void setRootGoal(ElementMachine rootGoal) {
 		this.rootGoal = rootGoal;
 	}
-	
+
 }

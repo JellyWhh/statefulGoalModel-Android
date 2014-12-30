@@ -25,7 +25,7 @@ public class GoalModelDetailsActivity extends FragmentActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_goalmodeldetails);
 
-		// 获取传递过来的intent中的goal model
+		// 获取传递过来的intent中的goal model position，然后从全局变量中得到对应的goal model
 		Intent intent = getIntent();
 		int goalmodelposition = (Integer) intent
 				.getSerializableExtra("goalmodelposition");
@@ -33,6 +33,7 @@ public class GoalModelDetailsActivity extends FragmentActivity {
 		GoalModel goalModel = ((SGMApplication) getApplication())
 				.getGoalModelList().get(goalmodelposition);
 
+		// 获取全局变量中保存的agentNickname
 		Log.i("GoalModelDetailsActivity",
 				((SGMApplication) getApplication()).getAgentNickname());
 		String agentNickname = ((SGMApplication) getApplication())

@@ -100,6 +100,9 @@ public abstract class TaskMachine extends ElementMachine {
 		
 	}
 	
+	/**
+	 * 弹出弹窗，提醒用户需要它的参与
+	 */
 	private void sendMesToAgent(){
 		
 	}

@@ -4,10 +4,11 @@
 package edu.fudan.se.mainfragments;
 
 import edu.fudan.se.R;
-import edu.fudan.se.clientgui.SettingAgentActivity;
-import edu.fudan.se.clientgui.StartAgentActivity;
 import android.support.v4.app.Fragment;
-import android.content.Intent;
+import android.support.v4.app.NotificationCompat.Builder;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,8 +24,7 @@ import android.widget.Button;
  */
 public class SettingFragment extends Fragment {
 
-	private Button bt_setAgent;
-	private Button bt_startAgent;
+	private Button bt_showNotification;
 
 	static final int SETTINGS_REQUEST = 1;
 
@@ -39,33 +39,35 @@ public class SettingFragment extends Fragment {
 			Bundle savedInstanceState) {
 		View rootView = inflater.inflate(R.layout.fragment_setting, container,
 				false);
+		bt_showNotification = (Button) rootView
+				.findViewById(R.id.bt_showNotification);
+		bt_showNotification.setOnClickListener(new OnClickListener() {
 
-//		bt_setAgent = (Button) rootView.findViewById(R.id.bt_setAgent);
-//		bt_startAgent = (Button) rootView.findViewById(R.id.bt_startAgent);
-//
-//		bt_setAgent.setOnClickListener(new OnClickListener() {
-//
-//			@Override
-//			public void onClick(View v) {
-//				// 跳转到zjh写的设置界面
-//				Intent showSettings = new Intent(getActivity(),
-//						SettingAgentActivity.class);
-//				startActivityForResult(showSettings, SETTINGS_REQUEST);
-//			}
-//		});
-//
-//		bt_startAgent.setOnClickListener(new OnClickListener() {
-//
-//			@Override
-//			public void onClick(View v) {
-//				// 跳转到zjh写的开始agent界面，也就是他代码中的MainActivity，在这里更名为了StartAgentActivity
-//				Intent startAgent = new Intent(getActivity(),
-//						StartAgentActivity.class);
-//				startActivity(startAgent);
-//
-//			}
-//		});
+			@Override
+			public void onClick(View v) {
+				showNotification();
+			}
+		});
 
 		return rootView;
+	}
+
+	/**
+	 * 弹出一个通知
+	 */
+	private void showNotification() {
+		
+		NotificationManager mNotificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE); 
+		
+		Builder mBuilder = new Builder(getActivity());
+		mBuilder.setContentTitle("Test Title").setContentText("Test Content")
+				.setTicker("New Notification from SGM!")
+				.setWhen(System.currentTimeMillis())
+				.setPriority(Notification.PRIORITY_HIGH).setOngoing(false)
+				.setDefaults(Notification.DEFAULT_VIBRATE)
+				.setSmallIcon(R.drawable.ic_launcher);
+		
+		Notification notification = mBuilder.build();
+		mNotificationManager.notify(200, notification);
 	}
 }

@@ -41,25 +41,25 @@ public class GoalModelDetailsFragment extends Fragment {
 	private ImageView iv_gmdetails_back, iv_gmdetails_refresh,
 			iv_gmdetails_orders;
 	private TextView tv_gmdetails_name;
-	
-	private AideAgentInterface aideAgentInterface; //agent interface
+
+	private AideAgentInterface aideAgentInterface; // agent interface
 	private String agentNickname;
 
 	public GoalModelDetailsFragment(GoalModel goalModel, String agentNickname) {
 		this.goalModel = goalModel;
 		this.agentNickname = agentNickname;
 		try {
-			Log.i("GoalModelDetailsFragment", "getting agent interface..." + this.agentNickname);
+			Log.i("GoalModelDetailsFragment", "getting agent interface..."
+					+ this.agentNickname);
 			aideAgentInterface = MicroRuntime.getAgent(this.agentNickname)
 					.getO2AInterface(AideAgentInterface.class);
-			Log.i("GoalModelDetailsFragment", "check interface, null?: " + (aideAgentInterface == null));
+			Log.i("GoalModelDetailsFragment", "check interface, null?: "
+					+ (aideAgentInterface == null));
 		} catch (StaleProxyException e) {
-			// TODO Auto-generated catch block
-			Log.i("GoalModelDetailsFragment", "StaleProxyException");
+			Log.e("GoalModelDetailsFragment", "StaleProxyException");
 			e.printStackTrace();
 		} catch (ControllerException e) {
-			// TODO Auto-generated catch block
-			Log.i("GoalModelDetailsFragment", "ControllerException");
+			Log.e("GoalModelDetailsFragment", "ControllerException");
 			e.printStackTrace();
 		}
 	}
@@ -89,7 +89,7 @@ public class GoalModelDetailsFragment extends Fragment {
 		mPager = (ViewPager) view
 				.findViewById(R.id.view_pager_goalmodeldetails);
 		mPager.setAdapter(new MyFragmentPagerAdapter(this.goalModel,
-				getChildFragmentManager()));
+				getChildFragmentManager(), aideAgentInterface));
 		mPager.setCurrentItem(0);
 
 		// 为按钮添加监听器
@@ -100,7 +100,7 @@ public class GoalModelDetailsFragment extends Fragment {
 				Toast.makeText(getActivity(), "back pressed", 2000).show();
 				// TODO 安卓的回收机制！！！！！目前返回后activity会销毁，于是goal
 				// model里面开启的进程都会关闭，下次点击进来后又重新初始化了goal model
-				//getActivity().finish();
+				getActivity().finish();
 			}
 		});
 
@@ -117,9 +117,10 @@ public class GoalModelDetailsFragment extends Fragment {
 			@Override
 			public void onClick(View v) {
 
-				//弹出窗口的按钮是否可见由goal model的root goal的状态决定
+				// 弹出窗口的按钮是否可见由goal model的root goal的状态决定
 				popupWindow = new SelectOrderPopupWindow(inflater,
-						itemsOnClick, goalModel.getRootGoal().getCurrentState().toString(), getResources());
+						itemsOnClick, goalModel.getRootGoal().getCurrentState()
+								.toString(), getResources());
 
 				// 显示窗口
 
@@ -196,18 +197,23 @@ public class GoalModelDetailsFragment extends Fragment {
 			switch (v.getId()) {
 			case R.id.bt_dialog_start:
 				aideAgentInterface.startGoalModel(goalModel);
+				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				break;
 			case R.id.bt_dialog_suspend:
 				aideAgentInterface.suspendGoalModel(goalModel);
+				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				break;
 			case R.id.bt_dialog_resume:
 				aideAgentInterface.resumeGoalModel(goalModel);
+				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				break;
 			case R.id.bt_dialog_stop:
 				aideAgentInterface.stopGoalModel(goalModel);
+				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				break;
 			case R.id.bt_dialog_reset:
 				aideAgentInterface.resetGoalModel(goalModel);
+				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				break;
 			case R.id.bt_dialog_cancel:
 				// 销毁弹出框
@@ -215,6 +221,7 @@ public class GoalModelDetailsFragment extends Fragment {
 				break;
 
 			default:
+				popupWindow.dismiss();
 				break;
 			}
 
@@ -231,9 +238,11 @@ public class GoalModelDetailsFragment extends Fragment {
 
 		Fragment goalTreeFragment;
 
-		public MyFragmentPagerAdapter(GoalModel goalModel, FragmentManager fm) {
+		public MyFragmentPagerAdapter(GoalModel goalModel, FragmentManager fm,
+				AideAgentInterface aideAgentInterface) {
 			super(fm);
-			goalTreeFragment = new GoalTreeFragment(goalModel);
+			goalTreeFragment = new GoalTreeFragment(goalModel,
+					aideAgentInterface);
 		}
 
 		@Override

@@ -3,9 +3,9 @@
  */
 package edu.fudan.se.agent;
 
-
 import android.content.Context;
 import android.util.Log;
+import edu.fudan.se.goalmachine.TaskMachine;
 import edu.fudan.se.goalmodel.GoalModel;
 import edu.fudan.se.goalmodel.GoalModelController;
 import edu.fudan.se.pool.Message;
@@ -24,14 +24,14 @@ import jade.lang.acl.UnreadableException;
 
 /**
  * @author zjh
- *
+ * 
  */
 public class AideAgent extends Agent implements AideAgentInterface {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	private GoalModelController goalModelController;
-	
+
 	private Context context;
 
 	@Override
@@ -44,11 +44,11 @@ public class AideAgent extends Agent implements AideAgentInterface {
 				context = (Context) args[0];
 			}
 		}
-		
+
 		goalModelController = new GoalModelController();
-		
+
 		registerO2AInterface(AideAgentInterface.class, this);
-		
+
 		DFAgentDescription dfd = new DFAgentDescription();
 		dfd.setName(getAID());
 		ServiceDescription sd = new ServiceDescription();
@@ -62,9 +62,6 @@ public class AideAgent extends Agent implements AideAgentInterface {
 			e.printStackTrace();
 		}
 
-		
-		
-		
 		// add different behaviour
 		addBehaviour(new TickerBehaviour(this, 1000) {
 
@@ -187,8 +184,6 @@ public class AideAgent extends Agent implements AideAgentInterface {
 		}
 	}
 
-	
-	
 	@Override
 	public void startGoalModel(GoalModel goalModel) {
 		this.addBehaviour(new GSMStarter(this, goalModel));
@@ -213,108 +208,123 @@ public class AideAgent extends Agent implements AideAgentInterface {
 	public void resetGoalModel(GoalModel goalModel) {
 		this.addBehaviour(new GSMResetter(this, goalModel));
 	}
-	
-	
-	
-	private class GSMStarter extends OneShotBehaviour{
-		/**
-		 * 
-		 */
+
+	@Override
+	public void endTaskMachine(TaskMachine taskMachine) {
+		this.addBehaviour(new GSMEndTaskMachine(this, taskMachine));
+	}
+
+	private class GSMStarter extends OneShotBehaviour {
+
 		private static final long serialVersionUID = 2126730704005002010L;
 		private GoalModel goalModel;
-		
-		private GSMStarter(Agent a, GoalModel goalModelName){
+
+		private GSMStarter(Agent a, GoalModel goalModel) {
 			super(a);
-			this.goalModel = goalModelName;
+			this.goalModel = goalModel;
 		}
-		
+
 		@Override
 		public void action() {
 			// TODO Auto-generated method stub
 			Log.i("MY_LOG", "Start Goal Model...");
 			goalModelController.start(goalModel);
 		}
-		
+
 	}
-	private class GSMStoper extends OneShotBehaviour{
-		/**
-		 * 
-		 */
+
+	private class GSMStoper extends OneShotBehaviour {
+
 		private static final long serialVersionUID = 2126730704005002010L;
 		private GoalModel goalModel;
-		
-		private GSMStoper(Agent a, GoalModel goalModelName){
+
+		private GSMStoper(Agent a, GoalModel goalModel) {
 			super(a);
-			this.goalModel = goalModelName;
+			this.goalModel = goalModel;
 		}
-		
+
 		@Override
 		public void action() {
 			// TODO Auto-generated method stub
 			Log.i("MY_LOG", "Stop Goal Model...");
 			goalModelController.stop(goalModel);
 		}
-		
+
 	}
-	private class GSMSuspender extends OneShotBehaviour{
-		/**
-		 * 
-		 */
+
+	private class GSMSuspender extends OneShotBehaviour {
+
 		private static final long serialVersionUID = 2126730704005002010L;
 		private GoalModel goalModel;
-		
-		private GSMSuspender(Agent a, GoalModel goalModelName){
+
+		private GSMSuspender(Agent a, GoalModel goalModel) {
 			super(a);
-			this.goalModel = goalModelName;
+			this.goalModel = goalModel;
 		}
-		
+
 		@Override
 		public void action() {
 			// TODO Auto-generated method stub
 			Log.i("MY_LOG", "Suspend Goal Model...");
 			goalModelController.suspend(goalModel);
 		}
-		
+
 	}
-	private class GSMResumer extends OneShotBehaviour{
-		/**
-		 * 
-		 */
+
+	private class GSMResumer extends OneShotBehaviour {
+
 		private static final long serialVersionUID = 2126730704005002010L;
 		private GoalModel goalModel;
-		
-		private GSMResumer(Agent a, GoalModel goalModelName){
+
+		private GSMResumer(Agent a, GoalModel goalModel) {
 			super(a);
-			this.goalModel = goalModelName;
+			this.goalModel = goalModel;
 		}
-		
+
 		@Override
 		public void action() {
 			// TODO Auto-generated method stub
 			Log.i("MY_LOG", "Resume Goal Model...");
 			goalModelController.resume(goalModel);
 		}
-		
+
 	}
-	private class GSMResetter extends OneShotBehaviour{
-		/**
-		 * 
-		 */
+
+	private class GSMResetter extends OneShotBehaviour {
+
 		private static final long serialVersionUID = 2126730704005002010L;
 		private GoalModel goalModel;
-		
-		private GSMResetter(Agent a, GoalModel goalModelName){
+
+		private GSMResetter(Agent a, GoalModel goalModel) {
 			super(a);
-			this.goalModel = goalModelName;
+			this.goalModel = goalModel;
 		}
-		
+
 		@Override
 		public void action() {
 			// TODO Auto-generated method stub
 			Log.i("MY_LOG", "Reset Goal Model...");
 			goalModelController.reset(goalModel);
 		}
-		
+
+	}
+
+	private class GSMEndTaskMachine extends OneShotBehaviour {
+
+		private static final long serialVersionUID = 2126730704005002010L;
+		private TaskMachine taskMachine;
+
+		private GSMEndTaskMachine(Agent a, TaskMachine taskMachine) {
+			super(a);
+			this.taskMachine = taskMachine;
+		}
+
+		@Override
+		public void action() {
+			// TODO Auto-generated method stub
+			Log.i("MY_LOG", "End Task Machine...");
+			goalModelController.endTaskMachine(taskMachine);
+		}
 	}
 
 }

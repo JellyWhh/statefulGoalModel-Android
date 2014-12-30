@@ -9,18 +9,11 @@
     tools:context="edu.fudan.se.mainfragments.SettingFragment" >
 
     <Button
-        android:id="@+id/bt_setAgent"
+        android:id="@+id/bt_showNotification"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/bt_setAgent" />
+        android:text="@string/bt_showNotification" />
 
-    <Button
-        android:id="@+id/bt_startAgent"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/bt_setAgent"
-        android:layout_below="@+id/bt_setAgent"
-        android:layout_marginTop="30dp"
-        android:text="@string/bt_startAgent" />
+  
 
 </RelativeLayout>
