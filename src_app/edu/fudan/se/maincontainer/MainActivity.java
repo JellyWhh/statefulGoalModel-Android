@@ -1,6 +1,7 @@
 package edu.fudan.se.maincontainer;
 
 import edu.fudan.se.R;
+import edu.fudan.se.initial.SGMApplication;
 import edu.fudan.se.mainfragments.MainFragment;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -15,17 +16,26 @@ import android.view.MenuItem;
  * 
  */
 public class MainActivity extends FragmentActivity {
+	
+//	private int initialItem = 0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		if (savedInstanceState == null) {
+			//休眠5s是为了让agent能够启动起来，不然在MessageFragment里得不到agent的引用
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			String agentNickname = ((SGMApplication) getApplication())
+					.getAgentNickname();
 			FragmentTransaction transaction = getSupportFragmentManager()
 					.beginTransaction();
-			transaction.add(R.id.container, new MainFragment()).commit();
-			// getFragmentManager().beginTransaction()
-			// .add(R.id.container, new MainFragment()).commit();
+			transaction.add(R.id.container, new MainFragment(0)).commit();
 		}
 	}
 
@@ -47,6 +57,15 @@ public class MainActivity extends FragmentActivity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
+	
+//	@Override
+//	protected void onNewIntent(Intent intent){
+//		super.onNewIntent(intent);
+//		String flagFragment= intent.getStringExtra("FLAG");
+//		if (flagFragment.equals("MESSAGE")) {
+//			this.setInitialItem(0);
+//		}
+//	}
 
 	@Override
 	public void onBackPressed() {
@@ -54,5 +73,13 @@ public class MainActivity extends FragmentActivity {
 		this.moveTaskToBack(true);
 		return;
 	}
+
+//	public int getInitialItem() {
+//		return initialItem;
+//	}
+//
+//	public void setInitialItem(int initialItem) {
+//		this.initialItem = initialItem;
+//	}
 
 }

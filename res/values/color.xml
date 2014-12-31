@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <color name="unclickable_grey">#777</color>
     <color name="clickable_black">#000</color>
+    <color name="done_grey">#ccc</color>
+    <color name="nodone_white">#fff</color>
     
+    
+    <color name="focus_black">#000</color>
+    <color name="unfocus_grey">#333</color>
+
 </resources>

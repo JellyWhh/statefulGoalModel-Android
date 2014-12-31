@@ -210,8 +210,8 @@ public class AideAgent extends Agent implements AideAgentInterface {
 	}
 
 	@Override
-	public void endTaskMachine(TaskMachine taskMachine) {
-		this.addBehaviour(new GSMEndTaskMachine(this, taskMachine));
+	public void endTaskMachine(TaskMachine taskMachine, String mes) {
+		this.addBehaviour(new GSMEndTaskMachine(this, taskMachine, mes));
 	}
 
 	private class GSMStarter extends OneShotBehaviour {
@@ -313,17 +313,19 @@ public class AideAgent extends Agent implements AideAgentInterface {
 
 		private static final long serialVersionUID = 2126730704005002010L;
 		private TaskMachine taskMachine;
+		private String mes;
 
-		private GSMEndTaskMachine(Agent a, TaskMachine taskMachine) {
+		private GSMEndTaskMachine(Agent a, TaskMachine taskMachine, String mes) {
 			super(a);
 			this.taskMachine = taskMachine;
+			this.mes = mes;
 		}
 
 		@Override
 		public void action() {
 			// TODO Auto-generated method stub
 			Log.i("MY_LOG", "End Task Machine...");
-			goalModelController.endTaskMachine(taskMachine);
+			goalModelController.endTaskMachine(taskMachine, mes);
 		}
 	}
 

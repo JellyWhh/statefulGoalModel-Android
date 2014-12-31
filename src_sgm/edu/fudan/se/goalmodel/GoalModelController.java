@@ -94,32 +94,33 @@ public class GoalModelController {
 					"reset()", "elementMachines is null or its size is 0!");
 		}
 	}
-	
+
 	/**
 	 * 给一个task machine发送END消息，这个是在用户完成了某个需要他参与的任务后，在UI上点击这个task后面的end按钮时触发的操作
 	 * 
 	 * @param taskMachine
 	 *            用户完成的task
+	 * @param mes
+	 *            发送的消息内容，END为完成了，QUIT为没有完成
 	 */
-	public void endTaskMachine(TaskMachine taskMachine) {
-		Log.logDebug("GoalModelController:" + taskMachine.getName(), "endTaskMachine()",
-				"init.");
+	public void endTaskMachine(TaskMachine taskMachine, String mes) {
+		Log.logDebug("GoalModelController:" + taskMachine.getName(),
+				"endTaskMachine()", "init.");
 		SGMMessage msg = new SGMMessage("TOTASK", "UI", taskMachine.getName(),
-				"END");
+				mes);
 		if (taskMachine.getMsgPool().offer(msg)) {
 			Log.logMessage(msg, true);
-			Log.logDebug("GoalModelController:" + taskMachine.getName(), "endTaskMachine()",
-					"UI thread send a END msg to " + taskMachine.getName()
-							+ " succeed!");
+			Log.logDebug("GoalModelController:" + taskMachine.getName(),
+					"endTaskMachine()", "UI thread send a " + mes + " msg to "
+							+ taskMachine.getName() + " succeed!");
 		} else {
 			Log.logMessage(msg, false);
-			Log.logError("GoalModelController:" + taskMachine.getName(), "endTaskMachine()",
-					"UI thread send a END msg to " + taskMachine.getName()
-							+ " error!");
+			Log.logError("GoalModelController:" + taskMachine.getName(),
+					"endTaskMachine()", "UI thread send a " + mes + " msg to "
+							+ taskMachine.getName() + " error!");
 		}
 
 	}
-	
 
 	/**
 	 * 发送一条消息给goal model中的root goal

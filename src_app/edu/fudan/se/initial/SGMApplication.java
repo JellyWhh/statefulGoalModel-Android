@@ -16,6 +16,7 @@ import edu.fudan.se.goalmachine.SGMMessage;
 import edu.fudan.se.goalmachine.TaskMachine;
 import edu.fudan.se.goalmodel.GoalModel;
 import edu.fudan.se.goalmodel.GoalModelController;
+import edu.fudan.se.userMes.UserTask;
 
 import android.app.Application;
 import android.content.SharedPreferences;
@@ -33,10 +34,12 @@ public class SGMApplication extends Application implements Serializable {
 	private Logger logger = Logger.getJADELogger(this.getClass().getName());
 
 	private ArrayList<GoalModel> goalModelList; // 全局变量，用来保存用户的goal model list
-	
+
+	private ArrayList<UserTask> userTaskList;
+
 	private String agentNickname;
-	
-//	private GoalModelController goalModelController;
+
+	// private GoalModelController goalModelController;
 
 	@Override
 	public void onCreate() {
@@ -50,10 +53,12 @@ public class SGMApplication extends Application implements Serializable {
 	 */
 	private void initialData() {
 		this.goalModelList = new ArrayList<>();
+		this.userTaskList = new ArrayList<>();
 
 		this.goalModelList.add(newGoalModel());
-		
-//		this.goalModelController = new GoalModelController(this.goalModelList);
+
+		// this.goalModelController = new
+		// GoalModelController(this.goalModelList);
 
 	}
 
@@ -78,17 +83,37 @@ public class SGMApplication extends Application implements Serializable {
 	public ArrayList<GoalModel> getGoalModelList() {
 		return this.goalModelList;
 	}
-	
-//	public GoalModelController getGoalModelController(){
-//		return this.goalModelController;
-//	}
-	
-	public String getAgentNickname(){
+
+	// public GoalModelController getGoalModelController(){
+	// return this.goalModelController;
+	// }
+
+	public String getAgentNickname() {
 		return this.agentNickname;
 	}
-	
-	public void setAgentNickname(String agentNickname){
+
+	public void setAgentNickname(String agentNickname) {
 		this.agentNickname = agentNickname;
+	}
+
+	public ArrayList<UserTask> getUserTaskList() {
+		return userTaskList;
+	}
+
+	public void addUserTask(UserTask userTask) {
+		this.userTaskList.add(userTask);
+	}
+
+	public void clearTasksOfGoalModel(GoalModel goalModel) {
+		ArrayList<UserTask> toRemoveArrayList = new ArrayList<>();
+		for (UserTask userTask : this.userTaskList) {
+			if (userTask.getGoalModel() == goalModel
+					|| userTask.getGoalModel().getName()
+							.equals(goalModel.getName())) {
+				toRemoveArrayList.add(userTask);
+			}
+		}
+		this.userTaskList.removeAll(toRemoveArrayList);
 	}
 
 	/**
@@ -205,7 +230,8 @@ public class SGMApplication extends Application implements Serializable {
 			}
 		};
 
-		TaskMachine aliceChild_1 = new TaskMachine("aliceChild_1", alice, 2,true) {
+		TaskMachine aliceChild_1 = new TaskMachine("aliceChild_1", alice, 2,
+				true) {
 
 			@Override
 			public void checkPreCondition() {
@@ -239,15 +265,15 @@ public class SGMApplication extends Application implements Serializable {
 
 			}
 
-
 			@Override
 			public void executingDo_once() {
 				System.out
-				.println("aliceChild_1 is doing his executingDoAction...");
+						.println("aliceChild_1 is doing his executingDoAction...");
 			}
 		};
 
-		TaskMachine aliceChild_2 = new TaskMachine("aliceChild_2", alice, 2,true) {
+		TaskMachine aliceChild_2 = new TaskMachine("aliceChild_2", alice, 2,
+				true) {
 
 			@Override
 			public void checkPreCondition() {
@@ -280,15 +306,14 @@ public class SGMApplication extends Application implements Serializable {
 
 			}
 
-
 			@Override
 			public void executingDo_once() {
 				System.out
-				.println("aliceChild_2 is doing his executingDoAction...");
+						.println("aliceChild_2 is doing his executingDoAction...");
 			}
 		};
 
-		TaskMachine bobChild_1 = new TaskMachine("bobChild_1", bob, 2,true) {
+		TaskMachine bobChild_1 = new TaskMachine("bobChild_1", bob, 2, true) {
 
 			@Override
 			public void checkPreCondition() {
@@ -322,15 +347,14 @@ public class SGMApplication extends Application implements Serializable {
 
 			}
 
-
 			@Override
 			public void executingDo_once() {
 				System.out
-				.println("bobChild_1 is doing his executingDoAction...");
+						.println("bobChild_1 is doing his executingDoAction...");
 			}
 		};
 
-		TaskMachine bobChild_2 = new TaskMachine("bobChild_2", bob, 2,true) {
+		TaskMachine bobChild_2 = new TaskMachine("bobChild_2", bob, 2, true) {
 
 			@Override
 			public void checkPreCondition() {
@@ -366,15 +390,13 @@ public class SGMApplication extends Application implements Serializable {
 
 			}
 
-			
-
 			@Override
 			public void executingDo_once() {
 				System.out
-				.println("bobChild_2 is doing his executingDoAction...");
+						.println("bobChild_2 is doing his executingDoAction...");
 			}
 		};
-		TaskMachine bobChild_3 = new TaskMachine("bobChild_3", bob, 2,true) {
+		TaskMachine bobChild_3 = new TaskMachine("bobChild_3", bob, 2, true) {
 
 			@Override
 			public void checkPreCondition() {
@@ -413,7 +435,7 @@ public class SGMApplication extends Application implements Serializable {
 			@Override
 			public void executingDo_once() {
 				System.out
-				.println("bobChild_3 is doing his executingDoAction...");
+						.println("bobChild_3 is doing his executingDoAction...");
 			}
 		};
 		// root.setCommitmentCondition(new Condition("COMMITMENT"));

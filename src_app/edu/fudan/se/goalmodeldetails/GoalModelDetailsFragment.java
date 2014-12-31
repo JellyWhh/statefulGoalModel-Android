@@ -9,6 +9,7 @@ import jade.wrapper.StaleProxyException;
 import edu.fudan.se.R;
 import edu.fudan.se.agent.AideAgentInterface;
 import edu.fudan.se.goalmodel.GoalModel;
+import edu.fudan.se.initial.SGMApplication;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -34,6 +35,7 @@ import android.widget.TextView;
 public class GoalModelDetailsFragment extends Fragment {
 
 	private GoalModel goalModel; // 要显示详情的Goal Model
+	private SGMApplication application; // 获取应用程序，以得到里面的全局变量
 
 	private SelectOrderPopupWindow popupWindow;
 	private ViewPager mPager;
@@ -42,18 +44,36 @@ public class GoalModelDetailsFragment extends Fragment {
 	private TextView tv_gmdetails_name;
 
 	private AideAgentInterface aideAgentInterface; // agent interface
-	private String agentNickname;
+//	private String agentNickname;
 
-	public GoalModelDetailsFragment(GoalModel goalModel, String agentNickname) {
+	public GoalModelDetailsFragment(GoalModel goalModel) {
 		this.goalModel = goalModel;
-		this.agentNickname = agentNickname;
+//		this.agentNickname = agentNickname;
+
+//		try {
+//			Log.i("GoalModelDetailsFragment", "getting agent interface..."
+//					+ this.agentNickname);
+//			aideAgentInterface = MicroRuntime.getAgent(this.agentNickname)
+//					.getO2AInterface(AideAgentInterface.class);
+//			Log.i("GoalModelDetailsFragment", "check interface, null?: "
+//					+ (aideAgentInterface == null));
+//		} catch (StaleProxyException e) {
+//			Log.e("GoalModelDetailsFragment", "StaleProxyException");
+//			e.printStackTrace();
+//		} catch (ControllerException e) {
+//			Log.e("GoalModelDetailsFragment", "ControllerException");
+//			e.printStackTrace();
+//		}
+	}
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		
+		application = (SGMApplication) getActivity().getApplication();
 		try {
-			Log.i("GoalModelDetailsFragment", "getting agent interface..."
-					+ this.agentNickname);
-			aideAgentInterface = MicroRuntime.getAgent(this.agentNickname)
+			aideAgentInterface = MicroRuntime.getAgent(application.getAgentNickname())
 					.getO2AInterface(AideAgentInterface.class);
-			Log.i("GoalModelDetailsFragment", "check interface, null?: "
-					+ (aideAgentInterface == null));
 		} catch (StaleProxyException e) {
 			Log.e("GoalModelDetailsFragment", "StaleProxyException");
 			e.printStackTrace();
@@ -61,12 +81,6 @@ public class GoalModelDetailsFragment extends Fragment {
 			Log.e("GoalModelDetailsFragment", "ControllerException");
 			e.printStackTrace();
 		}
-	}
-
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-
 	}
 
 	@Override
@@ -212,6 +226,8 @@ public class GoalModelDetailsFragment extends Fragment {
 				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				break;
 			case R.id.bt_dialog_reset:
+				//reset的时候要把让用户做的任务列表中的相关任务清除
+				application.clearTasksOfGoalModel(goalModel);
 				aideAgentInterface.resetGoalModel(goalModel);
 				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				break;

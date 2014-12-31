@@ -15,5 +15,5 @@ public interface AideAgentInterface {
 
 	public void resetGoalModel(GoalModel goalModel);
 
-	public void endTaskMachine(TaskMachine taskMachine);
+	public void endTaskMachine(TaskMachine taskMachine,String mes);
 }

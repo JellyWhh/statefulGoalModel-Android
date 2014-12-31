@@ -6,9 +6,13 @@
     <string name="action_settings">Settings</string>
 
     <!-- 标签页内容 -->
-    <string name="tab_home">Home</string>
+    <string name="tab_home">Message</string>
     <string name="tab_mygoal">MyGoal</string>
     <string name="tab_setting">Setting</string>
+    
+    <!-- Message标签页的两个标签 -->
+    <string name="tab_message_task">Task</string>
+    <string name="tab_message_mes">Message</string>
 
     <!-- orders弹出框中的按钮内容 -->
     <string name="dialog_start">Start</string>

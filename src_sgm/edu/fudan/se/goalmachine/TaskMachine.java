@@ -14,8 +14,9 @@ import edu.fudan.se.log.Log;
  */
 public abstract class TaskMachine extends ElementMachine {
 
-	private boolean needPeopleInteraction;	//是否需要人的交互
-	
+	private String description; // 任务的描述，如果这个任务需要人来完成，它需要有一段自然语言的描述展示给人看
+	private boolean needPeopleInteraction; // 是否需要人的交互
+
 	/**
 	 * 构造方法
 	 * 
@@ -24,7 +25,8 @@ public abstract class TaskMachine extends ElementMachine {
 	 * @param parentGoal
 	 *            父目标
 	 */
-	public TaskMachine(String name, ElementMachine parentGoal, int level,boolean needPeopleInteraction) {
+	public TaskMachine(String name, ElementMachine parentGoal, int level,
+			boolean needPeopleInteraction) {
 		super(name, parentGoal, level);
 		this.needPeopleInteraction = needPeopleInteraction;
 	}
@@ -71,40 +73,40 @@ public abstract class TaskMachine extends ElementMachine {
 
 		}
 	}
-	
-	boolean isSendUIMesDone = false;	//标记是否给用户发送提醒完毕
+
+	boolean isSendUIMesDone = false; // 标记是否给用户发送提醒完毕
 
 	/**
 	 * executing状态中do所做的action：这个需要根据具体的task有不同的具体执行行为，所以这个是抽象方法，在实例化时具体实现
 	 */
 	@Override
-	public void executingDo(SGMMessage msg){
-		
-		if(this.isNeedPeopleInteraction()){	//需要人的参与
-			//弹出窗口提示用户需要他的参与，然后进入等待end消息中
-			if (isSendUIMesDone) {	//发送提示完毕
+	public void executingDo(SGMMessage msg) {
+
+		if (this.isNeedPeopleInteraction()) { // 需要人的参与
+			// 弹出窗口提示用户需要他的参与，然后进入等待end消息中
+			if (isSendUIMesDone) { // 发送提示完毕
 				executingDo_waitingEnd(msg);
-			}else {
-				//发送消息给agent,让agent提醒用户需要他的参与
+			} else {
+				// 发送消息给agent,让agent提醒用户需要他的参与
 				sendMesToAgent();
 				isSendUIMesDone = true;
 			}
-		}else{	//不需要人的参与
-			//执行完要做的事情后直接跳转
+		} else { // 不需要人的参与
+			// 执行完要做的事情后直接跳转
 			executingDo_once();
 			this.setCurrentState(this.transition(State.Executing,
 					this.getPostCondition()));
 		}
-		
+
 	}
-	
+
 	/**
 	 * 弹出弹窗，提醒用户需要它的参与
 	 */
-	private void sendMesToAgent(){
-		//TODO
+	private void sendMesToAgent() {
+		// TODO
 	}
-	
+
 	/**
 	 * executing状态中do所做的action：不需要人的参与，直接根据具体的task有不同的具体执行行为，抽象方法，在实例化时具体实现
 	 */
@@ -130,6 +132,9 @@ public abstract class TaskMachine extends ElementMachine {
 			} else if (msg.getBody().equals("SUSPEND")) { // 收到父目标的SUSPEND消息
 				this.getMsgPool().poll();
 				this.setCurrentState(State.Suspended);
+			}else if (msg.getBody().equals("QUIT")) {	//用户没有完成这个任务，放弃了
+				this.getMsgPool().poll();
+				this.setCurrentState(State.Failed);
 			}
 		}
 	}
@@ -153,12 +158,12 @@ public abstract class TaskMachine extends ElementMachine {
 			}
 		}
 	}
-	
+
 	/**
 	 * 让TaskMachine重写，用来初始化里面的一个变量
 	 */
-	public void resetTaskMachine(){
-		isSendUIMesDone = false;	//标记是否给用户发送提醒完毕
+	public void resetTaskMachine() {
+		isSendUIMesDone = false; // 标记是否给用户发送提醒完毕
 	}
 
 	public boolean isNeedPeopleInteraction() {
@@ -167,6 +172,14 @@ public abstract class TaskMachine extends ElementMachine {
 
 	public void setNeedPeopleInteraction(boolean needPeopleInteraction) {
 		this.needPeopleInteraction = needPeopleInteraction;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 }

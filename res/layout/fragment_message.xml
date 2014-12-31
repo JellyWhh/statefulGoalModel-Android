@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:id="@+id/ll_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#eee"
+            android:paddingBottom="5dp"
+            android:paddingTop="10dp" >
+
+            <TextView
+                android:id="@+id/tv_tab_task"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1.0"
+                android:gravity="center"
+                android:text="@string/tab_message_task"
+                android:textColor="@color/focus_black"
+                android:textSize="18sp" />
+            
+            <ImageView
+                android:id="@+id/iv_middle_line"
+                android:layout_width="2dp"
+                android:layout_height="match_parent"
+                android:scaleType="matrix"
+                android:src="#222" />
+
+            <TextView
+                android:id="@+id/tv_tab_message"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1.0"
+                android:gravity="center"
+                android:text="@string/tab_message_mes"
+                android:textColor="@color/unfocus_grey"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:orientation="vertical"
+            android:paddingBottom="3dp" >
+
+            <ImageView
+                android:id="@+id/iv_bottom_line"
+                android:layout_width="100dp"
+                android:layout_height="2dp"
+                android:scaleType="matrix"
+                android:src="#000" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/vp_message"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:layout_weight="1.0"
+        android:background="#fff"
+        android:flipInterval="30"
+        android:persistentDrawingCache="animation" />
+
+</LinearLayout>

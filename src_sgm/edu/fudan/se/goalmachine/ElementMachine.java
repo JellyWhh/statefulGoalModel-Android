@@ -587,10 +587,6 @@ public abstract class ElementMachine implements Runnable {
 		case PostCondition:
 			retState = State.Failed;
 			break;
-		case DefaultPreCondition:
-			// default pre condition不满足，也就是有子目标激活失败，直接failed（只针对GoalMachine）
-			retState = State.Failed;
-			break;
 
 		default:
 			break;

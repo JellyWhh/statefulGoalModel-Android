@@ -13,6 +13,8 @@ import edu.fudan.se.goalmachine.GoalMachine;
 import edu.fudan.se.goalmachine.State;
 import edu.fudan.se.goalmachine.TaskMachine;
 import edu.fudan.se.goalmodel.GoalModel;
+import edu.fudan.se.initial.SGMApplication;
+import edu.fudan.se.userMes.UserTask;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -55,7 +57,8 @@ public class GoalTreeFragment extends ListFragment {
 		initialData();
 		treeViewAdapter = new TreeViewAdapter(getActivity(),
 				R.layout.tree_view_item_layout, allTreeElements, goalModel,
-				aideAgentInterface);
+				aideAgentInterface, (SGMApplication) getActivity()
+						.getApplication());
 		// setListAdapter(treeViewAdapter);
 		// registerForContextMenu(getListView());
 	}
@@ -97,10 +100,12 @@ class TreeViewAdapter extends ArrayAdapter<ElementMachine> {
 	private Bitmap iconOR; // or分解
 
 	private AideAgentInterface aideAgentInterface;
+	private SGMApplication application;
+	private GoalModel goalModel;
 
 	public TreeViewAdapter(Context context, int textViewResourceId,
 			List<ElementMachine> treeElements, GoalModel goalModel,
-			AideAgentInterface aideAgentInterface) {
+			AideAgentInterface aideAgentInterface, SGMApplication application) {
 		super(context, textViewResourceId, treeElements);
 		this.mInflater = LayoutInflater.from(context);
 		this.treeElements = treeElements;
@@ -109,7 +114,9 @@ class TreeViewAdapter extends ArrayAdapter<ElementMachine> {
 		this.iconOR = BitmapFactory.decodeResource(context.getResources(),
 				R.drawable.tree_view_icon_or);
 
+		this.goalModel = goalModel;
 		this.aideAgentInterface = aideAgentInterface;
+		this.application = application;
 	}
 
 	@Override
@@ -190,10 +197,13 @@ class TreeViewAdapter extends ArrayAdapter<ElementMachine> {
 						// 让agent给这个task machine发送END消息
 						// goalModel.endTaskMachine((TaskMachine) treeElements
 						// .get(position));
-						aideAgentInterface
-								.endTaskMachine((TaskMachine) treeElements
-										.get(position));
+						// aideAgentInterface
+						// .endTaskMachine((TaskMachine) treeElements
+						// .get(position));
 
+						UserTask userTask = new UserTask(goalModel,
+								(TaskMachine) treeElements.get(position), false);
+						application.addUserTask(userTask);
 					}
 				});
 			} else {
