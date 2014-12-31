@@ -48,8 +48,6 @@ public abstract class ElementMachine implements Runnable {
 	private Condition commitmentCondition; // 整个shouldDo符合状态里都有可能不满足的，要一直检查
 	private Condition invariantCondition; // 整个shouldDo符合状态里都有可能不满足的，要一直检查
 
-	private Condition defaultPreCondition; // default pre
-											// condition，GoalMachine不为空，用来检查是不是所有的子目标都激活成功了。
 	private CauseToRepairing causeToRepairing;
 
 	/* 标记各种状态的entry动作是否完成 */
@@ -212,6 +210,8 @@ public abstract class ElementMachine implements Runnable {
 				}
 
 				break;
+			default:
+				break;
 
 			}
 		}
@@ -246,18 +246,8 @@ public abstract class ElementMachine implements Runnable {
 			// 收到消息后的行为处理
 			if (msg.getBody().equals("ACTIVATE")) {
 				this.getMsgPool().poll();
-				this.setCurrentState(transition(State.Initial,
-						this.getContextCondition()));
-				// 如果激活后发现状态仍然回到了Intial状态，说明上下文不满足，激活失败，告诉父目标激活失败
-				if (this.getCurrentState() == State.Initial) {
-					if (sendMessageToParent("ACTIVATEDFAILED")) {
-						Log.logDebug(this.getName(), "initialDo()",
-								"send ACTIVATEDFAILED msg to parent succeed!");
-					} else {
-						Log.logError(this.getName(), "initialDo()",
-								"send ACTIVATEDFAILED msg to parent error!");
-					}
-				}
+				this.setCurrentState(State.Activated);
+
 			}
 		}
 	}
@@ -481,42 +471,42 @@ public abstract class ElementMachine implements Runnable {
 		State ret = currentState;
 
 		switch (currentState) {
-		case Initial: // (initial)
-			if (condition == null) { // context condition为空
-				ret = State.Activated;
-			} else {
-				// 先判断条件是不是context condition，是的话执行检查然后根据结果进行跳转；如果不是，无意义，返回-1，
-				if (condition.getType().equals("CONTEXT")) {
-					// 先检查一下context condition，在方法里面通过判断是否满足然后对conditon赋值
-					checkContextCondition();
-					if (condition.isSatisfied()) {
-						ret = State.Activated; // context
-												// condition满足，跳转到Activated
-					} else {
-						ret = State.Initial; // context
-												// condition不满足，跳回到initial状态，同时告诉父目标自己激活失败
-						// this.setConditionCauseToRepairing(condition);
-					}
-				}
-			}
-			break;
+		// case Initial: // (initial)
+		// if (condition == null) { // context condition为空
+		// ret = State.Activated;
+		// } else {
+		// // 先判断条件是不是context condition，是的话执行检查然后根据结果进行跳转；如果不是，无意义，返回-1，
+		// if (condition.getType().equals("CONTEXT")) {
+		// // 先检查一下context condition，在方法里面通过判断是否满足然后对conditon赋值
+		// checkContextCondition();
+		// if (condition.isSatisfied()) {
+		// ret = State.Activated; // context
+		// // condition满足，跳转到Activated
+		// } else {
+		// ret = State.Initial; // context
+		// // condition不满足，跳回到initial状态，同时告诉父目标自己激活失败
+		// // this.setConditionCauseToRepairing(condition);
+		// }
+		// }
+		// }
+		// break;
 
 		case Activated: // 1(activated)
 
-			// 先检查隐含的default pre conditon，基本只针对goal machine，task
-			// machine的defaultPreConditon为空
-			if (this.getDefaultPreCondition() != null) {
-				checkDefaultPreConditon();
-				// default pre condition不满足
-				if (!this.getDefaultPreCondition().isSatisfied()) {
-					ret = State.Repairing;
-					this.setCauseToRepairing(CauseToRepairing.DefaultPreCondition);
+			// // 先检查隐含的default pre conditon，基本只针对goal machine，task
+			// // machine的defaultPreConditon为空
+			// if (this.getDefaultPreCondition() != null) {
+			// checkDefaultPreConditon();
+			// // default pre condition不满足
+			// if (!this.getDefaultPreCondition().isSatisfied()) {
+			// ret = State.Repairing;
+			// this.setCauseToRepairing(CauseToRepairing.DefaultPreCondition);
+			//
+			// break; // 直接跳到修复，不用再检查下面的pre condition了
+			// }
+			// }
 
-					break; // 直接跳到修复，不用再检查下面的pre condition了
-				}
-			}
-
-			// 再检查pre condition
+			// 检查pre condition
 			if (condition == null) { // pre condition为空
 				ret = State.Executing; // 直接跳转到Executing
 			} else {
@@ -749,18 +739,25 @@ public abstract class ElementMachine implements Runnable {
 						"filter a RESUME msg!");
 				return true;
 			}
+			if (msg.getBody().equals("ACTIVATEDDONE")
+					&& (this.getCurrentState() != State.Activated)) {
+				this.getMsgPool().poll(); // 把它拿出来
+				Log.logDebug(this.getName(), "filterMessage()",
+						"filter a ACTIVATEDDONE msg!");
+				return true;
+			}
 		}
 		return false;
 
 	}
 
-	/**
-	 * 检查default pre condition，<code>GoalMachine</code>需要重写，
-	 * <code>TaskMachine</code>不需要重写
-	 */
-	public void checkDefaultPreConditon() {
-
-	}
+	// /**
+	// * 检查default pre condition，<code>GoalMachine</code>需要重写，
+	// * <code>TaskMachine</code>不需要重写
+	// */
+	// public void checkDefaultPreConditon() {
+	//
+	// }
 
 	// *************结束一些辅助方法************************
 
@@ -921,14 +918,6 @@ public abstract class ElementMachine implements Runnable {
 
 	public void setInvariantCondition(Condition invariantCondition) {
 		this.invariantCondition = invariantCondition;
-	}
-
-	public Condition getDefaultPreCondition() {
-		return defaultPreCondition;
-	}
-
-	public void setDefaultPreCondition(Condition defaultPreCondition) {
-		this.defaultPreCondition = defaultPreCondition;
 	}
 
 	public CauseToRepairing getCauseToRepairing() {

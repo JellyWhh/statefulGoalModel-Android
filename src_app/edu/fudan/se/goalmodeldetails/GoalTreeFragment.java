@@ -92,7 +92,6 @@ public class GoalTreeFragment extends ListFragment {
 class TreeViewAdapter extends ArrayAdapter<ElementMachine> {
 
 	private LayoutInflater mInflater;
-	private GoalModel goalModel;
 	private List<ElementMachine> treeElements;
 	private Bitmap iconAND; // and分解
 	private Bitmap iconOR; // or分解
@@ -105,7 +104,6 @@ class TreeViewAdapter extends ArrayAdapter<ElementMachine> {
 		super(context, textViewResourceId, treeElements);
 		this.mInflater = LayoutInflater.from(context);
 		this.treeElements = treeElements;
-		this.goalModel = goalModel;
 		this.iconAND = BitmapFactory.decodeResource(context.getResources(),
 				R.drawable.tree_view_icon_and);
 		this.iconOR = BitmapFactory.decodeResource(context.getResources(),

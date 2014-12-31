@@ -24,9 +24,11 @@
     <!-- welcome界面的按钮内容 -->
     <string name="bt_setAgent">Set Agent</string>
     <string name="bt_startAgent">Start Agent</string>
+    <string name="tv_setAgent">Click to set agent.</string>
+    <string name="tv_startAgent">Click to start agent.</string>
 
     <!-- 下面是郑家欢代码中需要的string -->
-    <string name="label_nick">Enter Nickname</string>
+    <string name="label_nick">Enter Nickname: (eg. alice)</string>
     <string name="label_host">Host</string>
     <string name="label_port">Port</string>
     <string name="button_login">Connect to JADE</string>

@@ -24,7 +24,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:orientation="vertical"
-            android:paddingTop="5dip" >
+            android:paddingTop="5dp" >
 
             <ImageView
                 android:id="@+id/iv_bottom_line"

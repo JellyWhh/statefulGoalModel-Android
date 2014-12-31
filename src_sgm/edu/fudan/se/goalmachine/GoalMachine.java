@@ -43,7 +43,7 @@ public abstract class GoalMachine extends ElementMachine {
 		super(name, parentGoal, level);
 		this.decomposition = decomposition;
 		this.schedulerMethod = schedulerMethod;
-		this.setDefaultPreCondition(new Condition("DEFAULTPRE"));
+		// this.setDefaultPreCondition(new Condition("DEFAULTPRE"));
 	}
 
 	// ***********************************************
@@ -57,28 +57,21 @@ public abstract class GoalMachine extends ElementMachine {
 	public void activatedEntry() {
 		Log.logDebug(this.getName(), "activatedEntry()", "init.");
 
-		if (this.getSubElements() != null) {
+		if (this.getDecomposition() == 0) { // AND分解
+			// 给所有子目标发送激活消息
+			activatedEntry_sendMesToAllSub_AND();
 
-			for (ElementMachine element : this.getSubElements()) {
-
-				if (sendMessageToSub(element, "ACTIVATE")) { // 发送成功
-					Log.logDebug(this.getName(), "activatedEntry()",
-							"send \"ACTIVATE\" msg to " + element.getName()
-									+ " succeed!");
-				} else {
-					Log.logError(this.getName(), "activatedEntry()",
-							"send ACTIVATE msg to " + element.getName()
-									+ " error!");
-				}
-			}
-		} else {
-			Log.logError(this.getName(), "activatedEntry()",
-					"getSubElements() == null");
+		} else {// OR分解
+				// 给下一个可以激活的子目标发送激活消息
+			activatedEntryDo_sendMesToOneSub_OR();
 		}
 
 	}
 
 	boolean isActivatedDo_waitingSubReplyDone = false;
+
+	boolean isSendActivateMesToOneSubDone = false;
+	boolean isRepaired = false;
 
 	/**
 	 * 重写了<code>ElementMachine</code>中的activateDo()方法。<br>
@@ -90,24 +83,37 @@ public abstract class GoalMachine extends ElementMachine {
 		Log.logDebug(this.getName(), "activateDo()", "init.");
 		if (isActivatedDo_waitingSubReplyDone) { // subElements都反馈已激活，进入等待父目标的START指令中。如果是root
 													// goal，则在activatedDo_waitingSubReply()方法中已发生状态跳转
-			// activateDo_waitingParentNotify();
-			// SGMMessage msg = this.getMsgPool().poll(); // 每次拿出一条消息
-			if (msg != null) {
-				Log.logDebug(this.getName(), "activateDo()",
-						"get a message from " + msg.getSender() + "; body is: "
-								+ msg.getBody());
 
-				// 消息内容是START，表示父目标让当前目标开始状态转换
-				if (msg.getBody().equals("START")) {
-					this.getMsgPool().poll();
-					this.setCurrentState(this.transition(State.Activated,
-							this.getPreCondition()));
+			// 如果是通过修复重新进入activate状态的，不用等待START命令，直接进入执行
+			if (isRepaired) {
+				this.setCurrentState(this.transition(State.Activated,
+						this.getPreCondition()));
+			} else {
+				if (msg != null) {
+					Log.logDebug(this.getName(), "activateDo()",
+							"get a message from " + msg.getSender()
+									+ "; body is: " + msg.getBody());
+
+					// 消息内容是START，表示父目标让当前目标开始状态转换
+					if (msg.getBody().equals("START")) {
+						this.getMsgPool().poll();
+						this.setCurrentState(this.transition(State.Activated,
+								this.getPreCondition()));
+					}
+
 				}
-
 			}
 
 		} else { // 等待subElements反馈中
-			activatedDo_waitingSubReply(msg);
+			if (this.getDecomposition() == 0) { // AND分解
+				activatedDo_waitingSubReply_AND(msg);
+			} else { // OR分解
+				if (isSendActivateMesToOneSubDone) {
+					activatedDo_waitingSubReply_OR(msg);
+				} else {
+					activatedEntryDo_sendMesToOneSub_OR();
+				}
+			}
 		}
 	}
 
@@ -270,19 +276,202 @@ public abstract class GoalMachine extends ElementMachine {
 	}
 
 	/**
+	 * AND分解</br> activated状态entry所做的action:检查子目标的上下文条件，如果满足，就给给子目标发送激活消息；
+	 * 只要有一个子目标的上下文条件不满足，就直接stop状态机，
+	 */
+	private void activatedEntry_sendMesToAllSub_AND() {
+		Log.logDebug(this.getName(), "activatedEntry_sendMesToAllSub_AND()",
+				"init.");
+		if (this.getSubElements() != null) {
+
+			for (ElementMachine element : this.getSubElements()) {
+				if (element.getContextCondition() == null) {
+					if (sendMessageToSub(element, "ACTIVATE")) { // 发送成功
+						Log.logDebug(this.getName(),
+								"activatedEntry_sendMesToAllSub_AND()",
+								"send \"ACTIVATE\" msg to " + element.getName()
+										+ " succeed!");
+					} else {
+						Log.logError(this.getName(),
+								"activatedEntry_sendMesToAllSub_AND()",
+								"send ACTIVATE msg to " + element.getName()
+										+ " error!");
+					}
+				} else {
+					element.checkContextCondition();
+					if (element.getContextCondition().isSatisfied()) {
+						if (sendMessageToSub(element, "ACTIVATE")) { // 发送成功
+							Log.logDebug(
+									this.getName(),
+									"activatedEntry_sendMesToAllSub_AND()",
+									"send \"ACTIVATE\" msg to "
+											+ element.getName() + " succeed!");
+						} else {
+							Log.logError(this.getName(),
+									"activatedEntry_sendMesToAllSub_AND()",
+									"send ACTIVATE msg to " + element.getName()
+											+ " error!");
+						}
+					} else {
+						// 只要不满足，就直接stop状态机，同时发送ACTIVATEDFAILED消息给父目标；如果自己是root
+						// goal，直接stop状态机，同时告诉agent通知用户激活失败
+						notifyParentActivatedFailed();
+						// 只要一个子目标不能激活，就跳出循环了，不再接着检查了
+						break;
+					}
+				}
+
+			}
+		} else {
+			Log.logError(this.getName(),
+					"activatedEntry_sendMesToAllSub_AND()",
+					"getSubElements() == null");
+		}
+	}
+
+	/**
+	 * OR分解</br> activated状态entry所做的action:给所有子目标发送激活消息，然后开始等待子目标的反馈
+	 */
+	private void activatedEntryDo_sendMesToOneSub_OR() {
+		Log.logDebug(this.getName(), "activatedEntryDo_sendMesToOneSub_OR()",
+				"init.");
+
+		if (this.getSubElements() != null) {
+			int failedCount = 0;
+			
+			for (ElementMachine element : this.getSubElements()) {
+				// 找到下一个处于initial状态的subElement，给其发送activate消息，然后break，跳出循环
+				if (element.getRecordedState() == RecordedState.Initial) {
+
+					if (element.getContextCondition() == null) {
+						if (sendMessageToSub(element, "ACTIVATE")) {
+							Log.logDebug(this.getName(),
+									"activatedEntryDo_sendMesToOneSub_OR()",
+									"send ACTIVATE msg to " + element.getName()
+											+ " succeed!");
+							isSendActivateMesToOneSubDone = true;
+							break;
+						} else {
+							Log.logError(this.getName(),
+									"activatedEntryDo_sendMesToOneSub_OR()",
+									"send ACTIVATE msg to " + element.getName()
+											+ " error!");
+						}
+					} else {
+						element.checkContextCondition();
+						// 如果上下文条件满足，就给它发送激活消息，然后跳出循环
+						if (element.getContextCondition().isSatisfied()) {
+							if (sendMessageToSub(element, "ACTIVATE")) {
+								Log.logDebug(
+										this.getName(),
+										"activatedEntryDo_sendMesToOneSub_OR()",
+										"send ACTIVATE msg to "
+												+ element.getName()
+												+ " succeed!");
+								isSendActivateMesToOneSubDone = true;
+								break;
+							} else {
+								Log.logError(
+										this.getName(),
+										"activatedEntryDo_sendMesToOneSub_OR()",
+										"send ACTIVATE msg to "
+												+ element.getName() + " error!");
+							}
+						} else {
+							// 如果上下文条件不满足，就把它标记为激活失败，然后给下一个initial状态的发送激活消息
+							setSubElementRecordedState(element.getName(),
+									"ACTIVATEDFAILED");
+							failedCount++;
+						}
+					}
+
+				}else {
+					failedCount++;	//如果不是激活状态，也代表失败了
+				}
+			}
+
+			// 检查是不是所有的都激活失败了，如果是，就停止自己，然后告诉父目标自己失败；如果自己就是父目标，直接stop，然后告诉agent通知用户
+			if (failedCount == this.getSubElements().size()) {
+				if (isRepaired) {
+					notifyParentFailed();	//如果是经过修复后又失败，直接告诉父目标Failed,而不是activatedFailed
+				}else{
+				notifyParentActivatedFailed();
+				}
+			}
+		} else {
+			Log.logError(this.getName(),
+					"activatedEntryDo_sendMesToOneSub_OR()",
+					"getSubElements() == null.");
+		}
+	}
+	
+	/**
+	 * 直接告诉父目标失败
+	 */
+	private void notifyParentFailed(){
+		if (this.getParentGoal() != null) { // 不是root goal
+			if (this.sendMessageToParent("FAILED")) {
+				Log.logDebug(this.getName(), "notifyParentFailed()",
+						"send FAILED msg to parent.");
+			} else {
+				Log.logError(this.getName(), "notifyParentFailed()",
+						"send FAILED msg to parent error!");
+			}
+
+			this.setCurrentState(State.Stop);
+			this.stopMachine();
+		} else {// 是root goal
+			// TODO 告诉agent通知用户激活失败
+			sendMesToAgent();
+			this.setCurrentState(State.Stop);
+			this.stopMachine();
+		}
+	}
+
+	/**
+	 * 只要激活失败，就直接stop状态机，同时发送ACTIVATEDFAILED消息给父目标；如果自己是root
+	 * goal，直接stop状态机，同时告诉agent通知用户激活失败
+	 * 
+	 */
+	private void notifyParentActivatedFailed() {
+		if (this.getParentGoal() != null) { // 不是root goal
+			if (this.sendMessageToParent("ACTIVATEDFAILED")) {
+				Log.logDebug(this.getName(), "notifyParentActivatedFailed()",
+						"send ACTIVATEDFAILED msg to parent.");
+			} else {
+				Log.logError(this.getName(), "notifyParentActivatedFailed()",
+						"send ACTIVATEDFAILED msg to parent error!");
+			}
+
+			this.setCurrentState(State.Stop);
+			this.stopMachine();
+		} else {// 是root goal
+			// TODO 告诉agent通知用户激活失败
+			sendMesToAgent();
+			this.setCurrentState(State.Stop);
+			this.stopMachine();
+		}
+	}
+
+	private void sendMesToAgent() {
+		// TODO
+	}
+
+	/**
+	 * AND分解</br>
 	 * activated状态中do所做的action：检查消息队列，看subElement是否已激活，如果subElement已激活，
 	 * 表示自己的激活全部完成，可告诉parent开始下一步行动了；这时，目标仍处于activated状态，等待父目标发送START指令。（root
 	 * goal除外，root goal要直接发生状态跳转）
+	 * 
+	 * @param msg
 	 */
-	private void activatedDo_waitingSubReply(SGMMessage msg) {
-		Log.logDebug(this.getName(), "activatedDo_waitingSubReply()", "init.");
-
-		// SGMMessage msg = this.getMsgPool().poll(); // 每次拿出一条消息
+	private void activatedDo_waitingSubReply_AND(SGMMessage msg) {
+		Log.logDebug(this.getName(), "activatedDo_waitingSubReply_AND()",
+				"init.");
 		if (msg != null) {
-			Log.logDebug(this.getName(), "activatedDo_waitingSubReply()",
+			Log.logDebug(this.getName(), "activatedDo_waitingSubReply_AND()",
 					"get a message from " + msg.getSender() + "; body is: "
 							+ msg.getBody());
-
 			// 消息内容是ACTIVATEDDONE，表示发送这条消息的子目标已激活
 			if (msg.getBody().equals("ACTIVATEDDONE")) {
 				this.getMsgPool().poll();
@@ -290,31 +479,90 @@ public abstract class GoalMachine extends ElementMachine {
 			} else if (msg.getBody().equals("ACTIVATEDFAILED")) { // 子目标反馈的是激活失败ACTIVATEDFAILED
 				this.getMsgPool().poll();
 				setSubElementRecordedState(msg.getSender(), msg.getBody());
+				// 只要收到了激活失败消息，就告诉父目标激活失败了,然后返回
+				notifyParentActivatedFailed();
+				return;
 			}
 
 			// 只要得到了所有子目标的反馈，不管反馈的是什么，都可以告诉父目标可以进入下个步骤了
 			int count = 0;
 			for (ElementMachine element : this.getSubElements()) {
-				if (element.getRecordedState() != RecordedState.Initial) { // 不是initial
+				if (element.getRecordedState() == RecordedState.Activated) { // 激活
 					count++;
 				}
 			}
-			if (count == this.getSubElements().size()) {
+			if (count == this.getSubElements().size()) {// 所有子目标都激活了
 				if (this.getParentGoal() != null) { // 不是root goal
 					if (this.sendMessageToParent("ACTIVATEDDONE")) {
 						Log.logDebug(this.getName(),
-								"activatedDo_waitingSubReply()",
+								"activatedDo_waitingSubReply_AND()",
 								"send ACTIVATEDDONE msg to parent.");
 						isActivatedDo_waitingSubReplyDone = true;
 					} else {
 						Log.logError(this.getName(),
-								"activatedDo_waitingSubReply()",
+								"activatedDo_waitingSubReply_AND()",
 								"send ACTIVATEDDONE msg to parent error!");
 					}
 				} else {// 自己本身是root goal，无需等待父目标发送START指令，直接发生跳转
 					this.setCurrentState(this.transition(State.Activated,
 							this.getPreCondition()));
 				}
+			}
+		}
+	}
+
+	/**
+	 * OR分解</br> activated状态中do所做的action：只要收到激活成功的消息，就告诉父目标激活成功，进入等待START命令中；
+	 * 如果收到了激活失败的消息， 重新发送激活消息给下一个目标。如果全部失败，告诉父目标失败
+	 * 
+	 * @param msg
+	 */
+	private void activatedDo_waitingSubReply_OR(SGMMessage msg) {
+		Log.logDebug(this.getName(), "activatedDo_waitingSubReply_OR()",
+				"init.");
+
+		if (msg != null) {
+			Log.logDebug(this.getName(), "activatedDo_waitingSubReply_OR()",
+					"get a message from " + msg.getSender() + "; body is: "
+							+ msg.getBody());
+
+			int failedCount = 0;
+
+			// 消息内容是ACTIVATEDDONE，表示发送这条消息的子目标已激活
+			if (msg.getBody().equals("ACTIVATEDDONE")) {
+				this.getMsgPool().poll();
+				setSubElementRecordedState(msg.getSender(), msg.getBody());
+
+				// 告诉父目标激活成功
+				if (this.getParentGoal() != null) { // 不是root goal
+					if (this.sendMessageToParent("ACTIVATEDDONE")) {
+						Log.logDebug(this.getName(),
+								"activatedDo_waitingSubReply_OR()",
+								"send ACTIVATEDDONE msg to parent.");
+					} else {
+						Log.logError(this.getName(),
+								"activatedDo_waitingSubReply_OR()",
+								"send ACTIVATEDDONE msg to parent error!");
+					}
+				} else {// 自己本身是root goal，无需等待父目标发送START指令，直接发生跳转
+					this.setCurrentState(this.transition(State.Activated,
+							this.getPreCondition()));
+				}
+
+				isActivatedDo_waitingSubReplyDone = true;
+
+			} else if (msg.getBody().equals("ACTIVATEDFAILED")) { // 子目标反馈的是激活失败ACTIVATEDFAILED
+				this.getMsgPool().poll();
+				setSubElementRecordedState(msg.getSender(), msg.getBody());
+
+				failedCount++;
+				// 检查是不是所有的都激活失败了，如果是，就停止自己，然后告诉父目标自己失败；如果自己就是父目标，直接stop，然后告诉agent通知用户
+				if (failedCount == this.getSubElements().size()) {
+					notifyParentActivatedFailed();
+				}
+
+				isActivatedDo_waitingSubReplyDone = false;
+				isSendActivateMesToOneSubDone = false;
 			}
 		}
 	}
@@ -558,48 +806,50 @@ public abstract class GoalMachine extends ElementMachine {
 					"getSubElements() == null!");
 		}
 	}
-	
+
 	/**
 	 * 让GoalMachine重写，用来初始化里面的两个变量
 	 */
-	public void resetGoalMachine(){
+	public void resetGoalMachine() {
 		isActivatedDo_waitingSubReplyDone = false;
 		isSendMesToOneSubDone = false;
+		isSendActivateMesToOneSubDone = false;
+		isRepaired = false;
 	}
 
-	/**
-	 * 检查default pre condition，<code>GoalMachine</code>需要重写，
-	 * <code>TaskMachine</code>不需要重写
-	 */
-	@Override
-	public void checkDefaultPreConditon() {
-		Log.logDebug(this.getName(), "checkDefaultPreConditon()", "init.");
-		if (this.getSubElements().size() != 0) {
-			int count = 0;
-			for (ElementMachine element : this.getSubElements()) {
-				if (element.getRecordedState() == RecordedState.Activated) {
-					count++;
-				}
-			}
-			if (this.getDecomposition() == 0) { // AND分解，必须所有子目标都激活
-				if (count == this.getSubElements().size()) {
-					this.getDefaultPreCondition().setSatisfied(true);
-				} else {
-					this.getDefaultPreCondition().setSatisfied(false);
-				}
-			} else { // OR分解，只要有一个激活
-				if (count > 0) {
-					this.getDefaultPreCondition().setSatisfied(true);
-				} else {
-					this.getDefaultPreCondition().setSatisfied(false);
-				}
-			}
-
-		} else {
-			Log.logError(this.getName(), "checkDefaultPreConditon()",
-					"getSubElements().size() == 0");
-		}
-	}
+	// /**
+	// * 检查default pre condition，<code>GoalMachine</code>需要重写，
+	// * <code>TaskMachine</code>不需要重写
+	// */
+	// @Override
+	// public void checkDefaultPreConditon() {
+	// Log.logDebug(this.getName(), "checkDefaultPreConditon()", "init.");
+	// if (this.getSubElements().size() != 0) {
+	// int count = 0;
+	// for (ElementMachine element : this.getSubElements()) {
+	// if (element.getRecordedState() == RecordedState.Activated) {
+	// count++;
+	// }
+	// }
+	// if (this.getDecomposition() == 0) { // AND分解，必须所有子目标都激活
+	// if (count == this.getSubElements().size()) {
+	// this.getDefaultPreCondition().setSatisfied(true);
+	// } else {
+	// this.getDefaultPreCondition().setSatisfied(false);
+	// }
+	// } else { // OR分解，只要有一个激活
+	// if (count > 0) {
+	// this.getDefaultPreCondition().setSatisfied(true);
+	// } else {
+	// this.getDefaultPreCondition().setSatisfied(false);
+	// }
+	// }
+	//
+	// } else {
+	// Log.logError(this.getName(), "checkDefaultPreConditon()",
+	// "getSubElements().size() == 0");
+	// }
+	// }
 
 	/**
 	 * 对SubFail情况进行修复，需要根据是AND分解还是OR分解分别判断。<br>
@@ -616,20 +866,26 @@ public abstract class GoalMachine extends ElementMachine {
 		if (this.getDecomposition() == 0) { // AND分解
 			return State.Failed;
 		} else { // OR分解
-			// 收到failed消息后，先检查是否所有的subElements都是failed或者initial，如果是说明没有可选的了，进入failed
+			// 收到failed消息后，先检查是否所有的subElements都是failed或者ActivatedFailed，如果是说明没有可选的了，进入failed
 			int count = 0;
 			for (ElementMachine element : this.getSubElements()) {
-				if (element.getRecordedState() != RecordedState.Activated) {
+				if (element.getRecordedState() == RecordedState.Failed
+						|| element.getRecordedState() == RecordedState.ActivatedFailed) {
 					count++;
 				}
 			}
-			if (count == this.getSubElements().size()) { // 全部是全部是failed或者initial
+			if (count == this.getSubElements().size()) { // 全部是全部是failed或者activatedFailed
 				isSendMesToOneSubDone = true;
 				return State.Failed; // 进入failed状态
 			} else {
-				// 重新开始执行executingEntryDo_sendMesToOneSub_OR()，给下个处于激活状态的subElement发送START消息
+				// 重新进入Activated，给下个处于初始化状态的subElement发送激活消息
 				isSendMesToOneSubDone = false;
-				return State.Executing;
+				isActivatedDo_waitingSubReplyDone = false;
+				isSendActivateMesToOneSubDone = false;
+				
+				isRepaired = true;
+
+				return State.Activated;
 			}
 		}
 		// return State.Repairing;

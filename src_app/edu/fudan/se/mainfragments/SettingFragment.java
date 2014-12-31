@@ -64,7 +64,7 @@ public class SettingFragment extends Fragment {
 				.setTicker("New Notification from SGM!")
 				.setWhen(System.currentTimeMillis())
 				.setPriority(Notification.PRIORITY_HIGH).setOngoing(false)
-				.setDefaults(Notification.DEFAULT_VIBRATE)
+				.setDefaults(Notification.DEFAULT_ALL)
 				.setSmallIcon(R.drawable.ic_launcher);
 		
 		Notification notification = mBuilder.build();

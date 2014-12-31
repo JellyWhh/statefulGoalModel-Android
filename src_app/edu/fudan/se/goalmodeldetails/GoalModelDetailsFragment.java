@@ -26,7 +26,6 @@ import android.view.View.OnTouchListener;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
-import android.widget.Toast;
 
 /**
  * @author whh
@@ -97,9 +96,7 @@ public class GoalModelDetailsFragment extends Fragment {
 
 			@Override
 			public void onClick(View v) {
-				Toast.makeText(getActivity(), "back pressed", 2000).show();
-				// TODO 安卓的回收机制！！！！！目前返回后activity会销毁，于是goal
-				// model里面开启的进程都会关闭，下次点击进来后又重新初始化了goal model
+				// 结束这个activity，和后退键的效果一样
 				getActivity().finish();
 			}
 		});
@@ -184,6 +181,7 @@ public class GoalModelDetailsFragment extends Fragment {
 			}
 		});
 
+		// 这个简介在屏幕中央显示
 		popupWindow.showAtLocation(parentView, Gravity.CENTER | Gravity.CENTER,
 				0, 0);
 	}
@@ -194,7 +192,9 @@ public class GoalModelDetailsFragment extends Fragment {
 		@Override
 		public void onClick(View v) {
 			popupWindow.dismiss();
+
 			switch (v.getId()) {
+
 			case R.id.bt_dialog_start:
 				aideAgentInterface.startGoalModel(goalModel);
 				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示

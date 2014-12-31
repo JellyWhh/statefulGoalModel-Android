@@ -14,8 +14,6 @@ import edu.fudan.se.log.Log;
  */
 public abstract class TaskMachine extends ElementMachine {
 
-	private static final long serialVersionUID = 4384425169172317259L;
-	
 	private boolean needPeopleInteraction;	//是否需要人的交互
 	
 	/**
@@ -104,7 +102,7 @@ public abstract class TaskMachine extends ElementMachine {
 	 * 弹出弹窗，提醒用户需要它的参与
 	 */
 	private void sendMesToAgent(){
-		
+		//TODO
 	}
 	
 	/**
