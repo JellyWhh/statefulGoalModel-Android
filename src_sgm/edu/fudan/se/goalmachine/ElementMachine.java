@@ -647,8 +647,9 @@ public abstract class ElementMachine implements Runnable {
 	 * @return true 发送成功, false 发送失败
 	 */
 	public boolean sendMessageToParent(String body) {
-		SGMMessage msg = new SGMMessage("TOPARENT", this.getName(), this
-				.getParentGoal().getName(), body);
+		SGMMessage msg = new SGMMessage("TOPARENT", 
+				null, null, this.getName(), 
+				null, null, this.getParentGoal().getName(), body);
 		if (this.getParentGoal().getMsgPool().offer(msg)) {
 			// 发送成功
 			Log.logMessage(msg, true);

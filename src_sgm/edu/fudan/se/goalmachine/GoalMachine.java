@@ -475,10 +475,10 @@ public abstract class GoalMachine extends ElementMachine {
 			// 消息内容是ACTIVATEDDONE，表示发送这条消息的子目标已激活
 			if (msg.getBody().equals("ACTIVATEDDONE")) {
 				this.getMsgPool().poll();
-				setSubElementRecordedState(msg.getSender(), msg.getBody());
+				setSubElementRecordedState(msg.getSender().getElementName(), msg.getBody());
 			} else if (msg.getBody().equals("ACTIVATEDFAILED")) { // 子目标反馈的是激活失败ACTIVATEDFAILED
 				this.getMsgPool().poll();
-				setSubElementRecordedState(msg.getSender(), msg.getBody());
+				setSubElementRecordedState(msg.getSender().getElementName(), msg.getBody());
 				// 只要收到了激活失败消息，就告诉父目标激活失败了,然后返回
 				notifyParentActivatedFailed();
 				return;
@@ -531,7 +531,7 @@ public abstract class GoalMachine extends ElementMachine {
 			// 消息内容是ACTIVATEDDONE，表示发送这条消息的子目标已激活
 			if (msg.getBody().equals("ACTIVATEDDONE")) {
 				this.getMsgPool().poll();
-				setSubElementRecordedState(msg.getSender(), msg.getBody());
+				setSubElementRecordedState(msg.getSender().getElementName(), msg.getBody());
 
 				// 告诉父目标激活成功
 				if (this.getParentGoal() != null) { // 不是root goal
@@ -553,7 +553,7 @@ public abstract class GoalMachine extends ElementMachine {
 
 			} else if (msg.getBody().equals("ACTIVATEDFAILED")) { // 子目标反馈的是激活失败ACTIVATEDFAILED
 				this.getMsgPool().poll();
-				setSubElementRecordedState(msg.getSender(), msg.getBody());
+				setSubElementRecordedState(msg.getSender().getElementName(), msg.getBody());
 
 				failedCount++;
 				// 检查是不是所有的都激活失败了，如果是，就停止自己，然后告诉父目标自己失败；如果自己就是父目标，直接stop，然后告诉agent通知用户
@@ -692,13 +692,13 @@ public abstract class GoalMachine extends ElementMachine {
 			// 如果子目标反馈的是ACHIEVED
 			if (msg.getBody().equals("ACHIEVEDDONE")) {
 				this.getMsgPool().poll();
-				setSubElementRecordedState(msg.getSender(), msg.getBody());
+				setSubElementRecordedState(msg.getSender().getElementName(), msg.getBody());
 				// 检查是否全部已完成
 				this.setCurrentState(State.ProgressChecking);
 
 			} else if (msg.getBody().equals("FAILED")) {
 				this.getMsgPool().poll();
-				setSubElementRecordedState(msg.getSender(), msg.getBody());
+				setSubElementRecordedState(msg.getSender().getElementName(), msg.getBody());
 				// 进入修复状态，并且设置导致进入修复状态的原因
 				this.setCurrentState(State.Repairing);
 				this.setCauseToRepairing(CauseToRepairing.SubFail);
@@ -728,13 +728,13 @@ public abstract class GoalMachine extends ElementMachine {
 			// 如果子目标反馈的是ACHIEVED
 			if (msg.getBody().equals("ACHIEVEDDONE")) {
 				this.getMsgPool().poll();
-				setSubElementRecordedState(msg.getSender(), msg.getBody());
+				setSubElementRecordedState(msg.getSender().getElementName(), msg.getBody());
 				// 检查是不是所有的都已完成
 				this.setCurrentState(State.ProgressChecking);
 
 			} else if (msg.getBody().equals("FAILED")) {
 				this.getMsgPool().poll();
-				setSubElementRecordedState(msg.getSender(), msg.getBody());
+				setSubElementRecordedState(msg.getSender().getElementName(), msg.getBody());
 				// 进入修复状态，并且设置导致进入修复状态的原因
 				this.setCurrentState(State.Repairing);
 				this.setCauseToRepairing(CauseToRepairing.SubFail);
@@ -762,11 +762,11 @@ public abstract class GoalMachine extends ElementMachine {
 
 			if (msg.getBody().equals("ACHIEVEDDONE")) { // 如果子目标反馈的是ACHIEVED，进入progressChecking状态
 				this.getMsgPool().poll();
-				setSubElementRecordedState(msg.getSender(), msg.getBody());
+				setSubElementRecordedState(msg.getSender().getElementName(), msg.getBody());
 				this.setCurrentState(State.ProgressChecking);
 			} else if (msg.getBody().equals("FAILED")) {
 				this.getMsgPool().poll();
-				setSubElementRecordedState(msg.getSender(), msg.getBody());
+				setSubElementRecordedState(msg.getSender().getElementName(), msg.getBody());
 
 				// 进入修复状态，并且设置导致进入修复状态的原因
 				this.setCurrentState(State.Repairing);
@@ -907,7 +907,9 @@ public abstract class GoalMachine extends ElementMachine {
 	 * @return true 发送成功, false 发送失败
 	 */
 	private boolean sendMessageToSub(ElementMachine sub, String body) {
-		SGMMessage msg = new SGMMessage("TOSUB", this.getName(), sub.getName(),
+		SGMMessage msg = new SGMMessage("TOSUB", 
+				null, null, this.getName(), 
+				null, null, sub.getName(),
 				body);
 		if (sub.getMsgPool().offer(msg)) {
 			Log.logMessage(msg, true);

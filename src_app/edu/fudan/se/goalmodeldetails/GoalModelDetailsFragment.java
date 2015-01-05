@@ -8,8 +8,10 @@ import jade.wrapper.ControllerException;
 import jade.wrapper.StaleProxyException;
 import edu.fudan.se.R;
 import edu.fudan.se.agent.AideAgentInterface;
+import edu.fudan.se.goalmachine.SGMMessage;
 import edu.fudan.se.goalmodel.GoalModel;
 import edu.fudan.se.initial.SGMApplication;
+import android.annotation.SuppressLint;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -32,6 +34,7 @@ import android.widget.TextView;
  * @author whh
  * 
  */
+@SuppressLint("ValidFragment")
 public class GoalModelDetailsFragment extends Fragment {
 
 	private GoalModel goalModel; // 要显示详情的Goal Model
@@ -210,25 +213,45 @@ public class GoalModelDetailsFragment extends Fragment {
 			switch (v.getId()) {
 
 			case R.id.bt_dialog_start:
-				aideAgentInterface.startGoalModel(goalModel);
+//				aideAgentInterface.startGoalModel(goalModel);
+				aideAgentInterface.sendExternalEvent(new SGMMessage("EXTERNAL_EVENT",
+						null, null, null,
+						null, goalModel.getName(), null,
+						"START"));
 				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				break;
 			case R.id.bt_dialog_suspend:
-				aideAgentInterface.suspendGoalModel(goalModel);
+//				aideAgentInterface.suspendGoalModel(goalModel);
+				aideAgentInterface.sendExternalEvent(new SGMMessage("EXTERNAL_EVENT",
+						null, null, null,
+						null, goalModel.getName(), null,
+						"SUSPEND"));
 				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				break;
 			case R.id.bt_dialog_resume:
-				aideAgentInterface.resumeGoalModel(goalModel);
+//				aideAgentInterface.resumeGoalModel(goalModel);
+				aideAgentInterface.sendExternalEvent(new SGMMessage("EXTERNAL_EVENT",
+						null, null, null,
+						null, goalModel.getName(), null,
+						"RESUME"));
 				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				break;
 			case R.id.bt_dialog_stop:
-				aideAgentInterface.stopGoalModel(goalModel);
+//				aideAgentInterface.stopGoalModel(goalModel);
+				aideAgentInterface.sendExternalEvent(new SGMMessage("EXTERNAL_EVENT",
+						null, null, null,
+						null, goalModel.getName(), null,
+						"STOP"));
 				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				break;
 			case R.id.bt_dialog_reset:
 				//reset的时候要把让用户做的任务列表中的相关任务清除
 				application.clearTasksOfGoalModel(goalModel);
-				aideAgentInterface.resetGoalModel(goalModel);
+//				aideAgentInterface.resetGoalModel(goalModel);
+				aideAgentInterface.sendExternalEvent(new SGMMessage("EXTERNAL_EVENT",
+						null, null, null,
+						null, goalModel.getName(), null,
+						"RESET"));
 				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				break;
 			case R.id.bt_dialog_cancel:

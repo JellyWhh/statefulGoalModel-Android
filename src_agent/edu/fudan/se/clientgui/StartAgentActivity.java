@@ -48,6 +48,8 @@ public class StartAgentActivity extends Activity {
 
 	private String nickname;
 	
+	
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -241,6 +243,6 @@ public class StartAgentActivity extends Activity {
 			}
 		};
 		microRuntimeServiceBinder.startAgent(nickname,AideAgent.class.getName(),
-				new Object[] { getApplicationContext() }, rc);
+				new Object[] { getApplicationContext(), ((SGMApplication)getApplication()).getGoalModelManager()}, rc);
 	}
 }

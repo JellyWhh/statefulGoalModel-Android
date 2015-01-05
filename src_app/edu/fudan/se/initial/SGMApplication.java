@@ -15,7 +15,8 @@ import edu.fudan.se.goalmachine.GoalMachine;
 import edu.fudan.se.goalmachine.SGMMessage;
 import edu.fudan.se.goalmachine.TaskMachine;
 import edu.fudan.se.goalmodel.GoalModel;
-import edu.fudan.se.goalmodel.GoalModelController;
+import edu.fudan.se.goalmodel.GoalModelManager;
+//import edu.fudan.se.goalmodel.GoalModelController;
 import edu.fudan.se.userMes.UserTask;
 
 import android.app.Application;
@@ -40,6 +41,8 @@ public class SGMApplication extends Application implements Serializable {
 	private String agentNickname;
 
 	// private GoalModelController goalModelController;
+	
+	private GoalModelManager goalModelManager;
 
 	@Override
 	public void onCreate() {
@@ -55,7 +58,13 @@ public class SGMApplication extends Application implements Serializable {
 		this.goalModelList = new ArrayList<>();
 		this.userTaskList = new ArrayList<>();
 
-		this.goalModelList.add(newGoalModel());
+		GoalModel gm = newGoalModel();
+		this.goalModelList.add(gm);
+		
+		goalModelManager = new GoalModelManager();
+		goalModelManager.addGoalModel(gm);
+		Thread gmm = new Thread(goalModelManager);
+		gmm.start();
 
 		// this.goalModelController = new
 		// GoalModelController(this.goalModelList);
@@ -90,6 +99,10 @@ public class SGMApplication extends Application implements Serializable {
 
 	public String getAgentNickname() {
 		return this.agentNickname;
+	}
+	
+	public GoalModelManager getGoalModelManager(){
+		return this.goalModelManager;
 	}
 
 	public void setAgentNickname(String agentNickname) {

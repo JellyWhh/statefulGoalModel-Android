@@ -3,12 +3,17 @@
  */
 package edu.fudan.se.agent;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 import android.content.Context;
 import android.util.Log;
 import edu.fudan.se.goalmachine.SGMMessage;
 import edu.fudan.se.goalmachine.TaskMachine;
 import edu.fudan.se.goalmodel.GoalModel;
-import edu.fudan.se.goalmodel.GoalModelController;
+//import edu.fudan.se.goalmodel.GoalModelController;
 import edu.fudan.se.goalmodel.GoalModelManager;
 import edu.fudan.se.pool.Message;
 import edu.fudan.se.pool.Pool;
@@ -33,7 +38,7 @@ public class AideAgent extends Agent implements AideAgentInterface {
 
 	private static final long serialVersionUID = 1L;
 
-	private GoalModelController goalModelController;
+//	private GoalModelController goalModelController;
 	
 	private GoalModelManager goalModelManager;
 
@@ -53,7 +58,7 @@ public class AideAgent extends Agent implements AideAgentInterface {
 			}
 		}
 
-		goalModelController = new GoalModelController();
+//		goalModelController = new GoalModelController();
 
 		registerO2AInterface(AideAgentInterface.class, this);
 
@@ -185,17 +190,30 @@ public class AideAgent extends Agent implements AideAgentInterface {
 		//接受委托请求启动相应的goal model
 		addBehaviour(new CyclicBehaviour(){
 
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -2613731756345395235L;
+
 			@Override
 			public void action() {
 				// TODO Auto-generated method stub
 				ACLMessage msg = receive();
-				if(msg != null){
-					Log.i("MY_LOG", "Message received!");
-					String content = msg.getContent();
-					String goalModelName = content.split(";")[0];
-					String sender = content.split(";")[1];
-					SGMMessage inner_msg = new SGMMessage("EXTERNAL_EVENT", sender, goalModelName, "START");
-					goalModelManager.getMsgPool().offer(inner_msg);
+				try{
+					if(msg != null){
+						Log.i("MY_LOG_receive acl", "Message received!");
+						String content = msg.getContent();
+						ByteArrayInputStream bais = new ByteArrayInputStream(content.getBytes());
+				        ObjectInputStream ois = new ObjectInputStream(bais);
+						SGMMessage inner_msg = (SGMMessage) ois.readObject(); //反序列化获得msg
+						
+						inner_msg.setHeader("EXTERNAL_EVENT"); //将委托请求在本地改成外部事件
+						
+						goalModelManager.getMsgPool().offer(inner_msg);
+					}
+				}
+				catch(Exception e){
+					Log.i("MY_LOG_receive acl", e.toString());
 				}
 			}
 			
@@ -212,150 +230,150 @@ public class AideAgent extends Agent implements AideAgentInterface {
 		}
 	}
 
-	@Override
-	public void startGoalModel(GoalModel goalModel) {
-		this.addBehaviour(new GSMStarter(this, goalModel));
-	}
-
-	@Override
-	public void stopGoalModel(GoalModel goalModel) {
-		this.addBehaviour(new GSMStoper(this, goalModel));
-	}
-
-	@Override
-	public void suspendGoalModel(GoalModel goalModel) {
-		this.addBehaviour(new GSMSuspender(this, goalModel));
-	}
-
-	@Override
-	public void resumeGoalModel(GoalModel goalModel) {
-		this.addBehaviour(new GSMResumer(this, goalModel));
-	}
-
-	@Override
-	public void resetGoalModel(GoalModel goalModel) {
-		this.addBehaviour(new GSMResetter(this, goalModel));
-	}
-
-	@Override
-	public void endTaskMachine(TaskMachine taskMachine, String mes) {
-		this.addBehaviour(new GSMEndTaskMachine(this, taskMachine, mes));
-	}
-
-	private class GSMStarter extends OneShotBehaviour {
-
-		private static final long serialVersionUID = 2126730704005002010L;
-		private GoalModel goalModel;
-
-		private GSMStarter(Agent a, GoalModel goalModel) {
-			super(a);
-			this.goalModel = goalModel;
-		}
-
-		@Override
-		public void action() {
-			// TODO Auto-generated method stub
-			Log.i("MY_LOG", "Start Goal Model...");
-			goalModelController.start(goalModel);
-		}
-
-	}
-
-	private class GSMStoper extends OneShotBehaviour {
-
-		private static final long serialVersionUID = 2126730704005002010L;
-		private GoalModel goalModel;
-
-		private GSMStoper(Agent a, GoalModel goalModel) {
-			super(a);
-			this.goalModel = goalModel;
-		}
-
-		@Override
-		public void action() {
-			// TODO Auto-generated method stub
-			Log.i("MY_LOG", "Stop Goal Model...");
-			goalModelController.stop(goalModel);
-		}
-
-	}
-
-	private class GSMSuspender extends OneShotBehaviour {
-
-		private static final long serialVersionUID = 2126730704005002010L;
-		private GoalModel goalModel;
-
-		private GSMSuspender(Agent a, GoalModel goalModel) {
-			super(a);
-			this.goalModel = goalModel;
-		}
-
-		@Override
-		public void action() {
-			// TODO Auto-generated method stub
-			Log.i("MY_LOG", "Suspend Goal Model...");
-			goalModelController.suspend(goalModel);
-		}
-
-	}
-
-	private class GSMResumer extends OneShotBehaviour {
-
-		private static final long serialVersionUID = 2126730704005002010L;
-		private GoalModel goalModel;
-
-		private GSMResumer(Agent a, GoalModel goalModel) {
-			super(a);
-			this.goalModel = goalModel;
-		}
-
-		@Override
-		public void action() {
-			// TODO Auto-generated method stub
-			Log.i("MY_LOG", "Resume Goal Model...");
-			goalModelController.resume(goalModel);
-		}
-
-	}
-
-	private class GSMResetter extends OneShotBehaviour {
-
-		private static final long serialVersionUID = 2126730704005002010L;
-		private GoalModel goalModel;
-
-		private GSMResetter(Agent a, GoalModel goalModel) {
-			super(a);
-			this.goalModel = goalModel;
-		}
-
-		@Override
-		public void action() {
-			// TODO Auto-generated method stub
-			Log.i("MY_LOG", "Reset Goal Model...");
-			goalModelController.reset(goalModel);
-		}
-
-	}
-
-	private class GSMEndTaskMachine extends OneShotBehaviour {
-
-		private static final long serialVersionUID = 2126730704005002010L;
-		private TaskMachine taskMachine;
-		private String mes;
-
-		private GSMEndTaskMachine(Agent a, TaskMachine taskMachine, String mes) {
-			super(a);
-			this.taskMachine = taskMachine;
-			this.mes = mes;
-		}
-
-		@Override
-		public void action() {
-			// TODO Auto-generated method stub
-			Log.i("MY_LOG", "End Task Machine...");
-			goalModelController.endTaskMachine(taskMachine, mes);
-		}
-	}
+//	@Override
+//	public void startGoalModel(GoalModel goalModel) {
+//		this.addBehaviour(new GSMStarter(this, goalModel));
+//	}
+//
+//	@Override
+//	public void stopGoalModel(GoalModel goalModel) {
+//		this.addBehaviour(new GSMStoper(this, goalModel));
+//	}
+//
+//	@Override
+//	public void suspendGoalModel(GoalModel goalModel) {
+//		this.addBehaviour(new GSMSuspender(this, goalModel));
+//	}
+//
+//	@Override
+//	public void resumeGoalModel(GoalModel goalModel) {
+//		this.addBehaviour(new GSMResumer(this, goalModel));
+//	}
+//
+//	@Override
+//	public void resetGoalModel(GoalModel goalModel) {
+//		this.addBehaviour(new GSMResetter(this, goalModel));
+//	}
+//
+//	@Override
+//	public void endTaskMachine(TaskMachine taskMachine, String mes) {
+//		this.addBehaviour(new GSMEndTaskMachine(this, taskMachine, mes));
+//	}
+//
+//	private class GSMStarter extends OneShotBehaviour {
+//
+//		private static final long serialVersionUID = 2126730704005002010L;
+//		private GoalModel goalModel;
+//
+//		private GSMStarter(Agent a, GoalModel goalModel) {
+//			super(a);
+//			this.goalModel = goalModel;
+//		}
+//
+//		@Override
+//		public void action() {
+//			// TODO Auto-generated method stub
+//			Log.i("MY_LOG", "Start Goal Model...");
+//			goalModelController.start(goalModel);
+//		}
+//
+//	}
+//
+//	private class GSMStoper extends OneShotBehaviour {
+//
+//		private static final long serialVersionUID = 2126730704005002010L;
+//		private GoalModel goalModel;
+//
+//		private GSMStoper(Agent a, GoalModel goalModel) {
+//			super(a);
+//			this.goalModel = goalModel;
+//		}
+//
+//		@Override
+//		public void action() {
+//			// TODO Auto-generated method stub
+//			Log.i("MY_LOG", "Stop Goal Model...");
+//			goalModelController.stop(goalModel);
+//		}
+//
+//	}
+//
+//	private class GSMSuspender extends OneShotBehaviour {
+//
+//		private static final long serialVersionUID = 2126730704005002010L;
+//		private GoalModel goalModel;
+//
+//		private GSMSuspender(Agent a, GoalModel goalModel) {
+//			super(a);
+//			this.goalModel = goalModel;
+//		}
+//
+//		@Override
+//		public void action() {
+//			// TODO Auto-generated method stub
+//			Log.i("MY_LOG", "Suspend Goal Model...");
+//			goalModelController.suspend(goalModel);
+//		}
+//
+//	}
+//
+//	private class GSMResumer extends OneShotBehaviour {
+//
+//		private static final long serialVersionUID = 2126730704005002010L;
+//		private GoalModel goalModel;
+//
+//		private GSMResumer(Agent a, GoalModel goalModel) {
+//			super(a);
+//			this.goalModel = goalModel;
+//		}
+//
+//		@Override
+//		public void action() {
+//			// TODO Auto-generated method stub
+//			Log.i("MY_LOG", "Resume Goal Model...");
+//			goalModelController.resume(goalModel);
+//		}
+//
+//	}
+//
+//	private class GSMResetter extends OneShotBehaviour {
+//
+//		private static final long serialVersionUID = 2126730704005002010L;
+//		private GoalModel goalModel;
+//
+//		private GSMResetter(Agent a, GoalModel goalModel) {
+//			super(a);
+//			this.goalModel = goalModel;
+//		}
+//
+//		@Override
+//		public void action() {
+//			// TODO Auto-generated method stub
+//			Log.i("MY_LOG", "Reset Goal Model...");
+//			goalModelController.reset(goalModel);
+//		}
+//
+//	}
+//
+//	private class GSMEndTaskMachine extends OneShotBehaviour {
+//
+//		private static final long serialVersionUID = 2126730704005002010L;
+//		private TaskMachine taskMachine;
+//		private String mes;
+//
+//		private GSMEndTaskMachine(Agent a, TaskMachine taskMachine, String mes) {
+//			super(a);
+//			this.taskMachine = taskMachine;
+//			this.mes = mes;
+//		}
+//
+//		@Override
+//		public void action() {
+//			// TODO Auto-generated method stub
+//			Log.i("MY_LOG", "End Task Machine...");
+//			goalModelController.endTaskMachine(taskMachine, mes);
+//		}
+//	}
 
 	@Override
 	public void sendExternalEvent(SGMMessage msg) {
@@ -370,10 +388,9 @@ public class AideAgent extends Agent implements AideAgentInterface {
 	}
 
 	@Override
-	public void sendDelegateServiceRequest(String targetAgent,
-			String goalModelName, String sender) {
+	public void sendDelegateServiceRequest(SGMMessage msg) {
 		// TODO Auto-generated method stub
-		this.addBehaviour(new DelegateServiceSender(this, targetAgent, goalModelName, sender));
+		this.addBehaviour(new DelegateServiceSender(this, msg));
 	}
 
 	@Override
@@ -388,9 +405,11 @@ public class AideAgent extends Agent implements AideAgentInterface {
 		 */
 		private static final long serialVersionUID = -2331623840990344209L;
 		private SGMMessage msg;
+		private Agent a;
 
 		private ExternalEventSender(Agent a, SGMMessage msg){
 			super(a);
+			this.a = a;
 			this.msg = msg;
 		}
 		
@@ -398,6 +417,7 @@ public class AideAgent extends Agent implements AideAgentInterface {
 		public void action() {
 			// TODO Auto-generated method stub
 			Log.i("MY_LOG", "Send externa event...");
+			msg.getSender().setAgentName(a.getName());
 			goalModelManager.getMsgPool().offer(msg);
 		}
 	
@@ -408,25 +428,47 @@ public class AideAgent extends Agent implements AideAgentInterface {
 		 * 
 		 */
 		private static final long serialVersionUID = -6490156755551520310L;
-		private String targetAgent;
-		private String goalModelName;
-		private String sender;
+		private SGMMessage msg;
+		private Agent a;
 		
-		private DelegateServiceSender(Agent a, String targetAgent, String goalModelName, String sender){
+		private DelegateServiceSender(Agent a, SGMMessage msg){
 			super(a);
-			this.targetAgent = targetAgent;
-			this.goalModelName = goalModelName;
-			this.sender = sender;
+			this.msg = msg;
 		}
 
 		@Override
 		public void action() {
 			// TODO Auto-generated method stub
-			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-			msg.addReceiver(new AID(targetAgent, AID.ISLOCALNAME));
-			msg.setContent(goalModelName + ";" + sender);
-			send(msg);
+			try{
+				String targetAgent = msg.getReceiver().getAgentName(); //获得委托对象的agent名字
+				
+				msg.getSender().setAgentName(a.getName()); //设置发送方agent名字
+				
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		        ObjectOutputStream oos = new ObjectOutputStream(baos);
+		        oos.writeObject(msg);
+		        oos.flush();
+		        byte[] sendBuf = baos.toByteArray();
+		        String content = new String(sendBuf); //序列化msg之后转化成string准别用ACL发送
+				
+				Log.i("MY_LOG_DelegateServiceSender", "Send delegate request...");
+				ACLMessage aclmsg = new ACLMessage(ACLMessage.INFORM);
+				aclmsg.addReceiver(new AID(targetAgent, AID.ISLOCALNAME));
+				aclmsg.setContent(content);
+				send(aclmsg);
+			}
+			catch(Exception e){
+				Log.i("MY_LOG_DelegateServiceSender", e.toString());
+			}
+			
 		}
+	}
+
+	@Override
+	public void sendDelegatedSericeResult(String targetAgent, String receiver,
+			String sender, String body) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

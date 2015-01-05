@@ -24,6 +24,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import edu.fudan.se.R;
 import edu.fudan.se.agent.AideAgentInterface;
+import edu.fudan.se.goalmachine.SGMMessage;
 import edu.fudan.se.initial.SGMApplication;
 import edu.fudan.se.userMes.UserTask;
 
@@ -45,6 +46,7 @@ public class TaskFragment extends ListFragment {
 		application = (SGMApplication) getActivity().getApplication();
 
 		try {
+			Thread.sleep(2 * 1000);
 			aideAgentInterface = MicroRuntime.getAgent(
 					application.getAgentNickname()).getO2AInterface(
 					AideAgentInterface.class);
@@ -53,6 +55,9 @@ public class TaskFragment extends ListFragment {
 			e.printStackTrace();
 		} catch (ControllerException e) {
 			Log.e("MessageFragment", "ControllerException");
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -159,8 +164,11 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 
 				@Override
 				public void onClick(View v) {
-					aideAgentInterface.endTaskMachine(
-							usertask.getTaskMachine(), "END");
+//					aideAgentInterface.endTaskMachine(
+//							usertask.getTaskMachine(), "END");
+					aideAgentInterface.sendExternalEvent(new SGMMessage("EXTERNAL_EVENT",
+							null, null, null,
+							null, usertask.getGoalModel().getName(), usertask.getTaskMachine().getName(), "END"));
 					usertask.setDone(true);
 				}
 			});
@@ -169,8 +177,11 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 
 				@Override
 				public void onClick(View v) {
-					aideAgentInterface.endTaskMachine(
-							usertask.getTaskMachine(), "QUIT");
+//					aideAgentInterface.endTaskMachine(
+//							usertask.getTaskMachine(), "QUIT");
+					aideAgentInterface.sendExternalEvent(new SGMMessage("EXTERNAL_EVENT",
+							null, null, null,
+							null, usertask.getGoalModel().getName(), usertask.getTaskMachine().getName(), "QUIT"));
 					usertask.setDone(true);
 				}
 			});
