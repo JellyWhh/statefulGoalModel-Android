@@ -13,6 +13,10 @@
     <!-- Message标签页的两个标签 -->
     <string name="tab_message_task">Task</string>
     <string name="tab_message_mes">Message</string>
+    
+    <!-- menu弹出框中的两个选项 -->
+    <string name="menu_abstract">Abstract</string>
+    <string name="menu_details">Details</string>
 
     <!-- orders弹出框中的按钮内容 -->
     <string name="dialog_start">Start</string>

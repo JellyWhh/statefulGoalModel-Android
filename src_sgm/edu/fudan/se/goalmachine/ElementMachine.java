@@ -12,6 +12,7 @@ import edu.fudan.se.goalmachine.message.MesBody;
 import edu.fudan.se.goalmachine.message.SGMMessage;
 import edu.fudan.se.goalmachine.support.CauseToRepairing;
 import edu.fudan.se.goalmachine.support.RecordedState;
+import edu.fudan.se.goalmodel.GoalModel;
 import edu.fudan.se.log.Log;
 
 /**
@@ -22,6 +23,8 @@ import edu.fudan.se.log.Log;
  * 
  */
 public abstract class ElementMachine implements Runnable {
+	
+	private GoalModel goalModel;	//这个element machine所属于的goal model
 
 	private int level; // 这个主要是在安卓界面显示目标树的时候用的，指这个element处在第几层，root goal为0层
 
@@ -926,6 +929,14 @@ public abstract class ElementMachine implements Runnable {
 
 	public void setCauseToRepairing(CauseToRepairing causeToRepairing) {
 		this.causeToRepairing = causeToRepairing;
+	}
+
+	public GoalModel getGoalModel() {
+		return goalModel;
+	}
+
+	public void setGoalModel(GoalModel goalModel) {
+		this.goalModel = goalModel;
 	}
 
 }

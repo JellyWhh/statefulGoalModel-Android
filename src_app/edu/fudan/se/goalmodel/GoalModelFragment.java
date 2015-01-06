@@ -1,7 +1,9 @@
 /**
  * 
  */
-package edu.fudan.se.goalmodeldetails;
+package edu.fudan.se.goalmodel;
+
+import java.util.ArrayList;
 
 import jade.core.MicroRuntime;
 import jade.wrapper.ControllerException;
@@ -12,7 +14,6 @@ import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
 import edu.fudan.se.goalmachine.message.SGMMessage;
 import edu.fudan.se.goalmodel.GoalModel;
 import edu.fudan.se.initial.SGMApplication;
-import android.annotation.SuppressLint;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -35,8 +36,7 @@ import android.widget.TextView;
  * @author whh
  * 
  */
-@SuppressLint("ValidFragment")
-public class GoalModelDetailsFragment extends Fragment {
+public class GoalModelFragment extends Fragment {
 
 	private GoalModel goalModel; // 要显示详情的Goal Model
 	private SGMApplication application; // 获取应用程序，以得到里面的全局变量
@@ -48,26 +48,11 @@ public class GoalModelDetailsFragment extends Fragment {
 	private TextView tv_gmdetails_name;
 
 	private AideAgentInterface aideAgentInterface; // agent interface
+
 	// private String agentNickname;
 
-	public GoalModelDetailsFragment(GoalModel goalModel) {
+	public GoalModelFragment(GoalModel goalModel) {
 		this.goalModel = goalModel;
-		// this.agentNickname = agentNickname;
-
-		// try {
-		// Log.i("GoalModelDetailsFragment", "getting agent interface..."
-		// + this.agentNickname);
-		// aideAgentInterface = MicroRuntime.getAgent(this.agentNickname)
-		// .getO2AInterface(AideAgentInterface.class);
-		// Log.i("GoalModelDetailsFragment", "check interface, null?: "
-		// + (aideAgentInterface == null));
-		// } catch (StaleProxyException e) {
-		// Log.e("GoalModelDetailsFragment", "StaleProxyException");
-		// e.printStackTrace();
-		// } catch (ControllerException e) {
-		// Log.e("GoalModelDetailsFragment", "ControllerException");
-		// e.printStackTrace();
-		// }
 	}
 
 	@Override
@@ -91,8 +76,7 @@ public class GoalModelDetailsFragment extends Fragment {
 	@Override
 	public View onCreateView(final LayoutInflater inflater,
 			ViewGroup container, Bundle savedInstanceState) {
-		final View view = inflater.inflate(R.layout.fragment_goalmodeldetails,
-				null);
+		final View view = inflater.inflate(R.layout.fragment_goalmodel, null);
 		iv_gmdetails_back = (ImageView) view
 				.findViewById(R.id.iv_gmdetails_back); // 返回按钮
 		iv_gmdetails_refresh = (ImageView) view
@@ -104,11 +88,7 @@ public class GoalModelDetailsFragment extends Fragment {
 				.findViewById(R.id.tv_gmdetails_name); // goal model名字
 		tv_gmdetails_name.setText(this.goalModel.getName()); // 显示goal model的名字
 
-		mPager = (ViewPager) view
-				.findViewById(R.id.view_pager_goalmodeldetails);
-		mPager.setAdapter(new MyFragmentPagerAdapter(this.goalModel,
-				getChildFragmentManager(), aideAgentInterface));
-		mPager.setCurrentItem(0);
+		initViewPager(view);
 
 		// 为按钮添加监听器
 		iv_gmdetails_back.setOnClickListener(new OnClickListener() {
@@ -152,44 +132,78 @@ public class GoalModelDetailsFragment extends Fragment {
 
 			@Override
 			public void onClick(View v) {
-				showGoalModelDescription(
-						view.findViewById(R.id.linearLayout_main),
-						goalModel.getDescription());
+				showGoalModelMenu();
 			}
 		});
 
 		return view;
 	}
 
+	private void initViewPager(View view) {
+		mPager = (ViewPager) view
+				.findViewById(R.id.view_pager_goalmodeldetails);
+
+		ArrayList<Fragment> fragmentsList = new ArrayList<Fragment>();
+
+		Fragment goalModelDetailsFragment = new GoalModelDetailsFragment(
+				goalModel);
+		Fragment goalModelAbstractFragment = new GoalModelAbstractFragment();
+
+		fragmentsList.add(goalModelAbstractFragment);
+		fragmentsList.add(goalModelDetailsFragment);
+
+		mPager.setAdapter(new MyFragmentPagerAdapter(getChildFragmentManager(),
+				fragmentsList));
+		mPager.setCurrentItem(0);
+
+	}
+
 	/**
-	 * 点击上方的goal model name后弹出goal model的介绍，是一个普通的popupwindow
+	 * 点击上方的goal model name后弹出一个menu，有abstract和details两个选项
 	 * 
-	 * @param description
-	 *            goal model的介绍
 	 */
-	private void showGoalModelDescription(View parentView, String description) {
-		final View popupDescriptionView = LayoutInflater.from(getActivity())
-				.inflate(R.layout.popupwindow_description, null);
-		final PopupWindow popupWindow = new PopupWindow(popupDescriptionView,
+	private void showGoalModelMenu() {
+		final View popupMenuView = LayoutInflater.from(getActivity()).inflate(
+				R.layout.popupwindow_menu, null);
+		final PopupWindow popupWindow = new PopupWindow(popupMenuView,
 				ViewGroup.LayoutParams.WRAP_CONTENT,
 				ViewGroup.LayoutParams.WRAP_CONTENT, true);
 
 		popupWindow.setOutsideTouchable(true);
 		popupWindow.setFocusable(true);
-		TextView tv_gmdetails_description = (TextView) popupDescriptionView
-				.findViewById(R.id.tv_gmdetails_description);
-		tv_gmdetails_description.setText(description);
+
+		TextView tv_menu_abstract = (TextView) popupMenuView
+				.findViewById(R.id.tv_menu_abstract);
+		TextView tv_menu_details = (TextView) popupMenuView
+				.findViewById(R.id.tv_menu_details);
+
+		tv_menu_abstract.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				mPager.setCurrentItem(0);
+				popupWindow.dismiss();
+			}
+		});
+		tv_menu_details.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				mPager.setCurrentItem(1);
+				popupWindow.dismiss();
+			}
+		});
 
 		ColorDrawable dw = new ColorDrawable(-00000);
 		popupWindow.setBackgroundDrawable(dw);
 
 		// mMenuView添加OnTouchListener监听判断获取触屏位置如果在选择框外面则销毁弹出框
-		popupDescriptionView.setOnTouchListener(new OnTouchListener() {
+		popupMenuView.setOnTouchListener(new OnTouchListener() {
 
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
-				int height = popupDescriptionView.findViewById(
-						R.id.tv_gmdetails_description).getTop();
+				int height = popupMenuView.findViewById(R.id.ll_popupmenu)
+						.getTop();
 				int y = (int) event.getY();
 				if (event.getAction() == MotionEvent.ACTION_UP) {
 					if (y < height) {
@@ -200,9 +214,9 @@ public class GoalModelDetailsFragment extends Fragment {
 			}
 		});
 
-		// 这个简介在屏幕中央显示
-		popupWindow.showAtLocation(parentView, Gravity.CENTER | Gravity.CENTER,
-				0, 0);
+		// 在goal model名字下方显示
+		popupWindow.showAsDropDown(tv_gmdetails_name);
+
 	}
 
 	// 为命令的弹出窗口实现监听类
@@ -223,16 +237,18 @@ public class GoalModelDetailsFragment extends Fragment {
 				break;
 			case R.id.bt_dialog_suspend:
 				// aideAgentInterface.suspendGoalModel(goalModel);
-				aideAgentInterface.sendExternalEvent(new SGMMessage(
-						"EXTERNAL_EVENT", null, null, null, null, goalModel
-								.getName(), null, MesBody_Mes2Manager.SuspendGM));
+				aideAgentInterface
+						.sendExternalEvent(new SGMMessage("EXTERNAL_EVENT",
+								null, null, null, null, goalModel.getName(),
+								null, MesBody_Mes2Manager.SuspendGM));
 				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				break;
 			case R.id.bt_dialog_resume:
 				// aideAgentInterface.resumeGoalModel(goalModel);
-				aideAgentInterface.sendExternalEvent(new SGMMessage(
-						"EXTERNAL_EVENT", null, null, null, null, goalModel
-								.getName(), null, MesBody_Mes2Manager.ResumeGM));
+				aideAgentInterface
+						.sendExternalEvent(new SGMMessage("EXTERNAL_EVENT",
+								null, null, null, null, goalModel.getName(),
+								null, MesBody_Mes2Manager.ResumeGM));
 				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				break;
 			case R.id.bt_dialog_stop:
@@ -272,23 +288,27 @@ public class GoalModelDetailsFragment extends Fragment {
 	 */
 	class MyFragmentPagerAdapter extends FragmentPagerAdapter {
 
-		Fragment goalTreeFragment;
+		private ArrayList<Fragment> fragmentsList;
 
-		public MyFragmentPagerAdapter(GoalModel goalModel, FragmentManager fm,
-				AideAgentInterface aideAgentInterface) {
+		// Fragment goalTreeFragment;
+
+		public MyFragmentPagerAdapter(FragmentManager fm,
+				ArrayList<Fragment> fragments) {
 			super(fm);
-			goalTreeFragment = new GoalTreeFragment(goalModel,
-					aideAgentInterface);
+			this.fragmentsList = fragments;
+			// goalTreeFragment = new GoalModelDetailsFragment(goalModel,
+			// aideAgentInterface);
 		}
 
 		@Override
 		public Fragment getItem(int arg0) {
-			return goalTreeFragment;
+			// return goalTreeFragment;
+			return fragmentsList.get(arg0);
 		}
 
 		@Override
 		public int getCount() {
-			return 1;
+			return fragmentsList.size();
 		}
 
 		@Override

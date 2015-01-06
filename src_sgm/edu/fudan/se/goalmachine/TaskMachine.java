@@ -3,7 +3,9 @@
  */
 package edu.fudan.se.goalmachine;
 
+import edu.fudan.se.goalmachine.message.MesBody;
 import edu.fudan.se.goalmachine.message.MesBody_Mes2Machine;
+import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
 import edu.fudan.se.goalmachine.message.SGMMessage;
 import edu.fudan.se.log.Log;
 
@@ -63,8 +65,9 @@ public abstract class TaskMachine extends ElementMachine {
 
 		// SGMMessage msg = this.getMsgPool().poll(); // 每次拿出一条消息
 		if (msg != null) {
-			Log.logDebug(this.getName(), "activateDo()", "get a message from "
-					+ msg.getSender().toString() + "; body is: " + msg.getBody());
+			Log.logDebug(this.getName(), "activateDo()",
+					"get a message from " + msg.getSender().toString()
+							+ "; body is: " + msg.getBody());
 
 			// 消息内容是START，表示父目标让当前目标开始状态转换
 			if (msg.getBody().equals(MesBody_Mes2Machine.START)) {
@@ -90,7 +93,7 @@ public abstract class TaskMachine extends ElementMachine {
 				executingDo_waitingEnd(msg);
 			} else {
 				// 发送消息给agent,让agent提醒用户需要他的参与
-				sendMesToAgent();
+				sendMesToManager();
 				isSendUIMesDone = true;
 			}
 		} else { // 不需要人的参与
@@ -103,10 +106,24 @@ public abstract class TaskMachine extends ElementMachine {
 	}
 
 	/**
-	 * 弹出弹窗，提醒用户需要它的参与
+	 * 发送消息给manager,让manager发送消息给agent，提醒用户需要他的参与
 	 */
-	private void sendMesToAgent() {
-		// TODO
+	private void sendMesToManager() {
+		Log.logDebug(this.getName(), "sendMesToManager()", "init.");
+		SGMMessage msg = new SGMMessage("TASK_REQUEST", null, this
+				.getGoalModel().getName(), this.getName(), null, null, null,
+				MesBody_Mes2Manager.RequestPersonIA);
+		msg.setDescription(this.getDescription());
+
+		if (this.getGoalModel().getGoalModelManager().getMsgPool().offer(msg)) {
+			Log.logMessage(msg, true);
+			Log.logDebug(this.getName(), "sendMesToManager()",
+					"send a RequestPersonIA message to Manager succeed!");
+		} else {
+			Log.logMessage(msg, false);
+			Log.logError(this.getName(), "sendMesToManager()",
+					"send a RequestPersonIA message to Manager error!");
+		}
 	}
 
 	/**
@@ -124,8 +141,8 @@ public abstract class TaskMachine extends ElementMachine {
 		// SGMMessage msg = this.getMsgPool().poll(); // 拿出一条消息
 		if (msg != null) {
 			Log.logDebug(this.getName(), "executingDo_waitingEnd()",
-					"get a message from " + msg.getSender().toString() + "; body is: "
-							+ msg.getBody());
+					"get a message from " + msg.getSender().toString()
+							+ "; body is: " + msg.getBody());
 
 			if (msg.getBody().equals(MesBody_Mes2Machine.TASK_END)) { // 收到外部UI的END消息
 				this.getMsgPool().poll();
@@ -134,7 +151,7 @@ public abstract class TaskMachine extends ElementMachine {
 			} else if (msg.getBody().equals(MesBody_Mes2Machine.SUSPEND)) { // 收到父目标的SUSPEND消息
 				this.getMsgPool().poll();
 				this.setCurrentState(State.Suspended);
-			}else if (msg.getBody().equals(MesBody_Mes2Machine.TASK_QUIT)) {	//用户没有完成这个任务，放弃了
+			} else if (msg.getBody().equals(MesBody_Mes2Machine.TASK_QUIT)) { // 用户没有完成这个任务，放弃了
 				this.getMsgPool().poll();
 				this.setCurrentState(State.Failed);
 			}
@@ -150,8 +167,9 @@ public abstract class TaskMachine extends ElementMachine {
 		Log.logDebug(this.getName(), "suspendedDo()", "init.");
 		// SGMMessage msg = this.getMsgPool().poll(); // 每次拿出一条消息
 		if (msg != null) {
-			Log.logDebug(this.getName(), "suspendedDo()", "get a message from "
-					+ msg.getSender().toString() + "; body is: " + msg.getBody());
+			Log.logDebug(this.getName(), "suspendedDo()",
+					"get a message from " + msg.getSender().toString()
+							+ "; body is: " + msg.getBody());
 			if (msg.getBody().equals(MesBody_Mes2Machine.RESUME)) {
 				this.getMsgPool().poll();
 				// 把自己状态设置为executing,同时resetSuspendEntry

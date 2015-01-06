@@ -17,7 +17,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import edu.fudan.se.goalmodel.GoalModel;
-import edu.fudan.se.goalmodeldetails.GoalModelDetailsActivity;
+import edu.fudan.se.goalmodel.GoalModelActivity;
 import edu.fudan.se.initial.SGMApplication;
 import edu.fudan.se.R;
 
@@ -62,7 +62,7 @@ public class MyGoalFragment extends ListFragment {
 		super.onListItemClick(l, v, position, id);
 
 		Intent intent = new Intent();
-		intent.setClass(getActivity(), GoalModelDetailsActivity.class);
+		intent.setClass(getActivity(), GoalModelActivity.class);
 		intent.putExtra("goalmodelposition", position);
 		startActivity(intent);
 	}

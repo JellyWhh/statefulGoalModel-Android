@@ -1,10 +1,15 @@
 package edu.fudan.se.goalmodel;
 
+import jade.core.MicroRuntime;
+import jade.wrapper.ControllerException;
+import jade.wrapper.StaleProxyException;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import edu.fudan.se.agent.AideAgentInterface;
 import edu.fudan.se.goalmachine.ElementMachine;
 import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
 import edu.fudan.se.goalmachine.message.MesBody_Mes2Machine;
@@ -19,17 +24,11 @@ public class GoalModelManager implements Runnable {
 
 	private List<GoalModel> goalModelList; // 所有目标模型列表
 
+	private String agentNickname;
+
 	public GoalModelManager() {
 		this.msgPool = new LinkedBlockingQueue<SGMMessage>();
-		goalModelList = new ArrayList<GoalModel>();
-	}
-
-	public void addGoalModel(GoalModel gm) {
-		this.goalModelList.add(gm);
-	}
-
-	public List<GoalModel> getGoalModelList() {
-		return this.goalModelList;
+		this.goalModelList = new ArrayList<GoalModel>();
 	}
 
 	@Override
@@ -50,7 +49,7 @@ public class GoalModelManager implements Runnable {
 				// 处理Task发来的请求事件
 				if (msg.getHeader().equals("TASK_REQUEST")) {
 					msg = this.getMsgPool().poll();
-					handleTaskRequest(msg);
+					handleElementRequest(msg);
 				}
 			}
 
@@ -64,7 +63,7 @@ public class GoalModelManager implements Runnable {
 	}
 
 	/**
-	 * 处理外部事件，也就是发送给GoalModel的各种命令消息
+	 * 处理外部事件，agent通过manager发送给GoalModel的各种命令消息
 	 * 
 	 * @param msg
 	 *            要发送的消息内容
@@ -88,7 +87,7 @@ public class GoalModelManager implements Runnable {
 		}
 
 		if (targetGoalModel != null) {
-			switch ((MesBody_Mes2Manager)msg.getBody()) {
+			switch ((MesBody_Mes2Manager) msg.getBody()) {
 			case StartGM:
 				start(targetGoalModel, msg);
 				break;
@@ -116,8 +115,23 @@ public class GoalModelManager implements Runnable {
 		}
 	}
 
-	private void handleTaskRequest(SGMMessage msg) {
+	/**
+	 * 处理委托、endTask、本地服务调用，是element machine通过maneger发送给agent的消息
+	 * 
+	 * @param msg
+	 */
+	private void handleElementRequest(SGMMessage msg) {
 		Log.logDebug("GoalModelManager", "handleTaskRequest()", "init");
+
+		if (msg != null) {
+			switch ((MesBody_Mes2Manager) msg.getBody()) {
+			case RequestPersonIA: // 转发消息给agent,agent收到消息后，弹出一个弹窗,同时添加一个userTask到userTask列表中
+				getAideAgentInterface().handleUserServiceRequest(msg);
+				break;
+			default:
+				break;
+			}
+		}
 	}
 
 	/**
@@ -218,10 +232,10 @@ public class GoalModelManager implements Runnable {
 		// SGMMessage msg = new SGMMessage("TOTASK", "UI",
 		// taskMachine.getName(),
 		// mes);
-		
-		if (msg.equals(MesBody_Mes2Manager.EndTE)) {
+
+		if (msg.getBody().equals(MesBody_Mes2Manager.EndTE)) {
 			msg.setBody(MesBody_Mes2Machine.TASK_END);
-		}else if (msg.equals(MesBody_Mes2Manager.QuitTE)) {
+		} else if (msg.getBody().equals(MesBody_Mes2Manager.QuitTE)) {
 			msg.setBody(MesBody_Mes2Machine.TASK_QUIT);
 		}
 		if (taskMachine.getMsgPool().offer(msg)) {
@@ -273,12 +287,47 @@ public class GoalModelManager implements Runnable {
 		}
 	}
 
+	/**
+	 * 拿到agent的引用
+	 * 
+	 * @return agent
+	 */
+	private AideAgentInterface getAideAgentInterface() {
+		AideAgentInterface aideAgentInterface = null; // agent interface
+		try {
+			aideAgentInterface = MicroRuntime.getAgent(agentNickname)
+					.getO2AInterface(AideAgentInterface.class);
+		} catch (StaleProxyException e) {
+			e.printStackTrace();
+		} catch (ControllerException e) {
+			e.printStackTrace();
+		}
+		return aideAgentInterface;
+	}
+
+	public void addGoalModel(GoalModel gm) {
+		this.goalModelList.add(gm);
+		gm.setGoalModelManager(this);
+	}
+
+	public List<GoalModel> getGoalModelList() {
+		return this.goalModelList;
+	}
+
 	public BlockingQueue<SGMMessage> getMsgPool() {
 		return msgPool;
 	}
 
 	public void setMsgPool(BlockingQueue<SGMMessage> msgPool) {
 		this.msgPool = msgPool;
+	}
+
+	public String getAgentNickname() {
+		return agentNickname;
+	}
+
+	public void setAgentNickname(String agentNickname) {
+		this.agentNickname = agentNickname;
 	}
 
 }

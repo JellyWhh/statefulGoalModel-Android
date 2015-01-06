@@ -35,8 +35,9 @@ import android.widget.EditText;
 
 /**
  * 此处是郑家欢原来代码中的<code>MainActivity</code>，主要是开始了agent
+ * 
  * @author zjh
- *
+ * 
  */
 public class StartAgentActivity extends Activity {
 	private Logger logger = Logger.getJADELogger(this.getClass().getName());
@@ -47,9 +48,7 @@ public class StartAgentActivity extends Activity {
 	static final int CHAT_REQUEST = 0;
 
 	private String nickname;
-	
-	
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -59,7 +58,7 @@ public class StartAgentActivity extends Activity {
 		button.setOnClickListener(buttonChatListener);
 
 	}
-	
+
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
@@ -86,18 +85,23 @@ public class StartAgentActivity extends Activity {
 				logger.log(Level.INFO, "Invalid nickname!");
 			} else {
 				try {
-					((SGMApplication)getApplication()).setAgentNickname(nickname);
-					Log.i("start agent", "agent nickname: " + ((SGMApplication)getApplication()).getAgentNickname());
+					((SGMApplication) getApplication())
+							.setAgentNickname(nickname);
+					((SGMApplication) getApplication()).getGoalModelManager().setAgentNickname(nickname);
+					Log.i("start agent",
+							"agent nickname: "
+									+ ((SGMApplication) getApplication())
+											.getAgentNickname());
 					SharedPreferences settings = getSharedPreferences(
 							"jadeChatPrefsFile", 0);
 					String host = settings.getString("defaultHost", "");
 					String port = settings.getString("defaultPort", "");
 					startChat(nickname, host, port, agentStartupCallback);
-//					Intent intent = new Intent(StartAgentActivity.this,
-//							WorkingActivity.class);
+					// Intent intent = new Intent(StartAgentActivity.this,
+					// WorkingActivity.class);
 					Intent intent = new Intent(StartAgentActivity.this,
 							MainActivity.class);
-//					intent.putExtra("agentname", nickname);
+					// intent.putExtra("agentname", nickname);
 					startActivity(intent);
 
 				} catch (Exception ex) {
@@ -109,7 +113,7 @@ public class StartAgentActivity extends Activity {
 			}
 		}
 	};
-	
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == CHAT_REQUEST) {
@@ -179,8 +183,8 @@ public class StartAgentActivity extends Activity {
 			};
 			logger.log(Level.INFO, "Binding Gateway to MicroRuntimeService...");
 
-//			this.startService(service);
-//			this.bindService(service, conn, flags)
+			// this.startService(service);
+			// this.bindService(service, conn, flags)
 			bindService(new Intent(getApplicationContext(),
 					MicroRuntimeService.class), serviceConnection,
 					Context.BIND_AUTO_CREATE);
@@ -195,7 +199,7 @@ public class StartAgentActivity extends Activity {
 	private void startContainer(final String nickname, Properties profile,
 			final RuntimeCallback<AgentController> agentStartupCallback) {
 		if (!MicroRuntime.isRunning()) {
-			
+
 			RuntimeCallback<Void> rc = new RuntimeCallback<Void>() {
 				@Override
 				public void onSuccess(Void thisIsNull) {
@@ -206,12 +210,11 @@ public class StartAgentActivity extends Activity {
 
 				@Override
 				public void onFailure(Throwable throwable) {
-					logger.log(Level.SEVERE,
-							"Failed to start the container...");
+					logger.log(Level.SEVERE, "Failed to start the container...");
 				}
 			};
-			
-			microRuntimeServiceBinder.startAgentContainer(profile,rc);
+
+			microRuntimeServiceBinder.startAgentContainer(profile, rc);
 		} else {
 			startAgent(nickname, agentStartupCallback);
 		}
@@ -242,7 +245,9 @@ public class StartAgentActivity extends Activity {
 				agentStartupCallback.onFailure(throwable);
 			}
 		};
-		microRuntimeServiceBinder.startAgent(nickname,AideAgent.class.getName(),
-				new Object[] { getApplicationContext(), ((SGMApplication)getApplication()).getGoalModelManager()}, rc);
+		microRuntimeServiceBinder.startAgent(nickname, AideAgent.class
+				.getName(), new Object[] { getApplicationContext(),
+				((SGMApplication) getApplication()).getGoalModelManager(),
+				((SGMApplication) getApplication()).getUserTaskList() }, rc);
 	}
 }

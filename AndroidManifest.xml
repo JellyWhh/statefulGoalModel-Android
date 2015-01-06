@@ -37,7 +37,7 @@
         </activity>
         <activity android:name=".maincontainer.MainActivity" >
         </activity>
-        <activity android:name=".goalmodeldetails.GoalModelDetailsActivity" >
+        <activity android:name="edu.fudan.se.goalmodel.GoalModelActivity" >
         </activity>
         <activity android:name="edu.fudan.se.clientgui.SettingAgentActivity" >
         </activity>

@@ -23,6 +23,7 @@ public class GoalModel {
 
 	private ElementMachine rootGoal; // goal model的root goal，在初始化goal
 										// model的时候要设置，并且也要把它加到elementMachines中去。
+	private GoalModelManager goalModelManager;
 
 	/**
 	 * 构造方法
@@ -33,10 +34,6 @@ public class GoalModel {
 	public GoalModel(String name) {
 		this.name = name;
 		this.elementMachines = new ArrayList<>();
-	}
-
-	private void sortElementMachines() {
-
 	}
 
 	public String getName() {
@@ -63,6 +60,7 @@ public class GoalModel {
 	 */
 	public void addElementMachine(ElementMachine elementMachine) {
 		this.elementMachines.add(elementMachine);
+		elementMachine.setGoalModel(this);
 	}
 
 	public ArrayList<ElementMachine> getElementMachines() {
@@ -75,6 +73,14 @@ public class GoalModel {
 
 	public void setRootGoal(ElementMachine rootGoal) {
 		this.rootGoal = rootGoal;
+	}
+
+	public GoalModelManager getGoalModelManager() {
+		return goalModelManager;
+	}
+
+	public void setGoalModelManager(GoalModelManager goalModelManager) {
+		this.goalModelManager = goalModelManager;
 	}
 
 }

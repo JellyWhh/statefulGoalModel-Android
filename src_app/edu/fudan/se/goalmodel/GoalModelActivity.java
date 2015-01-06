@@ -1,13 +1,12 @@
 /**
  * 
  */
-package edu.fudan.se.goalmodeldetails;
+package edu.fudan.se.goalmodel;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import edu.fudan.se.R;
@@ -18,12 +17,12 @@ import edu.fudan.se.initial.SGMApplication;
  * @author whh
  * 
  */
-public class GoalModelDetailsActivity extends FragmentActivity {
+public class GoalModelActivity extends FragmentActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_goalmodeldetails);
+		setContentView(R.layout.activity_goalmodel);
 
 		// 获取传递过来的intent中的goal model position，然后从全局变量中得到对应的goal model
 		Intent intent = getIntent();
@@ -34,19 +33,11 @@ public class GoalModelDetailsActivity extends FragmentActivity {
 				.getGoalModelManager().getGoalModelList()
 				.get(goalmodelposition);
 
-		// 获取全局变量中保存的agentNickname
-		// Log.i("GoalModelDetailsActivity",
-		// ((SGMApplication) getApplication()).getAgentNickname());
-		// String agentNickname = ((SGMApplication) getApplication())
-		// .getAgentNickname();
-
 		if (savedInstanceState == null) {
 			FragmentTransaction transaction = getSupportFragmentManager()
 					.beginTransaction();
 			transaction.add(R.id.container,
-					new GoalModelDetailsFragment(goalModel)).commit();
-			// getFragmentManager().beginTransaction()
-			// .add(R.id.container, new MainFragment()).commit();
+					new GoalModelFragment(goalModel)).commit();
 		}
 	}
 

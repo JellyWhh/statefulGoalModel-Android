@@ -38,7 +38,7 @@ public class SGMApplication extends Application implements Serializable {
 	private String agentNickname;
 
 	// private GoalModelController goalModelController;
-	
+
 	private GoalModelManager goalModelManager;
 
 	@Override
@@ -55,7 +55,7 @@ public class SGMApplication extends Application implements Serializable {
 		this.userTaskList = new ArrayList<>();
 
 		GoalModel gm = newGoalModel();
-		
+
 		goalModelManager = new GoalModelManager();
 		goalModelManager.addGoalModel(gm);
 		Thread gmm = new Thread(goalModelManager);
@@ -84,12 +84,11 @@ public class SGMApplication extends Application implements Serializable {
 		}
 	}
 
-
 	public String getAgentNickname() {
 		return this.agentNickname;
 	}
-	
-	public GoalModelManager getGoalModelManager(){
+
+	public GoalModelManager getGoalModelManager() {
 		return this.goalModelManager;
 	}
 
@@ -108,9 +107,7 @@ public class SGMApplication extends Application implements Serializable {
 	public void clearTasksOfGoalModel(GoalModel goalModel) {
 		ArrayList<UserTask> toRemoveArrayList = new ArrayList<>();
 		for (UserTask userTask : this.userTaskList) {
-			if (userTask.getGoalModel() == goalModel
-					|| userTask.getGoalModel().getName()
-							.equals(goalModel.getName())) {
+			if (userTask.getGoalModelName().equals(goalModel.getName())) {
 				toRemoveArrayList.add(userTask);
 			}
 		}

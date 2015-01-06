@@ -1,20 +1,15 @@
 /**
  * 
  */
-package edu.fudan.se.goalmodeldetails;
+package edu.fudan.se.goalmodel;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import edu.fudan.se.R;
-import edu.fudan.se.agent.AideAgentInterface;
 import edu.fudan.se.goalmachine.ElementMachine;
 import edu.fudan.se.goalmachine.GoalMachine;
-import edu.fudan.se.goalmachine.State;
-import edu.fudan.se.goalmachine.TaskMachine;
 import edu.fudan.se.goalmodel.GoalModel;
-import edu.fudan.se.initial.SGMApplication;
-import edu.fudan.se.userMes.UserTask;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -23,31 +18,25 @@ import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 /**
  * @author whh
  * 
  */
-public class GoalTreeFragment extends ListFragment {
+public class GoalModelDetailsFragment extends ListFragment {
 
 	private GoalModel goalModel; // 要显示目标树的goal model
-	private AideAgentInterface aideAgentInterface;
 
 	private ArrayList<ElementMachine> allTreeElements = new ArrayList<ElementMachine>(); // 所有的tree节点
 	private TreeViewAdapter treeViewAdapter = null;
 
-	public GoalTreeFragment(GoalModel goalModel,
-			AideAgentInterface aideAgentInterface) {
+	public GoalModelDetailsFragment(GoalModel goalModel) {
 		this.goalModel = goalModel;
-		this.aideAgentInterface = aideAgentInterface;
 	}
 
 	@Override
@@ -56,9 +45,7 @@ public class GoalTreeFragment extends ListFragment {
 
 		initialData();
 		treeViewAdapter = new TreeViewAdapter(getActivity(),
-				R.layout.tree_view_item_layout, allTreeElements, goalModel,
-				aideAgentInterface, (SGMApplication) getActivity()
-						.getApplication());
+				R.layout.listview_goalmodeldetails, allTreeElements);
 		// setListAdapter(treeViewAdapter);
 		// registerForContextMenu(getListView());
 	}
@@ -80,9 +67,6 @@ public class GoalTreeFragment extends ListFragment {
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
-		Toast.makeText(getActivity().getApplicationContext(),
-				"clicked " + allTreeElements.get(position).getName(), 2000)
-				.show();
 	}
 }
 
@@ -99,13 +83,8 @@ class TreeViewAdapter extends ArrayAdapter<ElementMachine> {
 	private Bitmap iconAND; // and分解
 	private Bitmap iconOR; // or分解
 
-	private AideAgentInterface aideAgentInterface;
-	private SGMApplication application;
-	private GoalModel goalModel;
-
 	public TreeViewAdapter(Context context, int textViewResourceId,
-			List<ElementMachine> treeElements, GoalModel goalModel,
-			AideAgentInterface aideAgentInterface, SGMApplication application) {
+			List<ElementMachine> treeElements) {
 		super(context, textViewResourceId, treeElements);
 		this.mInflater = LayoutInflater.from(context);
 		this.treeElements = treeElements;
@@ -113,10 +92,6 @@ class TreeViewAdapter extends ArrayAdapter<ElementMachine> {
 				R.drawable.tree_view_icon_and);
 		this.iconOR = BitmapFactory.decodeResource(context.getResources(),
 				R.drawable.tree_view_icon_or);
-
-		this.goalModel = goalModel;
-		this.aideAgentInterface = aideAgentInterface;
-		this.application = application;
 	}
 
 	@Override
@@ -138,7 +113,7 @@ class TreeViewAdapter extends ArrayAdapter<ElementMachine> {
 	public View getView(final int position, View convertView, ViewGroup parent) {
 		ViewHolder holder;
 		if (convertView == null) {
-			convertView = mInflater.inflate(R.layout.tree_view_item_layout,
+			convertView = mInflater.inflate(R.layout.listview_goalmodeldetails,
 					null);
 			holder = new ViewHolder();
 			holder.icon = (ImageView) convertView
@@ -147,8 +122,7 @@ class TreeViewAdapter extends ArrayAdapter<ElementMachine> {
 					.findViewById(R.id.tree_tv_goal_name);
 			holder.state = (TextView) convertView
 					.findViewById(R.id.tree_tv_goal_state);
-			holder.end = (Button) convertView
-					.findViewById(R.id.tree_bt_goal_end);
+			
 			convertView.setTag(holder);
 		} else {
 			holder = (ViewHolder) convertView.getTag();
@@ -178,38 +152,6 @@ class TreeViewAdapter extends ArrayAdapter<ElementMachine> {
 			holder.icon.setVisibility(View.VISIBLE);
 		}
 
-		// 如果这个ElementMachine是一个GoalMachine
-		if (treeElements.get(position) instanceof GoalMachine) {
-			holder.end.setVisibility(View.INVISIBLE);
-		}
-		// 如果这个ElementMachine是一个TaskMachine
-		else if (treeElements.get(position) instanceof TaskMachine) {
-			// 再设置是否显示end按钮，需要人的参与且在执行状态下时显示end按钮
-			if (treeElements.get(position).getCurrentState() == State.Executing
-					&& ((TaskMachine) treeElements.get(position))
-							.isNeedPeopleInteraction()) {
-				holder.end.setVisibility(View.VISIBLE);
-				// 给end按钮添加监听器
-				holder.end.setOnClickListener(new OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-						// 让agent给这个task machine发送END消息
-						// goalModel.endTaskMachine((TaskMachine) treeElements
-						// .get(position));
-						// aideAgentInterface
-						// .endTaskMachine((TaskMachine) treeElements
-						// .get(position));
-
-						UserTask userTask = new UserTask(goalModel,
-								(TaskMachine) treeElements.get(position), false);
-						application.addUserTask(userTask);
-					}
-				});
-			} else {
-				holder.end.setVisibility(View.INVISIBLE);
-			}
-		}
 
 		return convertView;
 	}
@@ -218,7 +160,6 @@ class TreeViewAdapter extends ArrayAdapter<ElementMachine> {
 		ImageView icon;
 		TextView name;
 		TextView state;
-		Button end;
 	}
 
 }

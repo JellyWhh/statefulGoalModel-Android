@@ -1,7 +1,7 @@
 /**
  * 
  */
-package edu.fudan.se.goalmodeldetails;
+package edu.fudan.se.goalmodel;
 
 import edu.fudan.se.R;
 import android.content.res.Resources;

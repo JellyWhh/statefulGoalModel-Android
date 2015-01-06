@@ -169,8 +169,8 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 					// usertask.getTaskMachine(), "END");
 					aideAgentInterface.sendExternalEvent(new SGMMessage(
 							"EXTERNAL_EVENT", null, null, null, null, usertask
-									.getGoalModel().getName(), usertask
-									.getTaskMachine().getName(),
+									.getGoalModelName(), usertask
+									.getElementName(),
 							MesBody_Mes2Manager.EndTE));
 					usertask.setDone(true);
 				}
@@ -184,19 +184,19 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 					// usertask.getTaskMachine(), "QUIT");
 					aideAgentInterface.sendExternalEvent(new SGMMessage(
 							"EXTERNAL_EVENT", null, null, null, null, usertask
-									.getGoalModel().getName(), usertask
-									.getTaskMachine().getName(),
+									.getGoalModelName(), usertask
+									.getElementName(),
 							MesBody_Mes2Manager.QuitTE));
 					usertask.setDone(true);
 				}
 			});
 		}
 		String description = "You need to do:\n";
-		if (usertask.getTaskMachine().getDescription() == null
-				|| usertask.getTaskMachine().getDescription().equals("")) {
-			description += usertask.getTaskMachine().getName();
+		if (usertask.getDescription() == null
+				|| usertask.getDescription().equals("")) {
+			description += usertask.getElementName();
 		} else {
-			description += usertask.getTaskMachine().getDescription();
+			description += usertask.getDescription();
 		}
 		holder.description.setText(description);
 

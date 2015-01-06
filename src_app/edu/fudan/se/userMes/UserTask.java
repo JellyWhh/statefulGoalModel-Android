@@ -3,9 +3,6 @@
  */
 package edu.fudan.se.userMes;
 
-import edu.fudan.se.goalmachine.TaskMachine;
-import edu.fudan.se.goalmodel.GoalModel;
-
 /**
  * 用户要做的任务
  * 
@@ -14,22 +11,15 @@ import edu.fudan.se.goalmodel.GoalModel;
  */
 public class UserTask {
 
-	private GoalModel goalModel;
-	private TaskMachine taskMachine;
+	private String goalModelName;
+	private String elementName;
+	private String description;
 	private boolean isDone; // 用户是否做过了
-	
-	public UserTask(GoalModel goalModel,TaskMachine taskMachine, boolean isDone){
-		this.goalModel = goalModel;
-		this.taskMachine = taskMachine;
+
+	public UserTask(String goalModelName, String elementName, boolean isDone) {
+		this.goalModelName = goalModelName;
+		this.elementName = elementName;
 		this.isDone = isDone;
-	}
-
-	public TaskMachine getTaskMachine() {
-		return taskMachine;
-	}
-
-	public void setTaskMachine(TaskMachine taskMachine) {
-		this.taskMachine = taskMachine;
 	}
 
 	public boolean isDone() {
@@ -40,12 +30,28 @@ public class UserTask {
 		this.isDone = isDone;
 	}
 
-	public GoalModel getGoalModel() {
-		return goalModel;
+	public String getGoalModelName() {
+		return goalModelName;
 	}
 
-	public void setGoalModel(GoalModel goalModel) {
-		this.goalModel = goalModel;
+	public void setGoalModelName(String goalModelName) {
+		this.goalModelName = goalModelName;
+	}
+
+	public String getElementName() {
+		return elementName;
+	}
+
+	public void setElementName(String elementName) {
+		this.elementName = elementName;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 }

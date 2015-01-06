@@ -18,7 +18,7 @@ public interface AideAgentInterface {
 	
 	public void sendExternalEvent(SGMMessage msg);
 	
-	public void sendUserServiceRequest(String request, String sender);
+	public void handleUserServiceRequest(SGMMessage msg);
 	
 	public void sendDelegateServiceRequest(SGMMessage msg);
 	
