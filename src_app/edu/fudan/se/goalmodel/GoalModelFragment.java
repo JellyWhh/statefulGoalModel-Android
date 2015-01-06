@@ -147,7 +147,8 @@ public class GoalModelFragment extends Fragment {
 
 		Fragment goalModelDetailsFragment = new GoalModelDetailsFragment(
 				goalModel);
-		Fragment goalModelAbstractFragment = new GoalModelAbstractFragment();
+		Fragment goalModelAbstractFragment = new GoalModelAbstractFragment(
+				goalModel);
 
 		fragmentsList.add(goalModelAbstractFragment);
 		fragmentsList.add(goalModelDetailsFragment);

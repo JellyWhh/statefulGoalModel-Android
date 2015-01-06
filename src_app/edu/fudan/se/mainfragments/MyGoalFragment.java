@@ -42,7 +42,7 @@ public class MyGoalFragment extends ListFragment {
 		application = (SGMApplication) getActivity().getApplication();
 
 		adapter = new MyGoalListAdapter(getActivity(),
-				R.layout.goalmodel_list_item, application.getGoalModelManager().getGoalModelList());
+				R.layout.listview_mygoal, application.getGoalModelManager().getGoalModelList());
 		// setListAdapter(adapter);
 		// registerForContextMenu(getListView());
 	}

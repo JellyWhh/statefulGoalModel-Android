@@ -63,7 +63,7 @@ public class TaskFragment extends ListFragment {
 		}
 
 		adapter = new UserTaskAdapter(getActivity(),
-				R.layout.usertask_list_item, application.getUserTaskList(),
+				R.layout.listview_usertask, application.getUserTaskList(),
 				aideAgentInterface);
 
 		adapter.notifyDataSetChanged();
