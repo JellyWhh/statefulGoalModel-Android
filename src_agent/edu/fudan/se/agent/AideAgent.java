@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
+import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
 import edu.fudan.se.goalmachine.message.SGMMessage;
 import edu.fudan.se.goalmodel.GoalModelManager;
 import edu.fudan.se.userMes.UserTask;
@@ -70,7 +71,6 @@ public class AideAgent extends Agent implements AideAgentInterface {
 			e.printStackTrace();
 		}
 
-		
 	}
 
 	@Override
@@ -195,18 +195,44 @@ public class AideAgent extends Agent implements AideAgentInterface {
 		@Override
 		public void action() {
 			Log.i("MY_LOG", "Handle user service request...");
-			// 添加一个user task到全局变量的user task列表中，然后MessageFragment会自动刷新user
-			// task的显示
-			UserTask userTask = new UserTask(
-					msg.getSender().getGoalModelName(), msg.getSender()
-							.getElementName(), false);
-			userTask.setDescription(msg.getDescription());
-			userTaskList.add(userTask);
 
-			// 发送 弹窗广播，在MainActivity会监听这个广播然后弹出通知窗口
-			Intent broadcast = new Intent();
-			broadcast.setAction("jade.task.NOTIFICATION");
-			context.sendBroadcast(broadcast);
+			switch ((MesBody_Mes2Manager) msg.getBody()) {
+			case RequestPersonIA:
+				// 添加一个user task到全局变量的user task列表中，然后MessageFragment会自动刷新user
+				// task的显示
+				UserTask userTask = new UserTask(msg.getSender()
+						.getGoalModelName(), msg.getSender().getElementName(),
+						false);
+				userTask.setDescription(msg.getDescription());
+				userTaskList.add(userTask);
+
+				// 发送 弹窗广播，在MainActivity会监听这个广播然后弹出通知窗口
+				Intent broadcast_nt = new Intent();
+				broadcast_nt.setAction("jade.task.NOTIFICATION");
+				broadcast_nt.putExtra("Content", "You have received a new task.");
+				context.sendBroadcast(broadcast_nt);
+				break;
+				
+			case DelegatedAchieved:
+				//TODO 告诉委托方agent任务完成
+				break;
+				
+			case DelegatedFailed:
+				//TODO 告诉委托方agent任务失败
+				break;
+				
+			case NoDelegatedAchieved:
+			case NoDelegatedFailed:
+				Intent broadcast_nda = new Intent();
+				broadcast_nda.setAction("jade.task.NOTIFICATION");
+				broadcast_nda.putExtra("Content", msg.getDescription());
+				context.sendBroadcast(broadcast_nda);
+				break;
+
+			default:
+				break;
+			}
+
 		}
 
 	}

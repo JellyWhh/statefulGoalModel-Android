@@ -46,10 +46,10 @@ public class GoalModelManager implements Runnable {
 					handleExternalEvent(msg);
 				}
 
-				// 处理Task发来的请求事件
-				if (msg.getHeader().equals("TASK_REQUEST")) {
+				// 处理element发来的message
+				if (msg.getHeader().equals("ELEMENT_MESSAGE")) {
 					msg = this.getMsgPool().poll();
-					handleElementRequest(msg);
+					handleElementMessage(msg);
 				}
 			}
 
@@ -120,14 +120,20 @@ public class GoalModelManager implements Runnable {
 	 * 
 	 * @param msg
 	 */
-	private void handleElementRequest(SGMMessage msg) {
+	private void handleElementMessage(SGMMessage msg) {
 		Log.logDebug("GoalModelManager", "handleTaskRequest()", "init");
 
 		if (msg != null) {
 			switch ((MesBody_Mes2Manager) msg.getBody()) {
-			case RequestPersonIA: // 转发消息给agent,agent收到消息后，弹出一个弹窗,同时添加一个userTask到userTask列表中
+			// 都是把消息直接转发给agent，由agent根据消息body部分进行处理
+			case RequestPersonIA: // 需要用户反馈是否完成task的消息
+			case DelegatedAchieved: // 告诉委托方agent完成了任务
+			case DelegatedFailed: // 告诉委托方agent没有完成任务
+			case NoDelegatedAchieved: // 告诉主人自己完成了任务
+			case NoDelegatedFailed: // 告诉主人自己没有完成任务
 				getAideAgentInterface().handleUserServiceRequest(msg);
 				break;
+
 			default:
 				break;
 			}

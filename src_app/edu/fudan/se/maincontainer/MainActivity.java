@@ -88,7 +88,7 @@ public class MainActivity extends FragmentActivity {
 		public void onReceive(Context context, Intent intent) {
 			String action = intent.getAction();
 			if (action.equalsIgnoreCase("jade.task.NOTIFICATION")) {
-				showNotification();
+				showNotification(intent.getExtras().getString("Content"));
 			}
 		}
 
@@ -97,14 +97,13 @@ public class MainActivity extends FragmentActivity {
 	/**
 	 * 弹出一个通知
 	 */
-	private void showNotification() {
+	private void showNotification(String content) {
 
 		NotificationManager mNotificationManager = (NotificationManager) this
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 
 		Builder mBuilder = new Builder(this);
-		mBuilder.setContentTitle("New User Task")
-				.setContentText("You have received a new task.")
+		mBuilder.setContentTitle("New User Task").setContentText(content)
 				.setTicker("New Notification from SGM!")
 				.setWhen(System.currentTimeMillis())
 				.setPriority(Notification.PRIORITY_HIGH).setOngoing(false)

@@ -23,8 +23,8 @@ import edu.fudan.se.log.Log;
  * 
  */
 public abstract class ElementMachine implements Runnable {
-	
-	private GoalModel goalModel;	//这个element machine所属于的goal model
+
+	private GoalModel goalModel; // 这个element machine所属于的goal model
 
 	private int level; // 这个主要是在安卓界面显示目标树的时候用的，指这个element处在第几层，root goal为0层
 
@@ -243,11 +243,9 @@ public abstract class ElementMachine implements Runnable {
 		Log.logDebug(this.getName(), "initialDo()", "init.");
 		// SGMMessage msg = this.getMsgPool().poll(); // 每次拿出一条消息
 		if (msg != null) {
-			Log.logDebug(
-					this.name,
-					"initialDo()",
-					"get a msg from " + msg.getSender().toString() + ", body is: "
-							+ msg.getBody());
+			Log.logDebug(this.name, "initialDo()",
+					"get a msg from " + msg.getSender().toString()
+							+ ", body is: " + msg.getBody());
 
 			// 收到消息后的行为处理
 			if (msg.getBody().equals(MesBody_Mes2Machine.ACTIVATE)) {
@@ -338,8 +336,8 @@ public abstract class ElementMachine implements Runnable {
 			if (msg.getBody().equals(MesBody_Mes2Machine.SUSPEND)) {
 				this.getMsgPool().poll(); // 如果消息真的是SUSPEND，那么就把它拿出来
 				Log.logDebug(this.getName(), "checkIfSuspend()",
-						"get a message from " + msg.getSender().toString() + "; body is: "
-								+ msg.getBody());
+						"get a message from " + msg.getSender().toString()
+								+ "; body is: " + msg.getBody());
 				this.setCurrentState(State.Suspended);
 				return true;
 			}
@@ -453,8 +451,8 @@ public abstract class ElementMachine implements Runnable {
 			if (msg.getBody().equals(MesBody_Mes2Machine.STOP)) {
 				this.getMsgPool().poll(); // 如果消息真的是STOP，那么就把它拿出来
 				Log.logDebug(this.getName(), "checkIfStop()",
-						"get a message from " + msg.getSender().toString() + "; body is: "
-								+ msg.getBody());
+						"get a message from " + msg.getSender().toString()
+								+ "; body is: " + msg.getBody());
 				// 收到STOP消息后把自己状态设置为stop
 				this.setCurrentState(State.Stop);
 				return true;
@@ -653,8 +651,7 @@ public abstract class ElementMachine implements Runnable {
 	 * @return true 发送成功, false 发送失败
 	 */
 	public boolean sendMessageToParent(MesBody body) {
-		SGMMessage msg = new SGMMessage("TOPARENT", 
-				null, null, this.getName(), 
+		SGMMessage msg = new SGMMessage("TOPARENT", null, null, this.getName(),
 				null, null, this.getParentGoal().getName(), body);
 		if (this.getParentGoal().getMsgPool().offer(msg)) {
 			// 发送成功
@@ -665,6 +662,26 @@ public abstract class ElementMachine implements Runnable {
 			return false;
 		}
 
+	}
+
+	/**
+	 * 发送消息给manager
+	 * 
+	 * @param msg
+	 *            要发送的消息
+	 */
+	public void sendMesToManager(SGMMessage msg) {
+		Log.logDebug(this.getName(), "sendMesToManager()", "init.");
+
+		if (this.getGoalModel().getGoalModelManager().getMsgPool().offer(msg)) {
+			Log.logMessage(msg, true);
+			Log.logDebug(this.getName(), "sendMesToManager()",
+					"send a " + msg.getBody() + " message to Manager succeed!");
+		} else {
+			Log.logMessage(msg, false);
+			Log.logError(this.getName(), "sendMesToManager()",
+					"send a " + msg.getBody() + " message to Manager error!");
+		}
 	}
 
 	/**

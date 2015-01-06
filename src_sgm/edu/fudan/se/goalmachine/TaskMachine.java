@@ -3,7 +3,6 @@
  */
 package edu.fudan.se.goalmachine;
 
-import edu.fudan.se.goalmachine.message.MesBody;
 import edu.fudan.se.goalmachine.message.MesBody_Mes2Machine;
 import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
 import edu.fudan.se.goalmachine.message.SGMMessage;
@@ -93,7 +92,14 @@ public abstract class TaskMachine extends ElementMachine {
 				executingDo_waitingEnd(msg);
 			} else {
 				// 发送消息给agent,让agent提醒用户需要他的参与
-				sendMesToManager();
+				
+				SGMMessage msgToManager = new SGMMessage("ELEMENT_MESSAGE", null, this
+						.getGoalModel().getName(), this.getName(), null, null, null,
+						MesBody_Mes2Manager.RequestPersonIA);
+				msgToManager.setDescription(this.getDescription());
+				
+				sendMesToManager(msgToManager);
+				
 				isSendUIMesDone = true;
 			}
 		} else { // 不需要人的参与
@@ -105,26 +111,6 @@ public abstract class TaskMachine extends ElementMachine {
 
 	}
 
-	/**
-	 * 发送消息给manager,让manager发送消息给agent，提醒用户需要他的参与
-	 */
-	private void sendMesToManager() {
-		Log.logDebug(this.getName(), "sendMesToManager()", "init.");
-		SGMMessage msg = new SGMMessage("TASK_REQUEST", null, this
-				.getGoalModel().getName(), this.getName(), null, null, null,
-				MesBody_Mes2Manager.RequestPersonIA);
-		msg.setDescription(this.getDescription());
-
-		if (this.getGoalModel().getGoalModelManager().getMsgPool().offer(msg)) {
-			Log.logMessage(msg, true);
-			Log.logDebug(this.getName(), "sendMesToManager()",
-					"send a RequestPersonIA message to Manager succeed!");
-		} else {
-			Log.logMessage(msg, false);
-			Log.logError(this.getName(), "sendMesToManager()",
-					"send a RequestPersonIA message to Manager error!");
-		}
-	}
 
 	/**
 	 * executing状态中do所做的action：不需要人的参与，直接根据具体的task有不同的具体执行行为，抽象方法，在实例化时具体实现
