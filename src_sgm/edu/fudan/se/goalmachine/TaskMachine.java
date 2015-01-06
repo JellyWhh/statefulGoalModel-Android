@@ -62,7 +62,7 @@ public abstract class TaskMachine extends ElementMachine {
 		// SGMMessage msg = this.getMsgPool().poll(); // 每次拿出一条消息
 		if (msg != null) {
 			Log.logDebug(this.getName(), "activateDo()", "get a message from "
-					+ msg.getSender() + "; body is: " + msg.getBody());
+					+ msg.getSender().toString() + "; body is: " + msg.getBody());
 
 			// 消息内容是START，表示父目标让当前目标开始状态转换
 			if (msg.getBody().equals("START")) {
@@ -122,17 +122,17 @@ public abstract class TaskMachine extends ElementMachine {
 		// SGMMessage msg = this.getMsgPool().poll(); // 拿出一条消息
 		if (msg != null) {
 			Log.logDebug(this.getName(), "executingDo_waitingEnd()",
-					"get a message from " + msg.getSender() + "; body is: "
+					"get a message from " + msg.getSender().toString() + "; body is: "
 							+ msg.getBody());
 
-			if (msg.getBody().equals("END")) { // 收到外部UI的END消息
+			if (msg.getBody().equals("TASK_END")) { // 收到外部UI的END消息
 				this.getMsgPool().poll();
 				this.setCurrentState(this.transition(State.Executing,
 						this.getPostCondition()));
 			} else if (msg.getBody().equals("SUSPEND")) { // 收到父目标的SUSPEND消息
 				this.getMsgPool().poll();
 				this.setCurrentState(State.Suspended);
-			}else if (msg.getBody().equals("QUIT")) {	//用户没有完成这个任务，放弃了
+			}else if (msg.getBody().equals("TASK_QUIT")) {	//用户没有完成这个任务，放弃了
 				this.getMsgPool().poll();
 				this.setCurrentState(State.Failed);
 			}
@@ -149,7 +149,7 @@ public abstract class TaskMachine extends ElementMachine {
 		// SGMMessage msg = this.getMsgPool().poll(); // 每次拿出一条消息
 		if (msg != null) {
 			Log.logDebug(this.getName(), "suspendedDo()", "get a message from "
-					+ msg.getSender() + "; body is: " + msg.getBody());
+					+ msg.getSender().toString() + "; body is: " + msg.getBody());
 			if (msg.getBody().equals("RESUME")) {
 				this.getMsgPool().poll();
 				// 把自己状态设置为executing,同时resetSuspendEntry

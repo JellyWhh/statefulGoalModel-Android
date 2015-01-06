@@ -31,20 +31,20 @@ public class GoalModelDetailsActivity extends FragmentActivity {
 				.getSerializableExtra("goalmodelposition");
 
 		GoalModel goalModel = ((SGMApplication) getApplication())
-				.getGoalModelList().get(goalmodelposition);
+				.getGoalModelManager().getGoalModelList()
+				.get(goalmodelposition);
 
 		// 获取全局变量中保存的agentNickname
-//		Log.i("GoalModelDetailsActivity",
-//				((SGMApplication) getApplication()).getAgentNickname());
-//		String agentNickname = ((SGMApplication) getApplication())
-//				.getAgentNickname();
+		// Log.i("GoalModelDetailsActivity",
+		// ((SGMApplication) getApplication()).getAgentNickname());
+		// String agentNickname = ((SGMApplication) getApplication())
+		// .getAgentNickname();
 
 		if (savedInstanceState == null) {
 			FragmentTransaction transaction = getSupportFragmentManager()
 					.beginTransaction();
 			transaction.add(R.id.container,
-					new GoalModelDetailsFragment(goalModel))
-					.commit();
+					new GoalModelDetailsFragment(goalModel)).commit();
 			// getFragmentManager().beginTransaction()
 			// .add(R.id.container, new MainFragment()).commit();
 		}

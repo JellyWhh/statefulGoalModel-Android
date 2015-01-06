@@ -7,6 +7,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import edu.fudan.se.goalmachine.ElementMachine;
 import edu.fudan.se.goalmachine.SGMMessage;
+import edu.fudan.se.goalmachine.SGMMessage.Messager;
 import edu.fudan.se.goalmachine.TaskMachine;
 import edu.fudan.se.log.Log;
 
@@ -24,6 +25,10 @@ public class GoalModelManager implements Runnable {
 	public void addGoalModel(GoalModel gm) {
 		this.goalModelList.add(gm);
 	}
+	
+	public List<GoalModel> getGoalModelList(){
+		return this.goalModelList;
+	}
 
 	@Override
 	public void run() {
@@ -33,14 +38,17 @@ public class GoalModelManager implements Runnable {
 			// 处理消息
 			SGMMessage msg = this.getMsgPool().peek();
 
-			// 处理Agent发来的外部事件
-			if (msg.getHeader().equals("EXTERNAL_EVENT"))
-				handleExternalEvent(msg);
-
-			// 处理Task发来的请求事件
-			if (msg.getHeader().equals("TASK_REQUEST"))
-				handleTaskRequest(msg);
-
+			
+			if(msg != null){
+				//处理Agent发来的外部事件
+				if(msg.getHeader().equals("EXTERNAL_EVENT"))
+					handleExternalEvent(msg);
+				
+				//处理Task发来的请求事件
+				if(msg.getHeader().equals("TASK_REQUEST"))
+					handleTaskRequest(msg);
+			}
+			
 			try {
 				Thread.sleep(2 * 1000);
 			} catch (InterruptedException e) {
@@ -59,39 +67,43 @@ public class GoalModelManager implements Runnable {
 		Log.logDebug("GoalModelManager", "handleExternalEvent()", "init");
 		GoalModel targetGoalModel = null;
 		TaskMachine tm = null;
-		String receiver = msg.getReceiver();
-		String targetTaskName = receiver.split("@")[0];
-		String targetGoalModelName = receiver.split("@")[1];
-
-		for (GoalModel gm : goalModelList) {
-			if (gm.getName().equals(targetGoalModelName)) {
+		
+		Messager receiver = msg.getReceiver();
+		String targetTaskName = receiver.getElementName();
+		String targetGoalModelName = receiver.getGoalModelName();
+		for(GoalModel gm : goalModelList){
+			if(gm.getName().equals(targetGoalModelName)){
 				targetGoalModel = gm;
 				for (ElementMachine em : gm.getElementMachines()) {
 					if (em.getName().equals(targetTaskName))
 						tm = (TaskMachine) em;
 				}
-				break;
 			}
 		}
-		if (targetGoalModel != null) {
-			switch (msg.getBody()) {
+
+		
+		if(targetGoalModel != null){
+			switch(msg.getBody()){
 			case "START":
-				start(targetGoalModel);
+				start(targetGoalModel, msg);
 				break;
 			case "STOP":
-				stop(targetGoalModel);
+				stop(targetGoalModel, msg);
 				break;
 			case "SUSPEND":
-				suspend(targetGoalModel);
+				suspend(targetGoalModel, msg);
 				break;
 			case "RESUME":
-				resume(targetGoalModel);
+				resume(targetGoalModel, msg);
 				break;
 			case "RESET":
-				reset(targetGoalModel);
+				reset(targetGoalModel, msg);
+				break;
+			case "TASK_END":
+			case "TASK_QUIT":
+				endTaskMachine(tm, msg);
 				break;
 			default:
-				endTaskMachine(tm, msg.getBody());
 			}
 		} else {
 			Log.logError("GoalModelManager:" + targetGoalModelName,
@@ -109,8 +121,9 @@ public class GoalModelManager implements Runnable {
 	 * @param goalModel
 	 *            要start的goal model
 	 */
-	private void start(GoalModel goalModel) {
-		Log.logDebug("GoalModelManager:" + goalModel.getName(), "start()",
+
+	private void start(GoalModel goalModel, SGMMessage msg) {
+		Log.logDebug("GoalModelController:" + goalModel.getName(), "start()",
 				"init.");
 		if (goalModel.getElementMachines() != null
 				&& goalModel.getElementMachines().size() != 0) {
@@ -119,7 +132,7 @@ public class GoalModelManager implements Runnable {
 				thread.start();
 			}
 			// 然后给root goal发送激活消息
-			sendMesToRoot(goalModel, "ACTIVATE");
+			sendMesToRoot(goalModel, msg);
 		} else {
 			Log.logError("GoalModelManager:" + goalModel.getName(), "start()",
 					"elementMachines is null or its size is 0!");
@@ -132,10 +145,10 @@ public class GoalModelManager implements Runnable {
 	 * @param goalModel
 	 *            要stop的goal model
 	 */
-	private void stop(GoalModel goalModel) {
-		Log.logDebug("GoalModelManager:" + goalModel.getName(), "stop()",
+	private void stop(GoalModel goalModel, SGMMessage msg) {
+		Log.logDebug("GoalModelController:" + goalModel.getName(), "stop()",
 				"init.");
-		sendMesToRoot(goalModel, "STOP");
+		sendMesToRoot(goalModel, msg);
 	}
 
 	/**
@@ -144,10 +157,10 @@ public class GoalModelManager implements Runnable {
 	 * @param goalModel
 	 *            要suspend的goal model
 	 */
-	private void suspend(GoalModel goalModel) {
-		Log.logDebug("GoalModelManager:" + goalModel.getName(), "suspend()",
+	private void suspend(GoalModel goalModel, SGMMessage msg) {
+		Log.logDebug("GoalModelController:" + goalModel.getName(), "suspend()",
 				"init.");
-		sendMesToRoot(goalModel, "SUSPEND");
+		sendMesToRoot(goalModel, msg);
 	}
 
 	/**
@@ -156,10 +169,10 @@ public class GoalModelManager implements Runnable {
 	 * @param goalModel
 	 *            要resume的goal model
 	 */
-	private void resume(GoalModel goalModel) {
-		Log.logDebug("GoalModelManager:" + goalModel.getName(), "resume()",
+	private void resume(GoalModel goalModel, SGMMessage msg) {
+		Log.logDebug("GoalModelController:" + goalModel.getName(), "resume()",
 				"init.");
-		sendMesToRoot(goalModel, "RESUME");
+		sendMesToRoot(goalModel, msg);
 	}
 
 	/**
@@ -168,8 +181,8 @@ public class GoalModelManager implements Runnable {
 	 * @param goalModel
 	 *            要reset的goal model
 	 */
-	private void reset(GoalModel goalModel) {
-		Log.logDebug("GoalModelManager:" + goalModel.getName(), "reset()",
+	private void reset(GoalModel goalModel, SGMMessage msg) {
+		Log.logDebug("GoalModelController:" + goalModel.getName(), "reset()",
 				"init.");
 		if (goalModel.getElementMachines() != null
 				&& goalModel.getElementMachines().size() != 0) {
@@ -190,20 +203,20 @@ public class GoalModelManager implements Runnable {
 	 * @param mes
 	 *            发送的消息内容，END为完成了，QUIT为没有完成
 	 */
-	private void endTaskMachine(TaskMachine taskMachine, String mes) {
-		Log.logDebug("GoalModelManager:" + taskMachine.getName(),
+	private void endTaskMachine(TaskMachine taskMachine, SGMMessage msg) {
+		Log.logDebug("GoalModelController:" + taskMachine.getName(),
 				"endTaskMachine()", "init.");
-		SGMMessage msg = new SGMMessage("TOTASK", "UI", taskMachine.getName(),
-				mes);
+//		SGMMessage msg = new SGMMessage("TOTASK", "UI", taskMachine.getName(),
+//				mes);
 		if (taskMachine.getMsgPool().offer(msg)) {
 			Log.logMessage(msg, true);
-			Log.logDebug("GoalModelManager:" + taskMachine.getName(),
-					"endTaskMachine()", "UI thread send a " + mes + " msg to "
+			Log.logDebug("GoalModelController:" + taskMachine.getName(),
+					"endTaskMachine()", "UI thread send a " + msg.getBody() + " msg to "
 							+ taskMachine.getName() + " succeed!");
 		} else {
 			Log.logMessage(msg, false);
-			Log.logError("GoalModelManager:" + taskMachine.getName(),
-					"endTaskMachine()", "UI thread send a " + mes + " msg to "
+			Log.logError("GoalModelController:" + taskMachine.getName(),
+					"endTaskMachine()", "UI thread send a " + msg.getBody() + " msg to "
 							+ taskMachine.getName() + " error!");
 		}
 
@@ -217,23 +230,23 @@ public class GoalModelManager implements Runnable {
 	 * @param mes
 	 *            要发送的消息
 	 */
-	private void sendMesToRoot(GoalModel goalModel, String mes) {
+	private void sendMesToRoot(GoalModel goalModel, SGMMessage msg) {
 		Log.logDebug("GoalModelManager:" + goalModel.getName(),
 				"sendMesToRoot()", "init.");
 		if (goalModel.getRootGoal() != null) {
-			SGMMessage msg = new SGMMessage("TOROOT", "UI", goalModel
-					.getRootGoal().getName(), mes);
+//			SGMMessage msg = new SGMMessage("TOROOT", "UI", goalModel
+//					.getRootGoal().getName(), mes);
 			if (goalModel.getRootGoal().getMsgPool().offer(msg)) {
 				Log.logMessage(msg, true);
-				Log.logDebug("GoalModelManager:" + goalModel.getName(),
-						"sendMesToRoot()", "UI thread send a " + mes
+				Log.logDebug("GoalModelController:" + goalModel.getName(),
+						"sendMesToRoot()", "UI thread send a " + msg.getBody()
 								+ " msg to "
 								+ goalModel.getRootGoal().getName()
 								+ " succeed!");
 			} else {
 				Log.logMessage(msg, false);
-				Log.logError("GoalModelManager:" + goalModel.getName(),
-						"sendMesToRoot()", "UI thread send a " + mes
+				Log.logError("GoalModelController:" + goalModel.getName(),
+						"sendMesToRoot()", "UI thread send a " + msg.getBody()
 								+ " msg to "
 								+ goalModel.getRootGoal().getName() + " error!");
 			}

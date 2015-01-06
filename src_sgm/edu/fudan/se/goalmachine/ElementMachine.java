@@ -240,7 +240,7 @@ public abstract class ElementMachine implements Runnable {
 			Log.logDebug(
 					this.name,
 					"initialDo()",
-					"get a msg from " + msg.getSender() + ", body is: "
+					"get a msg from " + msg.getSender().toString() + ", body is: "
 							+ msg.getBody());
 
 			// 收到消息后的行为处理
@@ -332,7 +332,7 @@ public abstract class ElementMachine implements Runnable {
 			if (msg.getBody().equals("SUSPEND")) {
 				this.getMsgPool().poll(); // 如果消息真的是SUSPEND，那么就把它拿出来
 				Log.logDebug(this.getName(), "checkIfSuspend()",
-						"get a message from " + msg.getSender() + "; body is: "
+						"get a message from " + msg.getSender().toString() + "; body is: "
 								+ msg.getBody());
 				this.setCurrentState(State.Suspended);
 				return true;
@@ -447,7 +447,7 @@ public abstract class ElementMachine implements Runnable {
 			if (msg.getBody().equals("STOP")) {
 				this.getMsgPool().poll(); // 如果消息真的是STOP，那么就把它拿出来
 				Log.logDebug(this.getName(), "checkIfStop()",
-						"get a message from " + msg.getSender() + "; body is: "
+						"get a message from " + msg.getSender().toString() + "; body is: "
 								+ msg.getBody());
 				// 收到STOP消息后把自己状态设置为stop
 				this.setCurrentState(State.Stop);
@@ -647,8 +647,9 @@ public abstract class ElementMachine implements Runnable {
 	 * @return true 发送成功, false 发送失败
 	 */
 	public boolean sendMessageToParent(String body) {
-		SGMMessage msg = new SGMMessage("TOPARENT", this.getName(), this
-				.getParentGoal().getName(), body);
+		SGMMessage msg = new SGMMessage("TOPARENT", 
+				null, null, this.getName(), 
+				null, null, this.getParentGoal().getName(), body);
 		if (this.getParentGoal().getMsgPool().offer(msg)) {
 			// 发送成功
 			Log.logMessage(msg, true);

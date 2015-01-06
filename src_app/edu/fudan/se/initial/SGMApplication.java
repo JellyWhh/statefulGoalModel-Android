@@ -12,10 +12,10 @@ import java.util.logging.Level;
 
 import edu.fudan.se.goalmachine.Condition;
 import edu.fudan.se.goalmachine.GoalMachine;
-import edu.fudan.se.goalmachine.SGMMessage;
 import edu.fudan.se.goalmachine.TaskMachine;
 import edu.fudan.se.goalmodel.GoalModel;
-import edu.fudan.se.goalmodel.GoalModelController;
+import edu.fudan.se.goalmodel.GoalModelManager;
+//import edu.fudan.se.goalmodel.GoalModelController;
 import edu.fudan.se.userMes.UserTask;
 
 import android.app.Application;
@@ -33,13 +33,13 @@ public class SGMApplication extends Application implements Serializable {
 
 	private Logger logger = Logger.getJADELogger(this.getClass().getName());
 
-	private ArrayList<GoalModel> goalModelList; // 全局变量，用来保存用户的goal model list
-
 	private ArrayList<UserTask> userTaskList;
 
 	private String agentNickname;
 
 	// private GoalModelController goalModelController;
+	
+	private GoalModelManager goalModelManager;
 
 	@Override
 	public void onCreate() {
@@ -52,10 +52,14 @@ public class SGMApplication extends Application implements Serializable {
 	 * 把用户的goal model list数据加载进来，如果以后要从xml文件里读取，就是在这里设置
 	 */
 	private void initialData() {
-		this.goalModelList = new ArrayList<>();
 		this.userTaskList = new ArrayList<>();
 
-		this.goalModelList.add(newGoalModel());
+		GoalModel gm = newGoalModel();
+		
+		goalModelManager = new GoalModelManager();
+		goalModelManager.addGoalModel(gm);
+		Thread gmm = new Thread(goalModelManager);
+		gmm.start();
 
 		// this.goalModelController = new
 		// GoalModelController(this.goalModelList);
@@ -80,16 +84,13 @@ public class SGMApplication extends Application implements Serializable {
 		}
 	}
 
-	public ArrayList<GoalModel> getGoalModelList() {
-		return this.goalModelList;
-	}
-
-	// public GoalModelController getGoalModelController(){
-	// return this.goalModelController;
-	// }
 
 	public String getAgentNickname() {
 		return this.agentNickname;
+	}
+	
+	public GoalModelManager getGoalModelManager(){
+		return this.goalModelManager;
 	}
 
 	public void setAgentNickname(String agentNickname) {
