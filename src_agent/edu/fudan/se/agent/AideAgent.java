@@ -5,11 +5,14 @@ package edu.fudan.se.agent;
 
 import android.content.Context;
 import android.util.Log;
+import edu.fudan.se.goalmachine.SGMMessage;
 import edu.fudan.se.goalmachine.TaskMachine;
 import edu.fudan.se.goalmodel.GoalModel;
 import edu.fudan.se.goalmodel.GoalModelController;
+import edu.fudan.se.goalmodel.GoalModelManager;
 import edu.fudan.se.pool.Message;
 import edu.fudan.se.pool.Pool;
+import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
@@ -31,6 +34,8 @@ public class AideAgent extends Agent implements AideAgentInterface {
 	private static final long serialVersionUID = 1L;
 
 	private GoalModelController goalModelController;
+	
+	private GoalModelManager goalModelManager;
 
 	private Context context;
 
@@ -42,6 +47,9 @@ public class AideAgent extends Agent implements AideAgentInterface {
 		if (args != null && args.length > 0) {
 			if (args[0] instanceof Context) {
 				context = (Context) args[0];
+			}
+			if(args[1] instanceof GoalModelManager){
+				goalModelManager = (GoalModelManager) args[1];
 			}
 		}
 
@@ -171,6 +179,26 @@ public class AideAgent extends Agent implements AideAgentInterface {
 					block();
 
 			}
+		});
+		
+		
+		//接受委托请求启动相应的goal model
+		addBehaviour(new CyclicBehaviour(){
+
+			@Override
+			public void action() {
+				// TODO Auto-generated method stub
+				ACLMessage msg = receive();
+				if(msg != null){
+					Log.i("MY_LOG", "Message received!");
+					String content = msg.getContent();
+					String goalModelName = content.split(";")[0];
+					String sender = content.split(";")[1];
+					SGMMessage inner_msg = new SGMMessage("EXTERNAL_EVENT", sender, goalModelName, "START");
+					goalModelManager.getMsgPool().offer(inner_msg);
+				}
+			}
+			
 		});
 
 	}
@@ -326,6 +354,78 @@ public class AideAgent extends Agent implements AideAgentInterface {
 			// TODO Auto-generated method stub
 			Log.i("MY_LOG", "End Task Machine...");
 			goalModelController.endTaskMachine(taskMachine, mes);
+		}
+	}
+
+	@Override
+	public void sendExternalEvent(SGMMessage msg) {
+		// TODO Auto-generated method stub
+		this.addBehaviour(new ExternalEventSender(this, msg));
+	}
+
+	@Override
+	public void sendUserServiceRequest(String request, String sender) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void sendDelegateServiceRequest(String targetAgent,
+			String goalModelName, String sender) {
+		// TODO Auto-generated method stub
+		this.addBehaviour(new DelegateServiceSender(this, targetAgent, goalModelName, sender));
+	}
+
+	@Override
+	public void sendLocalServiceRequest(String serviceDescription, String sender) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	private class ExternalEventSender extends OneShotBehaviour {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -2331623840990344209L;
+		private SGMMessage msg;
+
+		private ExternalEventSender(Agent a, SGMMessage msg){
+			super(a);
+			this.msg = msg;
+		}
+		
+		@Override
+		public void action() {
+			// TODO Auto-generated method stub
+			Log.i("MY_LOG", "Send externa event...");
+			goalModelManager.getMsgPool().offer(msg);
+		}
+	
+	}
+	
+	private class DelegateServiceSender extends OneShotBehaviour {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -6490156755551520310L;
+		private String targetAgent;
+		private String goalModelName;
+		private String sender;
+		
+		private DelegateServiceSender(Agent a, String targetAgent, String goalModelName, String sender){
+			super(a);
+			this.targetAgent = targetAgent;
+			this.goalModelName = goalModelName;
+			this.sender = sender;
+		}
+
+		@Override
+		public void action() {
+			// TODO Auto-generated method stub
+			ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+			msg.addReceiver(new AID(targetAgent, AID.ISLOCALNAME));
+			msg.setContent(goalModelName + ";" + sender);
+			send(msg);
 		}
 	}
 
