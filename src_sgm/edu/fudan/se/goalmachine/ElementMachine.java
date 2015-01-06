@@ -7,6 +7,9 @@ import java.util.Date;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import edu.fudan.se.goalmachine.message.MesBody_Mes2Machine;
+import edu.fudan.se.goalmachine.message.MesBody;
+import edu.fudan.se.goalmachine.message.SGMMessage;
 import edu.fudan.se.goalmachine.support.CauseToRepairing;
 import edu.fudan.se.goalmachine.support.RecordedState;
 import edu.fudan.se.log.Log;
@@ -244,7 +247,7 @@ public abstract class ElementMachine implements Runnable {
 							+ msg.getBody());
 
 			// 收到消息后的行为处理
-			if (msg.getBody().equals("ACTIVATE")) {
+			if (msg.getBody().equals(MesBody_Mes2Machine.ACTIVATE)) {
 				this.getMsgPool().poll();
 				this.setCurrentState(State.Activated);
 
@@ -329,7 +332,7 @@ public abstract class ElementMachine implements Runnable {
 		if (msg != null) {
 
 			// 消息内容是SUSPEND，表示父目标让当前目标进入挂起
-			if (msg.getBody().equals("SUSPEND")) {
+			if (msg.getBody().equals(MesBody_Mes2Machine.SUSPEND)) {
 				this.getMsgPool().poll(); // 如果消息真的是SUSPEND，那么就把它拿出来
 				Log.logDebug(this.getName(), "checkIfSuspend()",
 						"get a message from " + msg.getSender().toString() + "; body is: "
@@ -380,7 +383,7 @@ public abstract class ElementMachine implements Runnable {
 		Log.logDebug(this.getName(), "failedEntry()", "init.");
 		// 先告诉父目标自己进入executing状态了
 		if (this.getParentGoal() != null) {
-			if (sendMessageToParent("FAILED")) {
+			if (sendMessageToParent(MesBody_Mes2Machine.FAILED)) {
 				Log.logDebug(this.getName(), "failedEntry()",
 						"send FAILED msg to parent succeed!");
 			} else {
@@ -408,7 +411,7 @@ public abstract class ElementMachine implements Runnable {
 		Log.logDebug(this.getName(), "achievedEntry()", "init.");
 
 		if (this.getParentGoal() != null) { // 不是root goal
-			if (this.sendMessageToParent("ACHIEVEDDONE")) {
+			if (this.sendMessageToParent(MesBody_Mes2Machine.ACHIEVEDDONE)) {
 				Log.logDebug(this.getName(), "achievedEntry()",
 						"send ACHIEVEDDONE msg to parent succeed!");
 			} else {
@@ -444,7 +447,7 @@ public abstract class ElementMachine implements Runnable {
 		if (msg != null) {
 
 			// 消息内容是STOP，表示父目标让当前目标stop
-			if (msg.getBody().equals("STOP")) {
+			if (msg.getBody().equals(MesBody_Mes2Machine.STOP)) {
 				this.getMsgPool().poll(); // 如果消息真的是STOP，那么就把它拿出来
 				Log.logDebug(this.getName(), "checkIfStop()",
 						"get a message from " + msg.getSender().toString() + "; body is: "
@@ -646,7 +649,7 @@ public abstract class ElementMachine implements Runnable {
 	 *            消息的body部分
 	 * @return true 发送成功, false 发送失败
 	 */
-	public boolean sendMessageToParent(String body) {
+	public boolean sendMessageToParent(MesBody body) {
 		SGMMessage msg = new SGMMessage("TOPARENT", 
 				null, null, this.getName(), 
 				null, null, this.getParentGoal().getName(), body);
@@ -722,21 +725,21 @@ public abstract class ElementMachine implements Runnable {
 	 */
 	public boolean filterMessage(SGMMessage msg) {
 		if (msg != null) {
-			if (msg.getBody().equals("SUSPEND")
+			if (msg.getBody().equals(MesBody_Mes2Machine.SUSPEND)
 					&& (this.getCurrentState() != State.Executing)) {
 				this.getMsgPool().poll(); // 把它拿出来
 				Log.logDebug(this.getName(), "filterMessage()",
 						"filter a SUSPEND msg!");
 				return true;
 			}
-			if (msg.getBody().equals("RESUME")
+			if (msg.getBody().equals(MesBody_Mes2Machine.RESUME)
 					&& (this.getCurrentState() != State.Suspended)) {
 				this.getMsgPool().poll(); // 把它拿出来
 				Log.logDebug(this.getName(), "filterMessage()",
 						"filter a RESUME msg!");
 				return true;
 			}
-			if (msg.getBody().equals("ACTIVATEDDONE")
+			if (msg.getBody().equals(MesBody_Mes2Machine.ACTIVATEDDONE)
 					&& (this.getCurrentState() != State.Activated)) {
 				this.getMsgPool().poll(); // 把它拿出来
 				Log.logDebug(this.getName(), "filterMessage()",

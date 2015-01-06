@@ -12,7 +12,7 @@ import java.util.Date;
 
 import android.os.Environment;
 
-import edu.fudan.se.goalmachine.SGMMessage;
+import edu.fudan.se.goalmachine.message.SGMMessage;
 
 /**
  * 把程序运行中的各种日志写入到日志文件，包括Debug log和Error log等

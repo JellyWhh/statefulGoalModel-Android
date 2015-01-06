@@ -8,7 +8,8 @@ import jade.wrapper.ControllerException;
 import jade.wrapper.StaleProxyException;
 import edu.fudan.se.R;
 import edu.fudan.se.agent.AideAgentInterface;
-import edu.fudan.se.goalmachine.SGMMessage;
+import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
+import edu.fudan.se.goalmachine.message.SGMMessage;
 import edu.fudan.se.goalmodel.GoalModel;
 import edu.fudan.se.initial.SGMApplication;
 import android.annotation.SuppressLint;
@@ -47,36 +48,37 @@ public class GoalModelDetailsFragment extends Fragment {
 	private TextView tv_gmdetails_name;
 
 	private AideAgentInterface aideAgentInterface; // agent interface
-//	private String agentNickname;
+	// private String agentNickname;
 
 	public GoalModelDetailsFragment(GoalModel goalModel) {
 		this.goalModel = goalModel;
-//		this.agentNickname = agentNickname;
+		// this.agentNickname = agentNickname;
 
-//		try {
-//			Log.i("GoalModelDetailsFragment", "getting agent interface..."
-//					+ this.agentNickname);
-//			aideAgentInterface = MicroRuntime.getAgent(this.agentNickname)
-//					.getO2AInterface(AideAgentInterface.class);
-//			Log.i("GoalModelDetailsFragment", "check interface, null?: "
-//					+ (aideAgentInterface == null));
-//		} catch (StaleProxyException e) {
-//			Log.e("GoalModelDetailsFragment", "StaleProxyException");
-//			e.printStackTrace();
-//		} catch (ControllerException e) {
-//			Log.e("GoalModelDetailsFragment", "ControllerException");
-//			e.printStackTrace();
-//		}
+		// try {
+		// Log.i("GoalModelDetailsFragment", "getting agent interface..."
+		// + this.agentNickname);
+		// aideAgentInterface = MicroRuntime.getAgent(this.agentNickname)
+		// .getO2AInterface(AideAgentInterface.class);
+		// Log.i("GoalModelDetailsFragment", "check interface, null?: "
+		// + (aideAgentInterface == null));
+		// } catch (StaleProxyException e) {
+		// Log.e("GoalModelDetailsFragment", "StaleProxyException");
+		// e.printStackTrace();
+		// } catch (ControllerException e) {
+		// Log.e("GoalModelDetailsFragment", "ControllerException");
+		// e.printStackTrace();
+		// }
 	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		application = (SGMApplication) getActivity().getApplication();
 		try {
-			aideAgentInterface = MicroRuntime.getAgent(application.getAgentNickname())
-					.getO2AInterface(AideAgentInterface.class);
+			aideAgentInterface = MicroRuntime.getAgent(
+					application.getAgentNickname()).getO2AInterface(
+					AideAgentInterface.class);
 		} catch (StaleProxyException e) {
 			Log.e("GoalModelDetailsFragment", "StaleProxyException");
 			e.printStackTrace();
@@ -213,45 +215,40 @@ public class GoalModelDetailsFragment extends Fragment {
 			switch (v.getId()) {
 
 			case R.id.bt_dialog_start:
-//				aideAgentInterface.startGoalModel(goalModel);
-				aideAgentInterface.sendExternalEvent(new SGMMessage("EXTERNAL_EVENT",
-						null, null, null,
-						null, goalModel.getName(), null,
-						"START"));
+				// aideAgentInterface.startGoalModel(goalModel);
+				aideAgentInterface.sendExternalEvent(new SGMMessage(
+						"EXTERNAL_EVENT", null, null, null, null, goalModel
+								.getName(), null, MesBody_Mes2Manager.StartGM));
 				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				break;
 			case R.id.bt_dialog_suspend:
-//				aideAgentInterface.suspendGoalModel(goalModel);
-				aideAgentInterface.sendExternalEvent(new SGMMessage("EXTERNAL_EVENT",
-						null, null, null,
-						null, goalModel.getName(), null,
-						"SUSPEND"));
+				// aideAgentInterface.suspendGoalModel(goalModel);
+				aideAgentInterface.sendExternalEvent(new SGMMessage(
+						"EXTERNAL_EVENT", null, null, null, null, goalModel
+								.getName(), null, MesBody_Mes2Manager.SuspendGM));
 				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				break;
 			case R.id.bt_dialog_resume:
-//				aideAgentInterface.resumeGoalModel(goalModel);
-				aideAgentInterface.sendExternalEvent(new SGMMessage("EXTERNAL_EVENT",
-						null, null, null,
-						null, goalModel.getName(), null,
-						"RESUME"));
+				// aideAgentInterface.resumeGoalModel(goalModel);
+				aideAgentInterface.sendExternalEvent(new SGMMessage(
+						"EXTERNAL_EVENT", null, null, null, null, goalModel
+								.getName(), null, MesBody_Mes2Manager.ResumeGM));
 				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				break;
 			case R.id.bt_dialog_stop:
-//				aideAgentInterface.stopGoalModel(goalModel);
-				aideAgentInterface.sendExternalEvent(new SGMMessage("EXTERNAL_EVENT",
-						null, null, null,
-						null, goalModel.getName(), null,
-						"STOP"));
+				// aideAgentInterface.stopGoalModel(goalModel);
+				aideAgentInterface.sendExternalEvent(new SGMMessage(
+						"EXTERNAL_EVENT", null, null, null, null, goalModel
+								.getName(), null, MesBody_Mes2Manager.StopGM));
 				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				break;
 			case R.id.bt_dialog_reset:
-				//reset的时候要把让用户做的任务列表中的相关任务清除
+				// reset的时候要把让用户做的任务列表中的相关任务清除
 				application.clearTasksOfGoalModel(goalModel);
-//				aideAgentInterface.resetGoalModel(goalModel);
-				aideAgentInterface.sendExternalEvent(new SGMMessage("EXTERNAL_EVENT",
-						null, null, null,
-						null, goalModel.getName(), null,
-						"RESET"));
+				// aideAgentInterface.resetGoalModel(goalModel);
+				aideAgentInterface.sendExternalEvent(new SGMMessage(
+						"EXTERNAL_EVENT", null, null, null, null, goalModel
+								.getName(), null, MesBody_Mes2Manager.ResetGM));
 				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				break;
 			case R.id.bt_dialog_cancel:

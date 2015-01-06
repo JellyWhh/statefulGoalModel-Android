@@ -10,8 +10,8 @@ import java.io.ObjectOutputStream;
 
 import android.content.Context;
 import android.util.Log;
-import edu.fudan.se.goalmachine.SGMMessage;
 import edu.fudan.se.goalmachine.TaskMachine;
+import edu.fudan.se.goalmachine.message.SGMMessage;
 import edu.fudan.se.goalmodel.GoalModel;
 //import edu.fudan.se.goalmodel.GoalModelController;
 import edu.fudan.se.goalmodel.GoalModelManager;

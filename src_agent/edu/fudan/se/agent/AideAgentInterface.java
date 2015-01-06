@@ -1,6 +1,6 @@
 package edu.fudan.se.agent;
 
-import edu.fudan.se.goalmachine.SGMMessage;
+import edu.fudan.se.goalmachine.message.SGMMessage;
 
 public interface AideAgentInterface {
 

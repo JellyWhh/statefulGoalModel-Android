@@ -3,6 +3,8 @@
  */
 package edu.fudan.se.goalmachine;
 
+import edu.fudan.se.goalmachine.message.MesBody_Mes2Machine;
+import edu.fudan.se.goalmachine.message.SGMMessage;
 import edu.fudan.se.log.Log;
 
 /**
@@ -39,7 +41,7 @@ public abstract class TaskMachine extends ElementMachine {
 	public void activatedEntry() {
 		Log.logDebug(this.getName(), "activatedEntry()", "init.");
 
-		if (this.sendMessageToParent("ACTIVATEDDONE")) {
+		if (this.sendMessageToParent(MesBody_Mes2Machine.ACTIVATEDDONE)) {
 			Log.logDebug(this.getName(), "activatedEntry()",
 					"send ACTIVATEDDONE msg to "
 							+ this.getParentGoal().getName() + " succeed!");
@@ -65,7 +67,7 @@ public abstract class TaskMachine extends ElementMachine {
 					+ msg.getSender().toString() + "; body is: " + msg.getBody());
 
 			// 消息内容是START，表示父目标让当前目标开始状态转换
-			if (msg.getBody().equals("START")) {
+			if (msg.getBody().equals(MesBody_Mes2Machine.START)) {
 				this.getMsgPool().poll();
 				this.setCurrentState(this.transition(State.Activated,
 						this.getPreCondition()));
@@ -125,14 +127,14 @@ public abstract class TaskMachine extends ElementMachine {
 					"get a message from " + msg.getSender().toString() + "; body is: "
 							+ msg.getBody());
 
-			if (msg.getBody().equals("TASK_END")) { // 收到外部UI的END消息
+			if (msg.getBody().equals(MesBody_Mes2Machine.TASK_END)) { // 收到外部UI的END消息
 				this.getMsgPool().poll();
 				this.setCurrentState(this.transition(State.Executing,
 						this.getPostCondition()));
-			} else if (msg.getBody().equals("SUSPEND")) { // 收到父目标的SUSPEND消息
+			} else if (msg.getBody().equals(MesBody_Mes2Machine.SUSPEND)) { // 收到父目标的SUSPEND消息
 				this.getMsgPool().poll();
 				this.setCurrentState(State.Suspended);
-			}else if (msg.getBody().equals("TASK_QUIT")) {	//用户没有完成这个任务，放弃了
+			}else if (msg.getBody().equals(MesBody_Mes2Machine.TASK_QUIT)) {	//用户没有完成这个任务，放弃了
 				this.getMsgPool().poll();
 				this.setCurrentState(State.Failed);
 			}
@@ -150,7 +152,7 @@ public abstract class TaskMachine extends ElementMachine {
 		if (msg != null) {
 			Log.logDebug(this.getName(), "suspendedDo()", "get a message from "
 					+ msg.getSender().toString() + "; body is: " + msg.getBody());
-			if (msg.getBody().equals("RESUME")) {
+			if (msg.getBody().equals(MesBody_Mes2Machine.RESUME)) {
 				this.getMsgPool().poll();
 				// 把自己状态设置为executing,同时resetSuspendEntry
 				this.setCurrentState(State.Executing);
