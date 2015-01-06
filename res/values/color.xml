@@ -8,6 +8,6 @@
     
     
     <color name="focus_black">#000</color>
-    <color name="unfocus_grey">#333</color>
+    <color name="unfocus_grey">#888</color>
 
 </resources>

@@ -96,7 +96,7 @@ public class MessageFragment extends Fragment {
 		fragmentsList.add(taskFragment);
 		fragmentsList.add(mesFragment);
 
-		mPager.setAdapter(new MyFragmentPagerAdapter(getChildFragmentManager(),
+		mPager.setAdapter(new MyMessageFragmentPagerAdapter(getChildFragmentManager(),
 				fragmentsList));
 		mPager.setOnPageChangeListener(new MyOnPageChangeListener());
 		mPager.setCurrentItem(0);
@@ -158,14 +158,14 @@ public class MessageFragment extends Fragment {
 	}
 }
 
-class MyFragmentPagerAdapter extends FragmentPagerAdapter {
+class MyMessageFragmentPagerAdapter extends FragmentPagerAdapter {
 	private ArrayList<Fragment> fragmentsList;
 
-	public MyFragmentPagerAdapter(FragmentManager fm) {
+	public MyMessageFragmentPagerAdapter(FragmentManager fm) {
 		super(fm);
 	}
 
-	public MyFragmentPagerAdapter(FragmentManager fm,
+	public MyMessageFragmentPagerAdapter(FragmentManager fm,
 			ArrayList<Fragment> fragments) {
 		super(fm);
 		this.fragmentsList = fragments;
