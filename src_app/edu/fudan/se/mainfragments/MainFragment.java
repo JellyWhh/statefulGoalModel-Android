@@ -43,12 +43,6 @@ public class MainFragment extends Fragment {
 	private int offset;// 图片移动的偏移量
 
 	Fragment homeFragment, mygoalFragment, settingFragment;
-	
-	private int currentItem;
-
-	public MainFragment(int currentItem) {
-		this.currentItem = currentItem;
-	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -127,7 +121,7 @@ public class MainFragment extends Fragment {
 		mPager.setAdapter(new MyFragmentPagerAdapter(getChildFragmentManager(),
 				fragmentsList));
 		mPager.setOnPageChangeListener(new MyOnPageChangeListener());
-		mPager.setCurrentItem(currentItem);
+		mPager.setCurrentItem(0);
 	}
 
 	/**

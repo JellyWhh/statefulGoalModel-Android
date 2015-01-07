@@ -11,8 +11,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import edu.fudan.se.agent.AideAgentInterface;
 import edu.fudan.se.goalmachine.ElementMachine;
+import edu.fudan.se.goalmachine.GoalMachine;
 import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
 import edu.fudan.se.goalmachine.message.MesBody_Mes2Machine;
+import edu.fudan.se.goalmachine.message.MesHeader_Mes2Manger;
 import edu.fudan.se.goalmachine.message.SGMMessage;
 import edu.fudan.se.goalmachine.message.SGMMessage.Messager;
 import edu.fudan.se.goalmachine.TaskMachine;
@@ -40,17 +42,27 @@ public class GoalModelManager implements Runnable {
 			SGMMessage msg = this.getMsgPool().peek(); // peek是拿出来看看，但是没有从消息队列中remove
 
 			if (msg != null) {
-				// 处理Agent发来的外部事件
-				if (msg.getHeader().equals("EXTERNAL_EVENT")) {
-					msg = this.getMsgPool().poll(); // poll是remove
-					handleExternalEvent(msg);
+
+				msg = this.getMsgPool().poll(); // poll是remove
+
+				switch ((MesHeader_Mes2Manger) msg.getHeader()) {
+
+				case LOCAL_AGENT_MESSAGE: // 本地agent发来的消息，也就是通过UI操作发给agent然后agent又转发的消息
+					handleLocalAgentMessage(msg);
+					break;
+
+				case EXTERNAL_AGENT_MESSAGE: // 外部agent发来的消息，也是就外部agent发来消息然后本地agent转发的消息
+					handleExternalAgentMessage(msg);
+					break;
+
+				case ELEMENT_MESSAGE: // 本地element machine发来的消息
+					handleElementMessage(msg);
+					break;
+
+				default:
+					break;
 				}
 
-				// 处理element发来的message
-				if (msg.getHeader().equals("ELEMENT_MESSAGE")) {
-					msg = this.getMsgPool().poll();
-					handleElementMessage(msg);
-				}
 			}
 
 			try {
@@ -63,25 +75,28 @@ public class GoalModelManager implements Runnable {
 	}
 
 	/**
-	 * 处理外部事件，agent通过manager发送给GoalModel的各种命令消息
+	 * 本地agent发来的消息，也就是通过UI操作发给agent然后agent又转发的消息
 	 * 
 	 * @param msg
-	 *            要发送的消息内容
+	 *            消息内容
 	 */
-	private void handleExternalEvent(SGMMessage msg) {
-		Log.logDebug("GoalModelManager", "handleExternalEvent()", "init");
+	private void handleLocalAgentMessage(SGMMessage msg) {
+		Log.logDebug("GoalModelManager", "handleLocalAgentMessage()", "init");
 		GoalModel targetGoalModel = null;
 		TaskMachine tm = null;
 
 		Messager receiver = msg.getReceiver();
 		String targetTaskName = receiver.getElementName();
 		String targetGoalModelName = receiver.getGoalModelName();
-		for (GoalModel gm : goalModelList) {
+
+		outer: for (GoalModel gm : goalModelList) {
 			if (gm.getName().equals(targetGoalModelName)) {
 				targetGoalModel = gm;
 				for (ElementMachine em : gm.getElementMachines()) {
-					if (em.getName().equals(targetTaskName))
+					if (em.getName().equals(targetTaskName)) {
 						tm = (TaskMachine) em;
+						break outer;
+					}
 				}
 			}
 		}
@@ -116,22 +131,77 @@ public class GoalModelManager implements Runnable {
 	}
 
 	/**
+	 * 外部agent发来的消息，也是就外部agent发来消息然后本地agent转发的消息
+	 * 
+	 * @param msg
+	 *            消息内容
+	 */
+	private void handleExternalAgentMessage(SGMMessage msg) {
+		Log.logDebug("GoalModelManager", "handleExternalAgentMessage()", "init");
+		if (msg != null) {
+
+			String agentFrom = msg.getSender().getAgentName();
+
+			GoalModel targetGoalModel = null;
+			GoalMachine targerGoalMachine = null;
+
+			Messager receiver = msg.getReceiver();
+			String targetGoalName = receiver.getElementName();
+			String targetGoalModelName = receiver.getGoalModelName();
+
+			outer: for (GoalModel gm : goalModelList) {
+				if (gm.getName().equals(targetGoalModelName)) {
+					targetGoalModel = gm;
+					for (ElementMachine em : targetGoalModel
+							.getElementMachines()) {
+						if (em.getName().equals(targetGoalName)) {
+							targerGoalMachine = (GoalMachine) em;
+							break outer;
+						}
+					}
+				}
+			}
+
+			switch ((MesBody_Mes2Manager) msg.getBody()) {
+			case DelegatedAchieved:
+			case DelegatedFailed:
+				endGoalMachine(targerGoalMachine, msg);
+				break;
+
+			case StartGM:
+				targetGoalModel.getRootGoal().setDelegated(true);
+				targetGoalModel.getRootGoal().setAgentFrom(agentFrom);
+				start(targetGoalModel, msg);
+				break;
+
+			default:
+				break;
+			}
+		}
+
+	}
+
+	/**
 	 * 处理委托、endTask、本地服务调用，是element machine通过maneger发送给agent的消息
 	 * 
 	 * @param msg
 	 */
 	private void handleElementMessage(SGMMessage msg) {
-		Log.logDebug("GoalModelManager", "handleTaskRequest()", "init");
+		Log.logDebug("GoalModelManager", "handleElementMessage()", "init");
 
 		if (msg != null) {
 			switch ((MesBody_Mes2Manager) msg.getBody()) {
 			// 都是把消息直接转发给agent，由agent根据消息body部分进行处理
 			case RequestPersonIA: // 需要用户反馈是否完成task的消息
-			case DelegatedAchieved: // 告诉委托方agent完成了任务
-			case DelegatedFailed: // 告诉委托方agent没有完成任务
 			case NoDelegatedAchieved: // 告诉主人自己完成了任务
 			case NoDelegatedFailed: // 告诉主人自己没有完成任务
-				getAideAgentInterface().handleUserServiceRequest(msg);
+				getAideAgentInterface().handleMesFromManager(msg);
+				break;
+
+			case DelegatedAchieved: // 告诉委托方agent完成了任务
+			case DelegatedFailed: // 告诉委托方agent没有完成任务
+			case DelegateOut: // 告诉agent这个是要委托出去的任务
+				getAideAgentInterface().sendMesToExternalAgent(msg);
 				break;
 
 			default:
@@ -225,7 +295,8 @@ public class GoalModelManager implements Runnable {
 	}
 
 	/**
-	 * 给一个task machine发送END消息，这个是在用户完成了某个需要他参与的任务后，在UI上点击这个task后面的end按钮时触发的操作
+	 * 给一个task
+	 * machine发送END或者QUIT消息，这个是在用户完成了某个需要他参与的任务后，在UI上点击这个task后面的end按钮时触发的操作
 	 * 
 	 * @param taskMachine
 	 *            用户完成的task
@@ -256,6 +327,39 @@ public class GoalModelManager implements Runnable {
 							+ " msg to " + taskMachine.getName() + " error!");
 		}
 
+	}
+
+	/**
+	 * 给一个goal machine发送是否完成的消息，这个goal
+	 * machine是委托出去做的，现在是收到了外部agent发回来的反馈，根据反馈结果来设置goal machine是否完成
+	 * 
+	 * @param goalMachine
+	 *            之前委托出去的goal machine
+	 * @param msg
+	 *            消息
+	 */
+	private void endGoalMachine(GoalMachine goalMachine, SGMMessage msg) {
+		Log.logDebug("GoalModelManager:" + goalMachine.getName(),
+				"endGoalMachine()", "init.");
+		if (msg.getBody().equals(MesBody_Mes2Manager.DelegatedAchieved)) {
+			msg.setBody(MesBody_Mes2Machine.ACHIEVEDDONE);
+		} else if (msg.getBody().equals(MesBody_Mes2Manager.DelegatedFailed)) {
+			msg.setBody(MesBody_Mes2Machine.FAILED);
+		}
+
+		if (goalMachine.getMsgPool().offer(msg)) {
+			Log.logMessage(msg, true);
+			Log.logDebug("GoalModelManager:" + goalMachine.getName(),
+					"endGoalMachine()",
+					"External agent send a " + msg.getBody() + " msg to "
+							+ goalMachine.getName() + " succeed!");
+		} else {
+			Log.logMessage(msg, false);
+			Log.logError("GoalModelManager:" + goalMachine.getName(),
+					"endGoalMachine()",
+					"External agent send a " + msg.getBody() + " msg to "
+							+ goalMachine.getName() + " error!");
+		}
 	}
 
 	/**

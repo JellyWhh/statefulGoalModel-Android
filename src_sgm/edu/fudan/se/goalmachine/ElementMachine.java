@@ -9,6 +9,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import edu.fudan.se.goalmachine.message.MesBody_Mes2Machine;
 import edu.fudan.se.goalmachine.message.MesBody;
+import edu.fudan.se.goalmachine.message.MesHeader_Mes2Machine;
 import edu.fudan.se.goalmachine.message.SGMMessage;
 import edu.fudan.se.goalmachine.support.CauseToRepairing;
 import edu.fudan.se.goalmachine.support.RecordedState;
@@ -651,7 +652,7 @@ public abstract class ElementMachine implements Runnable {
 	 * @return true 发送成功, false 发送失败
 	 */
 	public boolean sendMessageToParent(MesBody body) {
-		SGMMessage msg = new SGMMessage("TOPARENT", null, null, this.getName(),
+		SGMMessage msg = new SGMMessage(MesHeader_Mes2Machine.ToParent, null, null, this.getName(),
 				null, null, this.getParentGoal().getName(), body);
 		if (this.getParentGoal().getMsgPool().offer(msg)) {
 			// 发送成功

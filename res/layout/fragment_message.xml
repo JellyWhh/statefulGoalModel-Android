@@ -26,7 +26,7 @@
                 android:text="@string/tab_message_task"
                 android:textColor="@color/focus_black"
                 android:textSize="18sp" />
-            
+
             <ImageView
                 android:id="@+id/iv_middle_line"
                 android:layout_width="2dp"
@@ -43,21 +43,6 @@
                 android:text="@string/tab_message_mes"
                 android:textColor="@color/unfocus_grey"
                 android:textSize="18sp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:orientation="vertical"
-            android:paddingBottom="3dp" >
-
-            <ImageView
-                android:id="@+id/iv_bottom_line"
-                android:layout_width="100dp"
-                android:layout_height="2dp"
-                android:scaleType="matrix"
-                android:src="#000" />
         </LinearLayout>
     </LinearLayout>
 

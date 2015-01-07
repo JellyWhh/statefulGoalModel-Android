@@ -25,6 +25,7 @@ import android.widget.TextView;
 import edu.fudan.se.R;
 import edu.fudan.se.agent.AideAgentInterface;
 import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
+import edu.fudan.se.goalmachine.message.MesHeader_Mes2Manger;
 import edu.fudan.se.goalmachine.message.SGMMessage;
 import edu.fudan.se.initial.SGMApplication;
 import edu.fudan.se.userMes.UserTask;
@@ -167,12 +168,13 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 				public void onClick(View v) {
 					// aideAgentInterface.endTaskMachine(
 					// usertask.getTaskMachine(), "END");
-					aideAgentInterface.sendExternalEvent(new SGMMessage(
-							"EXTERNAL_EVENT", null, null, null, null, usertask
-									.getGoalModelName(), usertask
-									.getElementName(),
+					aideAgentInterface.sendMesToManager(new SGMMessage(
+							MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
+							null, null, null, usertask.getGoalModelName(),
+							usertask.getElementName(),
 							MesBody_Mes2Manager.EndTE));
 					usertask.setDone(true);
+					notifyDataSetChanged();
 				}
 			});
 			holder.quit.setClickable(true);
@@ -182,12 +184,13 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 				public void onClick(View v) {
 					// aideAgentInterface.endTaskMachine(
 					// usertask.getTaskMachine(), "QUIT");
-					aideAgentInterface.sendExternalEvent(new SGMMessage(
-							"EXTERNAL_EVENT", null, null, null, null, usertask
-									.getGoalModelName(), usertask
-									.getElementName(),
+					aideAgentInterface.sendMesToManager(new SGMMessage(
+							MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
+							null, null, null, usertask.getGoalModelName(),
+							usertask.getElementName(),
 							MesBody_Mes2Manager.QuitTE));
 					usertask.setDone(true);
+					notifyDataSetChanged();
 				}
 			});
 		}

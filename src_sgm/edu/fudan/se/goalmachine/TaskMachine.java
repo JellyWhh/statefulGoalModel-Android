@@ -5,6 +5,7 @@ package edu.fudan.se.goalmachine;
 
 import edu.fudan.se.goalmachine.message.MesBody_Mes2Machine;
 import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
+import edu.fudan.se.goalmachine.message.MesHeader_Mes2Manger;
 import edu.fudan.se.goalmachine.message.SGMMessage;
 import edu.fudan.se.log.Log;
 
@@ -93,7 +94,7 @@ public abstract class TaskMachine extends ElementMachine {
 			} else {
 				// 发送消息给agent,让agent提醒用户需要他的参与
 				
-				SGMMessage msgToManager = new SGMMessage("ELEMENT_MESSAGE", null, this
+				SGMMessage msgToManager = new SGMMessage(MesHeader_Mes2Manger.ELEMENT_MESSAGE, null, this
 						.getGoalModel().getName(), this.getName(), null, null, null,
 						MesBody_Mes2Manager.RequestPersonIA);
 				msgToManager.setDescription(this.getDescription());

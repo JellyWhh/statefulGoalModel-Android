@@ -11,6 +11,7 @@ import jade.wrapper.StaleProxyException;
 import edu.fudan.se.R;
 import edu.fudan.se.agent.AideAgentInterface;
 import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
+import edu.fudan.se.goalmachine.message.MesHeader_Mes2Manger;
 import edu.fudan.se.goalmachine.message.SGMMessage;
 import edu.fudan.se.goalmodel.GoalModel;
 import edu.fudan.se.initial.SGMApplication;
@@ -230,44 +231,47 @@ public class GoalModelFragment extends Fragment {
 			switch (v.getId()) {
 
 			case R.id.bt_dialog_start:
-				// aideAgentInterface.startGoalModel(goalModel);
-				aideAgentInterface.sendExternalEvent(new SGMMessage(
-						"EXTERNAL_EVENT", null, null, null, null, goalModel
-								.getName(), null, MesBody_Mes2Manager.StartGM));
+				aideAgentInterface.sendMesToManager(new SGMMessage(
+						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null,
+						null, null, goalModel.getName(), null,
+						MesBody_Mes2Manager.StartGM));
 				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				break;
+
 			case R.id.bt_dialog_suspend:
-				// aideAgentInterface.suspendGoalModel(goalModel);
-				aideAgentInterface
-						.sendExternalEvent(new SGMMessage("EXTERNAL_EVENT",
-								null, null, null, null, goalModel.getName(),
-								null, MesBody_Mes2Manager.SuspendGM));
+				aideAgentInterface.sendMesToManager(new SGMMessage(
+						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null,
+						null, null, goalModel.getName(), null,
+						MesBody_Mes2Manager.SuspendGM));
 				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				break;
+
 			case R.id.bt_dialog_resume:
-				// aideAgentInterface.resumeGoalModel(goalModel);
-				aideAgentInterface
-						.sendExternalEvent(new SGMMessage("EXTERNAL_EVENT",
-								null, null, null, null, goalModel.getName(),
-								null, MesBody_Mes2Manager.ResumeGM));
+				aideAgentInterface.sendMesToManager(new SGMMessage(
+						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null,
+						null, null, goalModel.getName(), null,
+						MesBody_Mes2Manager.ResumeGM));
 				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				break;
+
 			case R.id.bt_dialog_stop:
-				// aideAgentInterface.stopGoalModel(goalModel);
-				aideAgentInterface.sendExternalEvent(new SGMMessage(
-						"EXTERNAL_EVENT", null, null, null, null, goalModel
-								.getName(), null, MesBody_Mes2Manager.StopGM));
+				aideAgentInterface.sendMesToManager(new SGMMessage(
+						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null,
+						null, null, goalModel.getName(), null,
+						MesBody_Mes2Manager.StopGM));
 				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				break;
+
 			case R.id.bt_dialog_reset:
 				// reset的时候要把让用户做的任务列表中的相关任务清除
 				application.clearTasksOfGoalModel(goalModel);
-				// aideAgentInterface.resetGoalModel(goalModel);
-				aideAgentInterface.sendExternalEvent(new SGMMessage(
-						"EXTERNAL_EVENT", null, null, null, null, goalModel
-								.getName(), null, MesBody_Mes2Manager.ResetGM));
+				aideAgentInterface.sendMesToManager(new SGMMessage(
+						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null,
+						null, null, goalModel.getName(), null,
+						MesBody_Mes2Manager.ResetGM));
 				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				break;
+
 			case R.id.bt_dialog_cancel:
 				// 销毁弹出框
 				popupWindow.dismiss();

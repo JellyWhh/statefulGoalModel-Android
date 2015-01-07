@@ -15,6 +15,7 @@ import edu.fudan.se.goalmachine.GoalMachine;
 import edu.fudan.se.goalmachine.TaskMachine;
 import edu.fudan.se.goalmodel.GoalModel;
 import edu.fudan.se.goalmodel.GoalModelManager;
+import edu.fudan.se.userMes.UserMessage;
 //import edu.fudan.se.goalmodel.GoalModelController;
 import edu.fudan.se.userMes.UserTask;
 
@@ -34,6 +35,7 @@ public class SGMApplication extends Application implements Serializable {
 	private Logger logger = Logger.getJADELogger(this.getClass().getName());
 
 	private ArrayList<UserTask> userTaskList;
+	private ArrayList<UserMessage> userMessageList;
 
 	private String agentNickname;
 
@@ -53,6 +55,7 @@ public class SGMApplication extends Application implements Serializable {
 	 */
 	private void initialData() {
 		this.userTaskList = new ArrayList<>();
+		this.userMessageList = new ArrayList<>();
 
 		GoalModel gm = newGoalModel();
 
@@ -100,10 +103,6 @@ public class SGMApplication extends Application implements Serializable {
 		return userTaskList;
 	}
 
-	public void addUserTask(UserTask userTask) {
-		this.userTaskList.add(userTask);
-	}
-
 	public void clearTasksOfGoalModel(GoalModel goalModel) {
 		ArrayList<UserTask> toRemoveArrayList = new ArrayList<>();
 		for (UserTask userTask : this.userTaskList) {
@@ -112,6 +111,14 @@ public class SGMApplication extends Application implements Serializable {
 			}
 		}
 		this.userTaskList.removeAll(toRemoveArrayList);
+	}
+
+	public ArrayList<UserMessage> getUserMessageList() {
+		return userMessageList;
+	}
+
+	public void clearUserMessages() {
+		this.userMessageList.clear();
 	}
 
 	/**

@@ -10,23 +10,14 @@ package edu.fudan.se.userMes;
  */
 public class UserMessage {
 
-	private String title;
 	private String time;
 	private String content;
 	
-	public UserMessage(String title,String time,String content){
-		this.title = title;
+	public UserMessage(String time,String content){
 		this.time = time;
 		this.content  = content;
 	}
 
-	public String getTitle() {
-		return title;
-	}
-
-	public void setTitle(String title) {
-		this.title = title;
-	}
 
 	public String getTime() {
 		return time;

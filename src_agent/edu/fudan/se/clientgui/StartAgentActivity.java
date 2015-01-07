@@ -87,7 +87,8 @@ public class StartAgentActivity extends Activity {
 				try {
 					((SGMApplication) getApplication())
 							.setAgentNickname(nickname);
-					((SGMApplication) getApplication()).getGoalModelManager().setAgentNickname(nickname);
+					((SGMApplication) getApplication()).getGoalModelManager()
+							.setAgentNickname(nickname);
 					Log.i("start agent",
 							"agent nickname: "
 									+ ((SGMApplication) getApplication())
@@ -248,6 +249,7 @@ public class StartAgentActivity extends Activity {
 		microRuntimeServiceBinder.startAgent(nickname, AideAgent.class
 				.getName(), new Object[] { getApplicationContext(),
 				((SGMApplication) getApplication()).getGoalModelManager(),
-				((SGMApplication) getApplication()).getUserTaskList() }, rc);
+				((SGMApplication) getApplication()).getUserTaskList(),
+				((SGMApplication) getApplication()).getUserMessageList() }, rc);
 	}
 }
