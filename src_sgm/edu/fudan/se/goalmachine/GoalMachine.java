@@ -560,10 +560,7 @@ public abstract class GoalMachine extends ElementMachine {
 			this.setCurrentState(State.Stop);
 			this.stopMachine();
 		} else {// 是root goal
-			// TODO 告诉agent通知用户激活失败
-			sendMesToAgent();
-			this.setCurrentState(State.Stop);
-			this.stopMachine();
+			this.setCurrentState(State.Failed);
 		}
 	}
 
@@ -585,16 +582,10 @@ public abstract class GoalMachine extends ElementMachine {
 			this.setCurrentState(State.Stop);
 			this.stopMachine();
 		} else {// 是root goal
-			// TODO 告诉agent通知用户激活失败
-			sendMesToAgent();
-			this.setCurrentState(State.Stop);
-			this.stopMachine();
+			this.setCurrentState(State.Failed);
 		}
 	}
 
-	private void sendMesToAgent() {
-		// TODO
-	}
 
 	/**
 	 * AND分解</br>

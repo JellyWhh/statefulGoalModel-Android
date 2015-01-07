@@ -3,21 +3,17 @@
  */
 package edu.fudan.se.agent;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
 import edu.fudan.se.goalmachine.message.MesHeader_Mes2Manger;
 import edu.fudan.se.goalmachine.message.SGMMessage;
 import edu.fudan.se.goalmodel.GoalModelManager;
+import edu.fudan.se.log.Log;
 import edu.fudan.se.userMes.UserMessage;
 import edu.fudan.se.userMes.UserTask;
 import jade.core.AID;
@@ -84,6 +80,78 @@ public class AideAgent extends Agent implements AideAgentInterface {
 		// 循环接收并处理来自外部agent的消息
 		addBehaviour(new HandleMesFromExternalAgent());
 
+		// addBehaviour(new OneShotBehaviour() {
+		//
+		// /**
+		// *
+		// */
+		// private static final long serialVersionUID = 2575005398776229772L;
+		//
+		// @Override
+		// public void action() {
+		// try {
+		// SGMMessage msg = new SGMMessage(
+		// MesHeader_Mes2Manger.EXTERNAL_AGENT_MESSAGE, this
+		// .getAgent().getName(), "", "", "bob", "",
+		// "", MesBody_Mes2Manager.StartGM);
+		//
+		// String content = msg.toString();
+		//
+		// Log.i("MY_LOG", "Send mes to external agent...message is: " +
+		// content);
+		// ACLMessage aclmsg = new ACLMessage(ACLMessage.INFORM);
+		// aclmsg.addReceiver(new AID(
+		// msg.getReceiver().getAgentName(), AID.ISLOCALNAME));
+		// aclmsg.setContent(content);
+		// send(aclmsg);
+		// } catch (Exception e) {
+		// Log.i("MY_LOG",
+		// "Send mes to external agent error! " + e.toString());
+		// }
+		// }
+		// });
+		//
+		// addBehaviour(new CyclicBehaviour() {
+		//
+		// /**
+		// *
+		// */
+		// private static final long serialVersionUID = 5017464169818414509L;
+		//
+		// @Override
+		// public void action() {
+		// ACLMessage msg = receive();
+		// try {
+		// if (msg != null) {
+		// Log.i("MY_LOG", "Handle mes from external agent...");
+		// String content = msg.getContent();
+		// String senderString = msg.getSender().getName();
+		//
+		// String message[] = content.split("-");
+		// SGMMessage inner_msg = new SGMMessage(
+		// MesHeader_Mes2Manger.getMesHeader(message[0]),
+		// message[1], message[2], message[3], message[4],
+		// message[5], message[6],
+		// MesBody_Mes2Manager.getMesBody(message[7]));
+		// inner_msg.setDescription(message[8]);
+		//
+		// Log.i("MY_LOG", "receive a new msg from: + "
+		// + senderString + ", body is: "
+		// + inner_msg.getBody().toString());
+		//
+		// Intent broadcast_nda = new Intent();
+		// broadcast_nda.setAction("jade.task.NOTIFICATION");
+		// broadcast_nda
+		// .putExtra("Content",
+		// "You have received a new mes from external agent!");
+		// context.sendBroadcast(broadcast_nda);
+		// }
+		// } catch (Exception e) {
+		// Log.i("MY_LOG_receive acl", e.toString());
+		// }
+		// }
+		// });
+
 	}
 
 	@Override
@@ -120,7 +188,6 @@ public class AideAgent extends Agent implements AideAgentInterface {
 
 		private static final long serialVersionUID = 4474626789362069528L;
 		private SGMMessage msg;
-		private Agent a;
 
 		public SendMesToManager(Agent a, SGMMessage msg) {
 			super(a);
@@ -129,9 +196,14 @@ public class AideAgent extends Agent implements AideAgentInterface {
 
 		@Override
 		public void action() {
-			Log.i("MY_LOG", "Send mes to manager...");
-			msg.getSender().setAgentName(a.getName());
-			goalModelManager.getMsgPool().offer(msg);
+			Log.logDebug("AideAgent", "SendMesToManager()", "init.");
+			android.util.Log.i("MY_LOG", "Send mes to manager...");
+			// msg.getSender().setAgentName(a.getName());
+			if (goalModelManager.getMsgPool().offer(msg)) {
+				Log.logMessage(msg, true);
+			} else {
+				Log.logMessage(msg, false);
+			}
 		}
 
 	}
@@ -154,7 +226,8 @@ public class AideAgent extends Agent implements AideAgentInterface {
 
 		@Override
 		public void action() {
-			Log.i("MY_LOG", "Handle mes from manager...");
+			Log.logDebug("AideAgent", "HandleMesFromManager()", "init.");
+			android.util.Log.i("MY_LOG", "Handle mes from manager...");
 
 			switch ((MesBody_Mes2Manager) msg.getBody()) {
 			case RequestPersonIA:
@@ -211,40 +284,36 @@ public class AideAgent extends Agent implements AideAgentInterface {
 
 		public SendMesToExternalAgent(Agent a, SGMMessage msg) {
 			super(a);
+			this.a = a;
 			this.msg = msg;
 		}
 
 		@Override
 		public void action() {
-			try {
-				String targetAgent = msg.getReceiver().getAgentName(); // 获得委托对象的agent名字
+			Log.logDebug("AideAgent", "SendMesToExternalAgent()", "init.");
 
-				msg.getSender().setAgentName(a.getName()); // 设置发送方agent名字
-				msg.setHeader(MesHeader_Mes2Manger.EXTERNAL_AGENT_MESSAGE);
+			String targetAgent = msg.getReceiver().getAgentName(); // 获得委托对象的agent名字
 
-				// 根据manager发来的消息body部分重新设置发出去的消息的body部分，只有DelegateOut需要重新设置
-				// 委托出去后，对方agent把消息转发给对方manager，其实也就是start对方的goal model
-				if (msg.getBody().equals(MesBody_Mes2Manager.DelegateOut)) {
-					msg.setBody(MesBody_Mes2Manager.StartGM);
-				}
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
-				// 序列化，然后在agent之间转发
-				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				ObjectOutputStream oos = new ObjectOutputStream(baos);
-				oos.writeObject(msg);
-				oos.flush();
-				byte[] sendBuf = baos.toByteArray();
-				String content = new String(sendBuf); // 序列化msg之后转化成string准别用ACL发送
+//			String[] agentName = a.getName().split("@");
+//			a.getL
+			msg.getSender().setAgentName(a.getLocalName()); // 设置发送方agent名字，只设置昵称就好
+			msg.setHeader(MesHeader_Mes2Manger.EXTERNAL_AGENT_MESSAGE);
 
-				Log.i("MY_LOG", "Send mes to external agent...");
-				ACLMessage aclmsg = new ACLMessage(ACLMessage.INFORM);
-				aclmsg.addReceiver(new AID(targetAgent, AID.ISLOCALNAME));
-				aclmsg.setContent(content);
-				send(aclmsg);
-			} catch (Exception e) {
-				Log.i("MY_LOG",
-						"Send mes to external agent error! " + e.toString());
+			// 根据manager发来的消息body部分重新设置发出去的消息的body部分，只有DelegateOut需要重新设置
+			// 委托出去后，对方agent把消息转发给对方manager，其实也就是start对方的goal model
+			if (msg.getBody().equals(MesBody_Mes2Manager.DelegateOut)) {
+				msg.setBody(MesBody_Mes2Manager.StartGM);
 			}
+
+			String content = msg.toString();
+			Log.logMessage(msg, true);
+
+			android.util.Log.i("MY_LOG",
+					"Send mes to external agent...content is: " + content);
+			ACLMessage aclmsg = new ACLMessage(ACLMessage.INFORM);
+			aclmsg.addReceiver(new AID(targetAgent, AID.ISLOCALNAME));
+			aclmsg.setContent(content);
+			send(aclmsg);
 
 		}
 
@@ -263,31 +332,33 @@ public class AideAgent extends Agent implements AideAgentInterface {
 		@Override
 		public void action() {
 			ACLMessage msg = receive();
-			try {
-				if (msg != null) {
-					Log.i("MY_LOG", "Handle mes from external agent...");
-					String content = msg.getContent();
-					ByteArrayInputStream bais = new ByteArrayInputStream(
-							content.getBytes());
-					ObjectInputStream ois = new ObjectInputStream(bais);
-					SGMMessage inner_msg = (SGMMessage) ois.readObject(); // 反序列化获得msg
+			if (msg != null) {
+				Log.logDebug("AideAgent", "HandleMesFromExternalAgent()",
+						"init.");
+				android.util.Log.i("MY_LOG",
+						"Handle mes from external agent...");
+				String content = msg.getContent();
 
-					if (inner_msg.getHeader().equals(
-							MesHeader_Mes2Manger.EXTERNAL_AGENT_MESSAGE)) {
+				String message[] = content.split("-");
+				SGMMessage inner_msg = new SGMMessage(
+						MesHeader_Mes2Manger.getMesHeader(message[0]),
+						message[1], message[2], message[3], message[4],
+						message[5], message[6],
+						MesBody_Mes2Manager.getMesBody(message[7]));
+				inner_msg.setDescription(message[8]);
 
-						Intent broadcast_nda = new Intent();
-						broadcast_nda.setAction("jade.task.NOTIFICATION");
-						broadcast_nda
-								.putExtra("Content",
-										"You have received a new mes from external agent!");
-						context.sendBroadcast(broadcast_nda);
+				if (inner_msg.getHeader().equals(
+						MesHeader_Mes2Manger.EXTERNAL_AGENT_MESSAGE)) {
 
-						goalModelManager.getMsgPool().offer(inner_msg);
-					}
+					Intent broadcast_nda = new Intent();
+					broadcast_nda.setAction("jade.task.NOTIFICATION");
+					broadcast_nda.putExtra("Content",
+							"You have received a new mes from external agent!");
+					context.sendBroadcast(broadcast_nda);
 
+					goalModelManager.getMsgPool().offer(inner_msg);
 				}
-			} catch (Exception e) {
-				Log.i("MY_LOG_receive acl", e.toString());
+
 			}
 		}
 

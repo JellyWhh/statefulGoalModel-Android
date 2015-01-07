@@ -14,12 +14,12 @@ import java.io.Serializable;
 public class SGMMessage implements Serializable {
 
 	private static final long serialVersionUID = -1901699789736351108L;
-	
+
 	private MesHeader header; // 消息头部
 	private Messager sender; // 消息发送者
 	private Messager receiver; // 消息接收者，只有一个，如果一个Goal要发消息给多个接收者，就发多条信息，每条信息只有一个接收者
 	private MesBody body; // 消息主体
-	private String description;	//消息附加的描述，在需要人为参与的task时，发送消息给manager，要把任务描述附加上去
+	private String description; // 消息附加的描述，在需要人为参与的task时，发送消息给manager，要把任务描述附加上去
 
 	public SGMMessage(MesHeader header, String senderAgentName,
 			String senderGoalModelName, String senderElementName,
@@ -31,6 +31,15 @@ public class SGMMessage implements Serializable {
 		this.receiver = new Messager(receiverAgentName, receiverGoalModelName,
 				receiverElementName);
 		this.body = body;
+	}
+
+	public String toString() {
+		String message = header.toString() + "-" + sender.getAgentName() + "-"
+				+ sender.getGoalModelName() + "-" + sender.getElementName()
+				+ "-" + receiver.getAgentName() + "-"
+				+ receiver.getGoalModelName() + "-" + receiver.getElementName()
+				+ "-" + body.toString() + "-" + description;
+		return message;
 	}
 
 	public MesHeader getHeader() {
@@ -68,7 +77,7 @@ public class SGMMessage implements Serializable {
 	public void setBody(MesBody body) {
 		this.body = body;
 	}
-	
+
 	public String getDescription() {
 		return description;
 	}
@@ -77,10 +86,10 @@ public class SGMMessage implements Serializable {
 		this.description = description;
 	}
 
-	public class Messager implements Serializable{
-		
+	public class Messager implements Serializable {
+
 		private static final long serialVersionUID = 8513804283789760689L;
-		
+
 		private String agentName;
 		private String goalModelName;
 		private String elementName;
