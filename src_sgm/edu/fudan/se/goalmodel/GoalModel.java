@@ -15,6 +15,7 @@ import edu.fudan.se.goalmachine.GoalMachine;
  * 
  */
 public class GoalModel {
+	
 
 	private String name; // goal model的名字
 	private String description; // goal model的描述

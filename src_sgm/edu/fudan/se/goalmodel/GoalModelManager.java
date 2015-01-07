@@ -141,6 +141,7 @@ public class GoalModelManager implements Runnable {
 		if (msg != null) {
 
 			String agentFrom = msg.getSender().getAgentName();
+			String delegateGoalModelFrom = msg.getSender().getGoalModelName();
 
 			GoalModel targetGoalModel = null;
 			GoalMachine targerGoalMachine = null;
@@ -171,6 +172,8 @@ public class GoalModelManager implements Runnable {
 			case StartGM:
 				targetGoalModel.getRootGoal().setDelegated(true);
 				targetGoalModel.getRootGoal().setAgentFrom(agentFrom);
+				targetGoalModel.getRootGoal().setDelegateGoalModelFrom(
+						delegateGoalModelFrom);
 				start(targetGoalModel, msg);
 				break;
 

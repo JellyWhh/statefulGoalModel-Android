@@ -34,6 +34,7 @@ public abstract class GoalMachine extends ElementMachine {
 	private boolean isDelegated = false; // 任务是否是被委托的，也就是是否是别人委托给本机的，只有是root
 											// goal的时候需要设置
 	private String agentFrom; // 如果是别人委托过来的，需要设置委托来源
+	private String delegateGoalModelFrom;	//委托来源的goal model的名字，把结果发回去的时候需要找到原来的goal model
 
 	private boolean needDelegate = false; // 任务是否要委托出去，也就是委托给别人做，如果是，则它应该是没有subElements的
 	private String agentTo; // 如果是要委托出去的，需要设置委托去向
@@ -70,13 +71,28 @@ public abstract class GoalMachine extends ElementMachine {
 	public void activatedEntry() {
 		Log.logDebug(this.getName(), "activatedEntry()", "init.");
 
-		if (this.getDecomposition() == 0) { // AND分解
-			// 给所有子目标发送激活消息
-			activatedEntry_sendMesToAllSub_AND();
+		if (this.isNeedDelegate()) { // 是需要委托出去的，不需要给子目标发送激活消息，直接告诉父目标自己激活了
 
-		} else {// OR分解
-				// 给下一个可以激活的子目标发送激活消息
-			activatedEntryDo_sendMesToOneSub_OR();
+			if (this.sendMessageToParent(MesBody_Mes2Machine.ACTIVATEDDONE)) {
+				Log.logDebug(this.getName(), "activatedEntry()",
+						"send ACTIVATEDDONE msg to "
+								+ this.getParentGoal().getName() + " succeed!");
+			} else {
+				Log.logError(this.getName(), "activatedEntry()",
+						"send ACTIVATEDDONE msg to "
+								+ this.getParentGoal().getName() + " error!");
+			}
+
+		} else { // 不是需要委托出去的
+
+			if (this.getDecomposition() == 0) { // AND分解
+				// 给所有子目标发送激活消息
+				activatedEntry_sendMesToAllSub_AND();
+
+			} else {// OR分解
+					// 给下一个可以激活的子目标发送激活消息
+				activatedEntryDo_sendMesToOneSub_OR();
+			}
 		}
 
 	}
@@ -94,37 +110,53 @@ public abstract class GoalMachine extends ElementMachine {
 	@Override
 	public void activateDo(SGMMessage msg) {
 		Log.logDebug(this.getName(), "activateDo()", "init.");
-		if (isActivatedDo_waitingSubReplyDone) { // subElements都反馈已激活，进入等待父目标的START指令中。如果是root
-													// goal，则在activatedDo_waitingSubReply()方法中已发生状态跳转
+		if (this.isNeedDelegate()) {// 是需要委托出去的，不需要等待子目标的反馈，直接等待父目标的start消息
+			if (msg != null) {
+				Log.logDebug(this.getName(), "activateDo()",
+						"get a message from " + msg.getSender().toString()
+								+ "; body is: " + msg.getBody());
 
-			// 如果是通过修复重新进入activate状态的，不用等待START命令，直接进入执行
-			if (isRepaired) {
-				this.setCurrentState(this.transition(State.Activated,
-						this.getPreCondition()));
-			} else {
-				if (msg != null) {
-					Log.logDebug(this.getName(), "activateDo()",
-							"get a message from " + msg.getSender().toString()
-									+ "; body is: " + msg.getBody());
-
-					// 消息内容是START，表示父目标让当前目标开始状态转换
-					if (msg.getBody().equals(MesBody_Mes2Machine.START)) {
-						this.getMsgPool().poll();
-						this.setCurrentState(this.transition(State.Activated,
-								this.getPreCondition()));
-					}
-
+				// 消息内容是START，表示父目标让当前目标开始状态转换
+				if (msg.getBody().equals(MesBody_Mes2Machine.START)) {
+					this.getMsgPool().poll();
+					this.setCurrentState(this.transition(State.Activated,
+							this.getPreCondition()));
 				}
 			}
+		} else {
+			if (isActivatedDo_waitingSubReplyDone) { // subElements都反馈已激活，进入等待父目标的START指令中。如果是root
+														// goal，则在activatedDo_waitingSubReply()方法中已发生状态跳转
 
-		} else { // 等待subElements反馈中
-			if (this.getDecomposition() == 0) { // AND分解
-				activatedDo_waitingSubReply_AND(msg);
-			} else { // OR分解
-				if (isSendActivateMesToOneSubDone) {
-					activatedDo_waitingSubReply_OR(msg);
+				// 如果是通过修复重新进入activate状态的，不用等待START命令，直接进入执行
+				if (isRepaired) {
+					this.setCurrentState(this.transition(State.Activated,
+							this.getPreCondition()));
 				} else {
-					activatedEntryDo_sendMesToOneSub_OR();
+					if (msg != null) {
+						Log.logDebug(this.getName(), "activateDo()",
+								"get a message from "
+										+ msg.getSender().toString()
+										+ "; body is: " + msg.getBody());
+
+						// 消息内容是START，表示父目标让当前目标开始状态转换
+						if (msg.getBody().equals(MesBody_Mes2Machine.START)) {
+							this.getMsgPool().poll();
+							this.setCurrentState(this.transition(
+									State.Activated, this.getPreCondition()));
+						}
+
+					}
+				}
+
+			} else { // 等待subElements反馈中
+				if (this.getDecomposition() == 0) { // AND分解
+					activatedDo_waitingSubReply_AND(msg);
+				} else { // OR分解
+					if (isSendActivateMesToOneSubDone) {
+						activatedDo_waitingSubReply_OR(msg);
+					} else {
+						activatedEntryDo_sendMesToOneSub_OR();
+					}
 				}
 			}
 		}
@@ -152,10 +184,8 @@ public abstract class GoalMachine extends ElementMachine {
 			SGMMessage msgToManager = new SGMMessage(
 					MesHeader_Mes2Manger.ELEMENT_MESSAGE, null, this
 							.getGoalModel().getName(), this.getName(),
-					this.getAgentTo(), this.getGoalModel().getName(), this.getName(),
-					MesBody_Mes2Manager.DelegateOut);
-			// msgToManager.setDescription("GoalModel-"
-			// + this.getGoalModel().getName() + " is failed!");
+					this.getAgentTo(), this.getName(),
+					this.getName(), MesBody_Mes2Manager.DelegateOut);
 			sendMesToManager(msgToManager);
 
 		} else {
@@ -330,8 +360,8 @@ public abstract class GoalMachine extends ElementMachine {
 				SGMMessage msgToManager = new SGMMessage(
 						MesHeader_Mes2Manger.ELEMENT_MESSAGE, null, this
 								.getGoalModel().getName(), this.getName(),
-						this.getAgentFrom(), this.getGoalModel().getName(), this.getName(),
-						MesBody_Mes2Manager.DelegatedAchieved);
+						this.getAgentFrom(), this.getDelegateGoalModelFrom(),
+						this.getName(), MesBody_Mes2Manager.DelegatedAchieved);
 				msgToManager.setDescription("GoalModel-"
 						+ this.getGoalModel().getName() + " is achieved!");
 				sendMesToManager(msgToManager);
@@ -363,8 +393,8 @@ public abstract class GoalMachine extends ElementMachine {
 				SGMMessage msgToManager = new SGMMessage(
 						MesHeader_Mes2Manger.ELEMENT_MESSAGE, null, this
 								.getGoalModel().getName(), this.getName(),
-						this.getAgentFrom(), this.getGoalModel().getName(), this.getName(),
-						MesBody_Mes2Manager.DelegatedFailed);
+						this.getAgentFrom(), this.getDelegateGoalModelFrom(),
+						this.getName(), MesBody_Mes2Manager.DelegatedFailed);
 				msgToManager.setDescription("GoalModel-"
 						+ this.getGoalModel().getName() + " is failed!");
 				sendMesToManager(msgToManager);
@@ -1138,6 +1168,14 @@ public abstract class GoalMachine extends ElementMachine {
 
 	public void setAgentFrom(String agentFrom) {
 		this.agentFrom = agentFrom;
+	}
+
+	public String getDelegateGoalModelFrom() {
+		return delegateGoalModelFrom;
+	}
+
+	public void setDelegateGoalModelFrom(String delegateGoalModelFrom) {
+		this.delegateGoalModelFrom = delegateGoalModelFrom;
 	}
 
 }
