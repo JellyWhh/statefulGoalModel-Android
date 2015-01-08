@@ -330,7 +330,6 @@ public class SGMApplication extends Application implements Serializable {
 		alice.addSubElement(aliceChild_2, 1);
 
 		bob.setNeedDelegate(true);
-		bob.setAgentTo("bob");
 
 		goalModel.setDescription("This is the description of the goal model!");
 		goalModel.setRootGoal(myGoal);
@@ -865,9 +864,6 @@ public class SGMApplication extends Application implements Serializable {
 
 		alice.addSubElement(aliceChild_1, 1);
 		alice.addSubElement(aliceChild_2, 1);
-
-		bob.setNeedDelegate(true);
-		bob.setAgentTo("bob");
 
 		bob.addSubElement(bobChild_1, 1);
 		bob.addSubElement(bobChild_2, 2);

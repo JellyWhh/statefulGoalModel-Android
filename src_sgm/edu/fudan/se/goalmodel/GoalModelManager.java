@@ -83,7 +83,8 @@ public class GoalModelManager implements Runnable {
 	private void handleLocalAgentMessage(SGMMessage msg) {
 		Log.logDebug("GoalModelManager", "handleLocalAgentMessage()", "init");
 		GoalModel targetGoalModel = null;
-		TaskMachine tm = null;
+		ElementMachine targetElementMachine = null;
+		// TaskMachine tm = null;
 
 		Messager receiver = msg.getReceiver();
 		String targetTaskName = receiver.getElementName();
@@ -94,7 +95,7 @@ public class GoalModelManager implements Runnable {
 				targetGoalModel = gm;
 				for (ElementMachine em : gm.getElementMachines()) {
 					if (em.getName().equals(targetTaskName)) {
-						tm = (TaskMachine) em;
+						targetElementMachine = em;
 						break outer;
 					}
 				}
@@ -120,7 +121,10 @@ public class GoalModelManager implements Runnable {
 				break;
 			case EndTE:
 			case QuitTE:
-				endTaskMachine(tm, msg);
+				endTaskMachine((TaskMachine) targetElementMachine, msg);
+				break;
+			case QuitGM:
+				endGoalMachine((GoalMachine) targetElementMachine, msg);
 				break;
 			default:
 			}
@@ -203,8 +207,11 @@ public class GoalModelManager implements Runnable {
 
 			case DelegatedAchieved: // 告诉委托方agent完成了任务
 			case DelegatedFailed: // 告诉委托方agent没有完成任务
-			case DelegateOut: // 告诉agent这个是要委托出去的任务
 				getAideAgentInterface().sendMesToExternalAgent(msg);
+				break;
+				
+			case DelegateOut: // 告诉agent这个是要委托出去的任务
+				getAideAgentInterface().handleMesFromManager(msg);
 				break;
 
 			default:
@@ -346,7 +353,8 @@ public class GoalModelManager implements Runnable {
 				"endGoalMachine()", "init.");
 		if (msg.getBody().equals(MesBody_Mes2Manager.DelegatedAchieved)) {
 			msg.setBody(MesBody_Mes2Machine.ACHIEVEDDONE);
-		} else if (msg.getBody().equals(MesBody_Mes2Manager.DelegatedFailed)) {
+		} else if (msg.getBody().equals(MesBody_Mes2Manager.DelegatedFailed)
+				|| msg.getBody().equals(MesBody_Mes2Manager.QuitGM)) {
 			msg.setBody(MesBody_Mes2Machine.FAILED);
 		}
 
@@ -354,7 +362,7 @@ public class GoalModelManager implements Runnable {
 			Log.logMessage(msg, true);
 			Log.logDebug("GoalModelManager:" + goalMachine.getName(),
 					"endGoalMachine()",
-					"External agent send a " + msg.getBody() + " msg to "
+					"External agent or UI send a " + msg.getBody() + " msg to "
 							+ goalMachine.getName() + " succeed!");
 		} else {
 			Log.logMessage(msg, false);

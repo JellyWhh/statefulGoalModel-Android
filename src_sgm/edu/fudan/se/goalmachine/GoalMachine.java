@@ -37,7 +37,6 @@ public abstract class GoalMachine extends ElementMachine {
 	private String delegateGoalModelFrom;	//委托来源的goal model的名字，把结果发回去的时候需要找到原来的goal model
 
 	private boolean needDelegate = false; // 任务是否要委托出去，也就是委托给别人做，如果是，则它应该是没有subElements的
-	private String agentTo; // 如果是要委托出去的，需要设置委托去向
 
 	/**
 	 * 目标状态机
@@ -184,7 +183,7 @@ public abstract class GoalMachine extends ElementMachine {
 			SGMMessage msgToManager = new SGMMessage(
 					MesHeader_Mes2Manger.ELEMENT_MESSAGE, null, this
 							.getGoalModel().getName(), this.getName(),
-					this.getAgentTo(), this.getName(),
+					null, this.getName(),
 					this.getName(), MesBody_Mes2Manager.DelegateOut);
 			sendMesToManager(msgToManager);
 
@@ -1143,14 +1142,6 @@ public abstract class GoalMachine extends ElementMachine {
 
 	public void setNeedDelegate(boolean needDelegate) {
 		this.needDelegate = needDelegate;
-	}
-
-	public String getAgentTo() {
-		return agentTo;
-	}
-
-	public void setAgentTo(String agentTo) {
-		this.agentTo = agentTo;
 	}
 
 	public String getAgentFrom() {

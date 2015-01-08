@@ -11,15 +11,25 @@ package edu.fudan.se.userMes;
  */
 public class UserTask {
 
+	private String time;
 	private String goalModelName;
 	private String elementName;
 	private String description;
 	private boolean isDone; // 用户是否做过了
-
-	public UserTask(String goalModelName, String elementName, boolean isDone) {
+	
+	public UserTask(String time,String goalModelName, String elementName, boolean isDone) {
+		this.time = time;
 		this.goalModelName = goalModelName;
 		this.elementName = elementName;
 		this.isDone = isDone;
+	}
+
+	public String getTime() {
+		return time;
+	}
+
+	public void setTime(String time) {
+		this.time = time;
 	}
 
 	public boolean isDone() {

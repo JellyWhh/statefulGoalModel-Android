@@ -5,6 +5,7 @@
     <color name="clickable_black">#000</color>
     <color name="done_grey">#ccc</color>
     <color name="nodone_white">#fff</color>
+    <color name="nodone_green">#ACE1AF</color>
     
     
     <color name="focus_black">#000</color>

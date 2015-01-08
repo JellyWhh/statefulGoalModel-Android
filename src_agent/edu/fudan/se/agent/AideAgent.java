@@ -12,8 +12,10 @@ import android.content.Intent;
 import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
 import edu.fudan.se.goalmachine.message.MesHeader_Mes2Manger;
 import edu.fudan.se.goalmachine.message.SGMMessage;
+import edu.fudan.se.goalmodel.GoalModel;
 import edu.fudan.se.goalmodel.GoalModelManager;
 import edu.fudan.se.log.Log;
+import edu.fudan.se.userMes.UserDelegateOutTask;
 import edu.fudan.se.userMes.UserMessage;
 import edu.fudan.se.userMes.UserTask;
 import jade.core.AID;
@@ -64,12 +66,15 @@ public class AideAgent extends Agent implements AideAgentInterface {
 
 		registerO2AInterface(AideAgentInterface.class, this);
 
+		// 在黄页服务中注册所有的goal model服务
 		DFAgentDescription dfd = new DFAgentDescription();
 		dfd.setName(getAID());
-		ServiceDescription sd = new ServiceDescription();
-		sd.setName(getLocalName() + "--teacher");
-		sd.setType("teacher");
-		dfd.addServices(sd);
+		for (GoalModel gm : goalModelManager.getGoalModelList()) {
+			ServiceDescription sd = new ServiceDescription();
+			sd.setType("GOALMODEL");
+			sd.setName(gm.getName());
+			dfd.addServices(sd);
+		}
 		try {
 			DFService.register(this, dfd);
 		} catch (FIPAException e) {
@@ -79,78 +84,6 @@ public class AideAgent extends Agent implements AideAgentInterface {
 
 		// 循环接收并处理来自外部agent的消息
 		addBehaviour(new HandleMesFromExternalAgent());
-
-		// addBehaviour(new OneShotBehaviour() {
-		//
-		// /**
-		// *
-		// */
-		// private static final long serialVersionUID = 2575005398776229772L;
-		//
-		// @Override
-		// public void action() {
-		// try {
-		// SGMMessage msg = new SGMMessage(
-		// MesHeader_Mes2Manger.EXTERNAL_AGENT_MESSAGE, this
-		// .getAgent().getName(), "", "", "bob", "",
-		// "", MesBody_Mes2Manager.StartGM);
-		//
-		// String content = msg.toString();
-		//
-		// Log.i("MY_LOG", "Send mes to external agent...message is: " +
-		// content);
-		// ACLMessage aclmsg = new ACLMessage(ACLMessage.INFORM);
-		// aclmsg.addReceiver(new AID(
-		// msg.getReceiver().getAgentName(), AID.ISLOCALNAME));
-		// aclmsg.setContent(content);
-		// send(aclmsg);
-		// } catch (Exception e) {
-		// Log.i("MY_LOG",
-		// "Send mes to external agent error! " + e.toString());
-		// }
-		// }
-		// });
-		//
-		// addBehaviour(new CyclicBehaviour() {
-		//
-		// /**
-		// *
-		// */
-		// private static final long serialVersionUID = 5017464169818414509L;
-		//
-		// @Override
-		// public void action() {
-		// ACLMessage msg = receive();
-		// try {
-		// if (msg != null) {
-		// Log.i("MY_LOG", "Handle mes from external agent...");
-		// String content = msg.getContent();
-		// String senderString = msg.getSender().getName();
-		//
-		// String message[] = content.split("-");
-		// SGMMessage inner_msg = new SGMMessage(
-		// MesHeader_Mes2Manger.getMesHeader(message[0]),
-		// message[1], message[2], message[3], message[4],
-		// message[5], message[6],
-		// MesBody_Mes2Manager.getMesBody(message[7]));
-		// inner_msg.setDescription(message[8]);
-		//
-		// Log.i("MY_LOG", "receive a new msg from: + "
-		// + senderString + ", body is: "
-		// + inner_msg.getBody().toString());
-		//
-		// Intent broadcast_nda = new Intent();
-		// broadcast_nda.setAction("jade.task.NOTIFICATION");
-		// broadcast_nda
-		// .putExtra("Content",
-		// "You have received a new mes from external agent!");
-		// context.sendBroadcast(broadcast_nda);
-		// }
-		// } catch (Exception e) {
-		// Log.i("MY_LOG_receive acl", e.toString());
-		// }
-		// }
-		// });
 
 	}
 
@@ -176,6 +109,11 @@ public class AideAgent extends Agent implements AideAgentInterface {
 	@Override
 	public void sendMesToExternalAgent(SGMMessage msg) {
 		this.addBehaviour(new SendMesToExternalAgent(this, msg));
+	}
+
+	@Override
+	public void obtainFriends(UserTask userTask) {
+		this.addBehaviour(new ObtainFriends(this, userTask));
 	}
 
 	/**
@@ -229,38 +167,70 @@ public class AideAgent extends Agent implements AideAgentInterface {
 			Log.logDebug("AideAgent", "HandleMesFromManager()", "init.");
 			android.util.Log.i("MY_LOG", "Handle mes from manager...");
 
+			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
 			switch ((MesBody_Mes2Manager) msg.getBody()) {
 			case RequestPersonIA:
 				// 添加一个user task到全局变量的user task列表中，然后MessageFragment会自动刷新user
 				// task的显示
-				UserTask userTask = new UserTask(msg.getSender()
+
+				String taskTime = df.format(new Date());
+				UserTask userTask = new UserTask(taskTime, msg.getSender()
 						.getGoalModelName(), msg.getSender().getElementName(),
 						false);
 				userTask.setDescription(msg.getDescription());
 				userTaskList.add(userTask);
 
+				String description = "You need to do:\n";
+				if (userTask.getDescription() == null
+						|| userTask.getDescription().equals("")) {
+					description += userTask.getElementName();
+				} else {
+					description += userTask.getDescription();
+				}
+
 				// 发送 弹窗广播，在MainActivity会监听这个广播然后弹出通知窗口
 				Intent broadcast_nt = new Intent();
 				broadcast_nt.setAction("jade.task.NOTIFICATION");
-				broadcast_nt.putExtra("Content",
-						"You have received a new task.");
+				broadcast_nt.putExtra("Content", description);
 				context.sendBroadcast(broadcast_nt);
 				break;
 
 			case NoDelegatedAchieved:
 			case NoDelegatedFailed:
 
-				SimpleDateFormat df = new SimpleDateFormat(
-						"yyyy-MM-dd HH:mm:ss");
 				String mesTime = df.format(new Date());
 				UserMessage userMessage = new UserMessage(mesTime,
 						msg.getDescription());
 				userMessageList.add(userMessage);
 
 				Intent broadcast_nda = new Intent();
-				broadcast_nda.setAction("jade.task.NOTIFICATION");
-				broadcast_nda.putExtra("Content", msg.getDescription());
+				broadcast_nda.setAction("jade.mes.NOTIFICATION");
+				broadcast_nda.putExtra("Content", userMessage.getContent());
 				context.sendBroadcast(broadcast_nda);
+				break;
+
+			case DelegateOut:
+				String delegateOutTaskTime = df.format(new Date());
+				UserDelegateOutTask userDelegateOutTask = new UserDelegateOutTask(
+						delegateOutTaskTime,
+						msg.getSender().getGoalModelName(), msg.getSender()
+								.getElementName(), false);
+				userTaskList.add(userDelegateOutTask);
+
+				String description2 = "You need to choose a friend to help you complete the goal:\n";
+				if (userDelegateOutTask.getDescription() == null
+						|| userDelegateOutTask.getDescription().equals("")) {
+					description2 += userDelegateOutTask.getElementName();
+				} else {
+					description2 += userDelegateOutTask.getDescription();
+				}
+
+				// 发送 弹窗广播，在MainActivity会监听这个广播然后弹出通知窗口
+				Intent broadcast_ndt = new Intent();
+				broadcast_ndt.setAction("jade.task.NOTIFICATION");
+				broadcast_ndt.putExtra("Content", description2);
+				context.sendBroadcast(broadcast_ndt);
 				break;
 
 			default:
@@ -294,8 +264,6 @@ public class AideAgent extends Agent implements AideAgentInterface {
 
 			String targetAgent = msg.getReceiver().getAgentName(); // 获得委托对象的agent名字
 
-//			String[] agentName = a.getName().split("@");
-//			a.getL
 			msg.getSender().setAgentName(a.getLocalName()); // 设置发送方agent名字，只设置昵称就好
 			msg.setHeader(MesHeader_Mes2Manger.EXTERNAL_AGENT_MESSAGE);
 
@@ -350,16 +318,110 @@ public class AideAgent extends Agent implements AideAgentInterface {
 				if (inner_msg.getHeader().equals(
 						MesHeader_Mes2Manger.EXTERNAL_AGENT_MESSAGE)) {
 
+					SimpleDateFormat df = new SimpleDateFormat(
+							"yyyy-MM-dd HH:mm:ss");
+					String mesTime = df.format(new Date());
+
+					String userMesContent = "";
+					switch ((MesBody_Mes2Manager) inner_msg.getBody()) {
+					case DelegatedAchieved:
+						userMesContent = inner_msg.getSender().getAgentName()
+								+ " has completed the goal: "
+								+ inner_msg.getReceiver().getElementName()
+								+ "!";
+						break;
+					case DelegatedFailed:
+						userMesContent = inner_msg.getSender().getAgentName()
+								+ " didn't complete the goal: "
+								+ inner_msg.getReceiver().getElementName()
+								+ "!";
+						break;
+
+					case StartGM:
+						userMesContent = inner_msg.getSender().getAgentName()
+								+ " want you to help him/her complete the goal: "
+								+ inner_msg.getReceiver().getElementName()
+								+ "! GoalModel has started!";
+						break;
+
+					default:
+						break;
+					}
+
+					UserMessage userMessage = new UserMessage(mesTime,
+							userMesContent);
+					userMessageList.add(userMessage);
+
 					Intent broadcast_nda = new Intent();
-					broadcast_nda.setAction("jade.task.NOTIFICATION");
-					broadcast_nda.putExtra("Content",
-							"You have received a new mes from external agent!");
+					broadcast_nda.setAction("jade.mes.NOTIFICATION");
+					broadcast_nda.putExtra("Content", userMessage.getContent());
 					context.sendBroadcast(broadcast_nda);
 
 					goalModelManager.getMsgPool().offer(inner_msg);
 				}
 
 			}
+		}
+
+	}
+
+	/**
+	 * 从agent platform上获取可委托对象
+	 * 
+	 * @author whh
+	 * 
+	 */
+	private class ObtainFriends extends OneShotBehaviour {
+
+		private static final long serialVersionUID = 5110063359758030270L;
+		private Agent agent;
+		private UserTask userTask;
+
+		public ObtainFriends(Agent a, UserTask userTask) {
+			super(a);
+			this.agent = a;
+			this.userTask = userTask;
+		}
+
+		@Override
+		public void action() {
+			android.util.Log.i(
+					"MY_LOG",
+					"Obtain friends...goal model name is: "
+							+ userTask.getGoalModelName());
+
+			ArrayList<String> friendsArrayList = new ArrayList<>();
+			DFAgentDescription template = new DFAgentDescription();
+			ServiceDescription serviceDescription = new ServiceDescription();
+			serviceDescription.setType("GOALMODEL");
+			serviceDescription.setName(userTask.getGoalModelName());
+			template.addServices(serviceDescription);
+			try {
+				DFAgentDescription[] results = DFService
+						.search(agent, template);
+				for (int i = 0; i < results.length; i++) {
+					String agentNickName = results[i].getName().getLocalName();
+					// 跳过自己
+					if ((!agentNickName.equals(this.getAgent().getLocalName()))
+							&& agentNickName != null && agentNickName != "") {
+						friendsArrayList.add(agentNickName);
+					}
+				}
+
+			} catch (FIPAException e) {
+				e.printStackTrace();
+			}
+
+			// 发送 UI更新广播，在TaskFragment会监听这个广播然后弹出通知窗口
+			String[] friends = new String[friendsArrayList.size()];
+			friends = friendsArrayList.toArray(friends);
+			Intent broadcast_fs = new Intent();
+			broadcast_fs.setAction("jade.delegate.FRIENDS");
+			broadcast_fs.putExtra("Friends", friends);
+			broadcast_fs.putExtra("GoalModelName", userTask.getGoalModelName());
+			broadcast_fs.putExtra("ElementName", userTask.getElementName());
+			context.sendBroadcast(broadcast_fs);
+
 		}
 
 	}

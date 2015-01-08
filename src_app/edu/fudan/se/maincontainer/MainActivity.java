@@ -15,6 +15,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NotificationCompat.Builder;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.RemoteViews;
 
 /**
  * 主体activity，加载了一个fragment
@@ -46,6 +47,7 @@ public class MainActivity extends FragmentActivity {
 		myReceiver = new MyReceiver();
 		IntentFilter refreshChatFilter = new IntentFilter();
 		refreshChatFilter.addAction("jade.task.NOTIFICATION");
+		refreshChatFilter.addAction("jade.mes.NOTIFICATION");
 		registerReceiver(myReceiver, refreshChatFilter);
 
 	}
@@ -88,7 +90,14 @@ public class MainActivity extends FragmentActivity {
 		public void onReceive(Context context, Intent intent) {
 			String action = intent.getAction();
 			if (action.equalsIgnoreCase("jade.task.NOTIFICATION")) {
-				showNotification(intent.getExtras().getString("Content"));
+				showNotification("New Task",
+						intent.getExtras().getString("Content"),
+						"New Task From SGM!");
+			}
+			if (action.equalsIgnoreCase("jade.mes.NOTIFICATION")) {
+				showNotification("New Mes",
+						intent.getExtras().getString("Content"),
+						"New Mes from SGM!");
 			}
 		}
 
@@ -96,17 +105,28 @@ public class MainActivity extends FragmentActivity {
 
 	/**
 	 * 弹出一个通知
+	 * 
+	 * @param title
+	 *            通知的title
+	 * @param content
+	 *            通知的内容
+	 * @param ticker
+	 *            通知的提示
 	 */
-	private void showNotification(String content) {
+	private void showNotification(String title, String content, String ticker) {
+		
+		RemoteViews notification_view=new RemoteViews(getPackageName(), R.layout.view_notification);
+		notification_view.setImageViewResource(R.id.notification_icon, R.drawable.app__launcher);
+		notification_view.setTextViewText(R.id.tv_notification_title, title);
+		notification_view.setTextViewText(R.id.tv_notification_content, content);
 
 		NotificationManager mNotificationManager = (NotificationManager) this
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 
 		Builder mBuilder = new Builder(this);
-		mBuilder.setContentTitle("New User Task").setContentText(content)
-				.setTicker("New Notification from SGM!")
-				.setWhen(System.currentTimeMillis())
-				.setPriority(Notification.PRIORITY_HIGH).setOngoing(false)
+		mBuilder.setContent(notification_view)
+				.setTicker(ticker).setWhen(System.currentTimeMillis())
+				.setPriority(Notification.PRIORITY_DEFAULT).setOngoing(false)
 				.setDefaults(Notification.DEFAULT_ALL)
 				.setSmallIcon(R.drawable.ic_launcher).setAutoCancel(true);
 
@@ -119,6 +139,7 @@ public class MainActivity extends FragmentActivity {
 		mBuilder.setContentIntent(pendingIntent);
 
 		Notification notification = mBuilder.build();
+		notification.contentView = notification_view;
 		mNotificationManager.notify(200, notification);
 	}
 

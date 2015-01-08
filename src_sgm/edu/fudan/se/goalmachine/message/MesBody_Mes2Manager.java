@@ -9,7 +9,7 @@ import java.io.Serializable;
  * 
  */
 public enum MesBody_Mes2Manager implements MesBody, Serializable {
-	StartGM, StopGM, SuspendGM, ResumeGM, ResetGM, EndTE, QuitTE,
+	StartGM, StopGM, SuspendGM, ResumeGM, ResetGM, EndTE, QuitTE, QuitGM,
 	RequestPersonIA, DelegatedAchieved, DelegatedFailed, NoDelegatedAchieved, NoDelegatedFailed, DelegateOut;
 
 	public static MesBody getMesBody(String body) {
