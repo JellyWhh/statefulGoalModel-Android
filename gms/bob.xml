@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GoalModel name="myGoal" description="This is a goal model. Its name is bob.">
+
+	<ElementMachine id="0" type="GoalMachine" name="myGoal"
+		level="0" description="my goal">
+		<decomposition>0</decomposition>
+		<schedulerMethod>1</schedulerMethod>
+		<needDelegate>false</needDelegate>
+	</ElementMachine>
+
+	<ElementMachine id="1" type="GoalMachine" name="alice"
+		level="1" description="alice">
+		<parentGoal>myGoal</parentGoal>
+		<decomposition>0</decomposition>
+		<schedulerMethod>0</schedulerMethod>
+		<priorityLevel>1</priorityLevel>
+		<needDelegate>false</needDelegate>
+	</ElementMachine>
+
+	<ElementMachine id="2" type="TaskMachine" name="aliceChild_1"
+		level="2" description="alice child 1">
+		<parentGoal>alice</parentGoal>
+		<priorityLevel>1</priorityLevel>
+		<needPeopleInteraction>true</needPeopleInteraction>
+	</ElementMachine>
+
+	<ElementMachine id="3" type="TaskMachine" name="aliceChild_2"
+		level="2" description="alice child 2">
+		<parentGoal>alice</parentGoal>
+		<priorityLevel>1</priorityLevel>
+		<needPeopleInteraction>true</needPeopleInteraction>
+	</ElementMachine>
+
+	<ElementMachine id="4" type="GoalMachine" name="bob"
+		level="1" description="bob">
+		<parentGoal>myGoal</parentGoal>
+		<decomposition>1</decomposition>
+		<schedulerMethod>-1</schedulerMethod>
+		<priorityLevel>1</priorityLevel>
+		<needDelegate>false</needDelegate>
+	</ElementMachine>
+
+	<ElementMachine id="5" type="TaskMachine" name="bobChild_1"
+		level="2" description="bob child 1">
+		<parentGoal>bob</parentGoal>
+		<priorityLevel>1</priorityLevel>
+		<needPeopleInteraction>true</needPeopleInteraction>
+		<Condition type="Context">
+			<decription>Temperature</decription>
+			<relation>LARGER</relation>
+			<value>20</value>
+		</Condition>
+	</ElementMachine>
+
+	<ElementMachine id="6" type="TaskMachine" name="bobChild_2"
+		level="2" description="bob child 2">
+		<parentGoal>bob</parentGoal>
+		<priorityLevel>2</priorityLevel>
+		<needPeopleInteraction>true</needPeopleInteraction>
+		<waitingTimeLimit>5</waitingTimeLimit>
+		<Condition type="PRE">
+			<canRepairing>false</canRepairing>
+			<decription>Temperature</decription>
+			<relation>LARGER</relation>
+			<value>20</value>
+		</Condition>
+	</ElementMachine>
+
+	<ElementMachine id="7" type="TaskMachine" name="bobChild_3"
+		level="2" description="bob child 3">
+		<parentGoal>bob</parentGoal>
+		<priorityLevel>3</priorityLevel>
+		<needPeopleInteraction>true</needPeopleInteraction>
+		<Condition type="POST">
+			<decription>Temperature</decription>
+			<relation>LARGER</relation>
+			<value>20</value>
+		</Condition>
+	</ElementMachine>
+
+</GoalModel>

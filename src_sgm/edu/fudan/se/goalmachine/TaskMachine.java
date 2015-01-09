@@ -18,7 +18,6 @@ import edu.fudan.se.log.Log;
  */
 public abstract class TaskMachine extends ElementMachine {
 
-	private String description; // 任务的描述，如果这个任务需要人来完成，它需要有一段自然语言的描述展示给人看
 	private boolean needPeopleInteraction; // 是否需要人的交互
 
 	/**
@@ -181,12 +180,5 @@ public abstract class TaskMachine extends ElementMachine {
 		this.needPeopleInteraction = needPeopleInteraction;
 	}
 
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
 
 }

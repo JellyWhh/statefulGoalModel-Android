@@ -26,6 +26,10 @@ public class GoalModel {
 	private GoalMachine rootGoal; // goal model的root goal，在初始化goal
 										// model的时候要设置，并且也要把它加到elementMachines中去。
 	private GoalModelManager goalModelManager;
+	
+	public GoalModel(){
+		
+	}
 
 	/**
 	 * 构造方法

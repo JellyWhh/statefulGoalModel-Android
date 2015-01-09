@@ -32,6 +32,7 @@ public abstract class ElementMachine implements Runnable {
 	private String name; // element的名字
 	private ElementMachine parentGoal; // 当前element的父目标，除root
 										// goal外每个element都有parentGoal
+	private String description; // 任务的描述，如果这个任务需要人来完成，它需要有一段自然语言的描述展示给人看
 
 	private State currentState = State.Initial; // element目前所处的状态
 
@@ -476,40 +477,8 @@ public abstract class ElementMachine implements Runnable {
 		State ret = currentState;
 
 		switch (currentState) {
-		// case Initial: // (initial)
-		// if (condition == null) { // context condition为空
-		// ret = State.Activated;
-		// } else {
-		// // 先判断条件是不是context condition，是的话执行检查然后根据结果进行跳转；如果不是，无意义，返回-1，
-		// if (condition.getType().equals("CONTEXT")) {
-		// // 先检查一下context condition，在方法里面通过判断是否满足然后对conditon赋值
-		// checkContextCondition();
-		// if (condition.isSatisfied()) {
-		// ret = State.Activated; // context
-		// // condition满足，跳转到Activated
-		// } else {
-		// ret = State.Initial; // context
-		// // condition不满足，跳回到initial状态，同时告诉父目标自己激活失败
-		// // this.setConditionCauseToRepairing(condition);
-		// }
-		// }
-		// }
-		// break;
 
 		case Activated: // 1(activated)
-
-			// // 先检查隐含的default pre conditon，基本只针对goal machine，task
-			// // machine的defaultPreConditon为空
-			// if (this.getDefaultPreCondition() != null) {
-			// checkDefaultPreConditon();
-			// // default pre condition不满足
-			// if (!this.getDefaultPreCondition().isSatisfied()) {
-			// ret = State.Repairing;
-			// this.setCauseToRepairing(CauseToRepairing.DefaultPreCondition);
-			//
-			// break; // 直接跳到修复，不用再检查下面的pre condition了
-			// }
-			// }
 
 			// 检查pre condition
 			if (condition == null) { // pre condition为空
@@ -652,8 +621,9 @@ public abstract class ElementMachine implements Runnable {
 	 * @return true 发送成功, false 发送失败
 	 */
 	public boolean sendMessageToParent(MesBody body) {
-		SGMMessage msg = new SGMMessage(MesHeader_Mes2Machine.ToParent, null, null, this.getName(),
-				null, null, this.getParentGoal().getName(), body);
+		SGMMessage msg = new SGMMessage(MesHeader_Mes2Machine.ToParent, null,
+				null, this.getName(), null, null, this.getParentGoal()
+						.getName(), body);
 		if (this.getParentGoal().getMsgPool().offer(msg)) {
 			// 发送成功
 			Log.logMessage(msg, true);
@@ -955,6 +925,14 @@ public abstract class ElementMachine implements Runnable {
 
 	public void setGoalModel(GoalModel goalModel) {
 		this.goalModel = goalModel;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 }

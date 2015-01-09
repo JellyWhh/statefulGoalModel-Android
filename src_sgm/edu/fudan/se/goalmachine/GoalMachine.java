@@ -36,7 +36,7 @@ public abstract class GoalMachine extends ElementMachine {
 	private String agentFrom; // 如果是别人委托过来的，需要设置委托来源
 	private String delegateGoalModelFrom;	//委托来源的goal model的名字，把结果发回去的时候需要找到原来的goal model
 
-	private boolean needDelegate = false; // 任务是否要委托出去，也就是委托给别人做，如果是，则它应该是没有subElements的
+	private boolean needDelegate; // 任务是否要委托出去，也就是委托给别人做，如果是，则它应该是没有subElements的
 
 	/**
 	 * 目标状态机
@@ -52,10 +52,11 @@ public abstract class GoalMachine extends ElementMachine {
 	 *            当前目标的父目标，如果当前目标是root goal，这个值可以设置为null
 	 */
 	public GoalMachine(String name, int decomposition, int schedulerMethod,
-			ElementMachine parentGoal, int level) {
+			ElementMachine parentGoal, int level,boolean needDelegate) {
 		super(name, parentGoal, level);
 		this.decomposition = decomposition;
 		this.schedulerMethod = schedulerMethod;
+		this.needDelegate = needDelegate;
 		// this.setDefaultPreCondition(new Condition("DEFAULTPRE"));
 	}
 

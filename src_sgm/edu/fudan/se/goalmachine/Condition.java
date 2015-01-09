@@ -20,9 +20,9 @@ public class Condition{
 	public Condition(String type) {
 		this.type = type;
 	}
-	public Condition(String type, boolean canPrepairing) {
+	public Condition(String type, boolean canRepairing) {
 		this.type = type;
-		this.canRepairing = canPrepairing;
+		this.canRepairing = canRepairing;
 	}
 
 	public String getType() {
