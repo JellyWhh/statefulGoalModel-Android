@@ -115,6 +115,12 @@ public class AideAgent extends Agent implements AideAgentInterface {
 	public void obtainFriends(UserTask userTask) {
 		this.addBehaviour(new ObtainFriends(this, userTask));
 	}
+	
+
+	@Override
+	public void handleMesFromService(SGMMessage msg) {
+		this.addBehaviour(new HandleMesFromService(this, msg));
+	}
 
 	/**
 	 * 发送消息给本地manager
@@ -425,5 +431,39 @@ public class AideAgent extends Agent implements AideAgentInterface {
 		}
 
 	}
+	
+	private class HandleMesFromService extends OneShotBehaviour {
+
+		private static final long serialVersionUID = 4286751790137940309L;
+		private SGMMessage msg;
+		private Agent a;
+
+		public HandleMesFromService(Agent a, SGMMessage msg) {
+			super(a);
+			this.a = a;
+			this.msg = msg;
+		}
+
+		@Override
+		public void action() {
+			Log.logDebug("AideAgent", "HandleMesFromService()", "init.");
+			if (msg.getBody().equals(MesBody_Mes2Manager.ServiceResult)) {
+				
+				SimpleDateFormat df = new SimpleDateFormat(
+						"yyyy-MM-dd HH:mm:ss");
+				String mesTime = df.format(new Date());
+				UserMessage userMessage = new UserMessage(mesTime,
+						msg.getDescription());
+				userMessageList.add(userMessage);
+
+				Intent broadcast_nda = new Intent();
+				broadcast_nda.setAction("jade.mes.NOTIFICATION");
+				broadcast_nda.putExtra("Content", userMessage.getContent());
+				context.sendBroadcast(broadcast_nda);
+			}
+		}
+		
+	}
+
 
 }

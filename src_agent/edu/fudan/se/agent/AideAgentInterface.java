@@ -12,5 +12,7 @@ public interface AideAgentInterface {
 	public void sendMesToExternalAgent(SGMMessage msg);
 	
 	public void obtainFriends(UserTask userTask);
+	
+	public void handleMesFromService(SGMMessage msg);
 
 }

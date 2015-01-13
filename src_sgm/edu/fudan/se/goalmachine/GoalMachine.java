@@ -465,7 +465,7 @@ public abstract class GoalMachine extends ElementMachine {
 					"getSubElements() == null");
 		}
 	}
-
+	
 	/**
 	 * OR分解</br> activated状态entry所做的action:给所有子目标发送激活消息，然后开始等待子目标的反馈
 	 */

@@ -114,18 +114,21 @@ public class MainActivity extends FragmentActivity {
 	 *            通知的提示
 	 */
 	private void showNotification(String title, String content, String ticker) {
-		
-		RemoteViews notification_view=new RemoteViews(getPackageName(), R.layout.view_notification);
-		notification_view.setImageViewResource(R.id.notification_icon, R.drawable.app__launcher);
+
+		RemoteViews notification_view = new RemoteViews(getPackageName(),
+				R.layout.view_notification);
+		notification_view.setImageViewResource(R.id.notification_icon,
+				R.drawable.app__launcher);
 		notification_view.setTextViewText(R.id.tv_notification_title, title);
-		notification_view.setTextViewText(R.id.tv_notification_content, content);
+		notification_view
+				.setTextViewText(R.id.tv_notification_content, content);
 
 		NotificationManager mNotificationManager = (NotificationManager) this
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 
 		Builder mBuilder = new Builder(this);
-		mBuilder.setContent(notification_view)
-				.setTicker(ticker).setWhen(System.currentTimeMillis())
+		mBuilder.setContent(notification_view).setTicker(ticker)
+				.setWhen(System.currentTimeMillis())
 				.setPriority(Notification.PRIORITY_DEFAULT).setOngoing(false)
 				.setDefaults(Notification.DEFAULT_ALL)
 				.setSmallIcon(R.drawable.ic_launcher).setAutoCancel(true);

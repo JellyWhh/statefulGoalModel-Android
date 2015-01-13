@@ -746,6 +746,9 @@ public class SGMApplication extends Application implements Serializable {
 
 			@Override
 			public void checkContextCondition() {
+				//这里改成查询天气，如果温度大于0度，上下文条件就是满足的
+				
+				
 				if (true) {
 					this.getContextCondition().setSatisfied(false);
 				}

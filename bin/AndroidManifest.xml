@@ -25,6 +25,12 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <service android:name="jade.android.MicroRuntimeService" />
+        
+        <service android:name="service.webservice.weather.IntentServiceWeather" >
+            <intent-filter>
+                <action android:name="service.intentservice.weather"/>
+            </intent-filter>
+        </service>
 
         <activity
             android:name="edu.fudan.se.initial.WelcomeActivity"

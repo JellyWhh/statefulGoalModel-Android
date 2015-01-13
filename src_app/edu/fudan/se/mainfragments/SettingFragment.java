@@ -47,12 +47,24 @@ public class SettingFragment extends Fragment {
 
 			@Override
 			public void onClick(View v) {
-				showNotification("Test title",
-						"test content!\n金州勇士官方宣布球队已经解雇了主帅马克-杰克逊，随后宣布了最后的结果。",
-						"New Msg From SGM!");
+				// showNotification("Test title",
+				// "test content!\n金州勇士官方宣布球队已经解雇了主帅马克-杰克逊，随后宣布了最后的结果。",
+				// "New Msg From SGM!");
+				invokeService("testGoalModelName", "testElementName", "Shanghai");
 			}
 		});
 		return rootView;
+	}
+
+	private void invokeService(String goalModelName, String elementName,
+			String city) {
+		Intent serviceIntent = new Intent("service.intentservice.weather");
+		Bundle bundle = new Bundle();
+		bundle.putString("CITY", city);
+		bundle.putString("GOAL_MODEL_NAME", goalModelName);
+		bundle.putString("ELEMENT_NAME", elementName);
+		serviceIntent.putExtras(bundle);
+		getActivity().startService(serviceIntent);
 	}
 
 	private void showNotification(String title, String content, String ticker) {
