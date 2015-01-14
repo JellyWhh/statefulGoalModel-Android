@@ -2,9 +2,8 @@ package edu.fudan.se.maincontainer;
 
 import edu.fudan.se.R;
 import edu.fudan.se.mainfragments.MainFragment;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
+import edu.fudan.se.utils.Constant;
+import edu.fudan.se.utils.NotificationUtil;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -12,10 +11,8 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.NotificationCompat.Builder;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.RemoteViews;
 
 /**
  * 主体activity，加载了一个fragment
@@ -88,62 +85,19 @@ public class MainActivity extends FragmentActivity {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
+			NotificationUtil mNotificationUtil = new NotificationUtil(context);
 			String action = intent.getAction();
 			if (action.equalsIgnoreCase("jade.task.NOTIFICATION")) {
-				showNotification("New Task",
-						intent.getExtras().getString("Content"),
-						"New Task From SGM!");
+				mNotificationUtil.showNotification("New Task", intent
+						.getExtras().getString("Content"),
+						"New Task From SGM!", Constant.Notification_New_Task);
 			}
 			if (action.equalsIgnoreCase("jade.mes.NOTIFICATION")) {
-				showNotification("New Mes",
-						intent.getExtras().getString("Content"),
-						"New Mes from SGM!");
+				mNotificationUtil.showNotification("New Task", intent
+						.getExtras().getString("Content"),
+						"New Task From SGM!", Constant.Notification_New_Mes);
 			}
 		}
-
-	}
-
-	/**
-	 * 弹出一个通知
-	 * 
-	 * @param title
-	 *            通知的title
-	 * @param content
-	 *            通知的内容
-	 * @param ticker
-	 *            通知的提示
-	 */
-	private void showNotification(String title, String content, String ticker) {
-
-		RemoteViews notification_view = new RemoteViews(getPackageName(),
-				R.layout.view_notification);
-		notification_view.setImageViewResource(R.id.notification_icon,
-				R.drawable.app__launcher);
-		notification_view.setTextViewText(R.id.tv_notification_title, title);
-		notification_view
-				.setTextViewText(R.id.tv_notification_content, content);
-
-		NotificationManager mNotificationManager = (NotificationManager) this
-				.getSystemService(Context.NOTIFICATION_SERVICE);
-
-		Builder mBuilder = new Builder(this);
-		mBuilder.setContent(notification_view).setTicker(ticker)
-				.setWhen(System.currentTimeMillis())
-				.setPriority(Notification.PRIORITY_DEFAULT).setOngoing(false)
-				.setDefaults(Notification.DEFAULT_ALL)
-				.setSmallIcon(R.drawable.ic_launcher).setAutoCancel(true);
-
-		// 点击的意图ACTION是跳转到Intent
-		Intent resultIntent = new Intent(this, MainActivity.class);
-		// resultIntent.putExtra("FLAG", "MESSAGE");
-		resultIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-		PendingIntent pendingIntent = PendingIntent.getActivity(this, 0,
-				resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-		mBuilder.setContentIntent(pendingIntent);
-
-		Notification notification = mBuilder.build();
-		notification.contentView = notification_view;
-		mNotificationManager.notify(200, notification);
 	}
 
 }

@@ -104,6 +104,12 @@ public class StartAgentActivity extends Activity {
 							MainActivity.class);
 					// intent.putExtra("agentname", nickname);
 					startActivity(intent);
+					
+					//开启定位服务
+					android.util.Log.i("MY_LOG", "startLocationService......");
+					Intent locationServiceIntent = new Intent("service.appservice.locator");
+					startService(locationServiceIntent);
+					
 
 				} catch (Exception ex) {
 					System.out.println(ex.toString()

@@ -4,6 +4,7 @@
 package edu.fudan.se.mainfragments;
 
 import edu.fudan.se.R;
+import edu.fudan.se.initial.SGMApplication;
 import edu.fudan.se.maincontainer.MainActivity;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat.Builder;
@@ -19,6 +20,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.RemoteViews;
+import android.widget.TextView;
 
 /**
  * setting标签页
@@ -29,6 +31,7 @@ import android.widget.RemoteViews;
 public class SettingFragment extends Fragment {
 
 	private Button button;
+	private TextView textView;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -43,6 +46,7 @@ public class SettingFragment extends Fragment {
 				false);
 
 		button = (Button) rootView.findViewById(R.id.bt_showNotification);
+		textView = (TextView) rootView.findViewById(R.id.tv_showResult);
 		button.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -50,13 +54,15 @@ public class SettingFragment extends Fragment {
 				// showNotification("Test title",
 				// "test content!\n金州勇士官方宣布球队已经解雇了主帅马克-杰克逊，随后宣布了最后的结果。",
 				// "New Msg From SGM!");
-				invokeService("testGoalModelName", "testElementName", "Shanghai");
+//				invokeWeatherService("testGoalModelName", "testElementName",
+//						"Shanghai");
+				textView.setText(((SGMApplication)getActivity().getApplication()).getLocation());
 			}
 		});
 		return rootView;
 	}
 
-	private void invokeService(String goalModelName, String elementName,
+	private void invokeWeatherService(String goalModelName, String elementName,
 			String city) {
 		Intent serviceIntent = new Intent("service.intentservice.weather");
 		Bundle bundle = new Bundle();
@@ -66,6 +72,8 @@ public class SettingFragment extends Fragment {
 		serviceIntent.putExtras(bundle);
 		getActivity().startService(serviceIntent);
 	}
+
+	
 
 	private void showNotification(String title, String content, String ticker) {
 

@@ -43,6 +43,8 @@ public class SGMApplication extends Application implements Serializable {
 
 	private GoalModelManager goalModelManager;
 
+	private String location = ""; // 位置信息
+
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -126,6 +128,14 @@ public class SGMApplication extends Application implements Serializable {
 		this.userMessageList.clear();
 	}
 
+	public String getLocation() {
+		return location;
+	}
+
+	public void setLocation(String location) {
+		this.location = location;
+	}
+
 	/**
 	 * 目前测试时只用这个方法添加了一个测试用的GoalModel
 	 * 
@@ -135,7 +145,7 @@ public class SGMApplication extends Application implements Serializable {
 
 		GoalModel goalModel = new GoalModel("myGoal");
 
-		GoalMachine myGoal = new GoalMachine("myGoal", 0, 1, null, 0,false) {
+		GoalMachine myGoal = new GoalMachine("myGoal", 0, 1, null, 0, false) {
 
 			@Override
 			public void checkPreCondition() {
@@ -175,7 +185,7 @@ public class SGMApplication extends Application implements Serializable {
 			}
 		};
 
-		GoalMachine alice = new GoalMachine("alice", 0, 0, myGoal, 1,false) {
+		GoalMachine alice = new GoalMachine("alice", 0, 0, myGoal, 1, false) {
 
 			@Override
 			public void checkPreCondition() {
@@ -207,7 +217,7 @@ public class SGMApplication extends Application implements Serializable {
 
 			}
 		};
-		GoalMachine bob = new GoalMachine("bob", 1, -1, myGoal, 1,true) {
+		GoalMachine bob = new GoalMachine("bob", 1, -1, myGoal, 1, true) {
 
 			@Override
 			public void checkPreCondition() {
@@ -345,7 +355,7 @@ public class SGMApplication extends Application implements Serializable {
 
 		GoalModel goalModel = new GoalModel("bob");
 
-		GoalMachine bob = new GoalMachine("bob", 1, -1, null, 1,false) {
+		GoalMachine bob = new GoalMachine("bob", 1, -1, null, 1, false) {
 
 			@Override
 			public void checkPreCondition() {
@@ -536,7 +546,7 @@ public class SGMApplication extends Application implements Serializable {
 		GoalModel goalModel = new GoalModel("my goal model test");
 
 		GoalMachine myGoal = new GoalMachine("my goal model test", 0, 1, null,
-				0,false) {
+				0, false) {
 
 			@Override
 			public void checkPreCondition() {
@@ -576,7 +586,7 @@ public class SGMApplication extends Application implements Serializable {
 			}
 		};
 
-		GoalMachine alice = new GoalMachine("alice", 0, 0, myGoal, 1,false) {
+		GoalMachine alice = new GoalMachine("alice", 0, 0, myGoal, 1, false) {
 
 			@Override
 			public void checkPreCondition() {
@@ -608,7 +618,7 @@ public class SGMApplication extends Application implements Serializable {
 
 			}
 		};
-		GoalMachine bob = new GoalMachine("bob", 1, -1, myGoal, 1,false) {
+		GoalMachine bob = new GoalMachine("bob", 1, -1, myGoal, 1, false) {
 
 			@Override
 			public void checkPreCondition() {
@@ -746,9 +756,8 @@ public class SGMApplication extends Application implements Serializable {
 
 			@Override
 			public void checkContextCondition() {
-				//这里改成查询天气，如果温度大于0度，上下文条件就是满足的
-				
-				
+				// 这里改成查询天气，如果温度大于0度，上下文条件就是满足的
+
 				if (true) {
 					this.getContextCondition().setSatisfied(false);
 				}

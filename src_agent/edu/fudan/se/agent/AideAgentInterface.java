@@ -14,5 +14,7 @@ public interface AideAgentInterface {
 	public void obtainFriends(UserTask userTask);
 	
 	public void handleMesFromService(SGMMessage msg);
+	
+	public void sendLocationToServerAgent(String userLocation);
 
 }

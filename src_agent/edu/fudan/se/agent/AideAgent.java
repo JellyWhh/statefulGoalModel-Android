@@ -14,6 +14,7 @@ import edu.fudan.se.goalmachine.message.MesHeader_Mes2Manger;
 import edu.fudan.se.goalmachine.message.SGMMessage;
 import edu.fudan.se.goalmodel.GoalModel;
 import edu.fudan.se.goalmodel.GoalModelManager;
+import edu.fudan.se.initial.SGMApplication;
 import edu.fudan.se.log.Log;
 import edu.fudan.se.userMes.UserDelegateOutTask;
 import edu.fudan.se.userMes.UserMessage;
@@ -115,11 +116,15 @@ public class AideAgent extends Agent implements AideAgentInterface {
 	public void obtainFriends(UserTask userTask) {
 		this.addBehaviour(new ObtainFriends(this, userTask));
 	}
-	
 
 	@Override
 	public void handleMesFromService(SGMMessage msg) {
 		this.addBehaviour(new HandleMesFromService(this, msg));
+	}
+
+	@Override
+	public void sendLocationToServerAgent(String userLocation) {
+		this.addBehaviour(new SendLocationToServerAgent(this, userLocation));
 	}
 
 	/**
@@ -431,7 +436,7 @@ public class AideAgent extends Agent implements AideAgentInterface {
 		}
 
 	}
-	
+
 	private class HandleMesFromService extends OneShotBehaviour {
 
 		private static final long serialVersionUID = 4286751790137940309L;
@@ -448,7 +453,7 @@ public class AideAgent extends Agent implements AideAgentInterface {
 		public void action() {
 			Log.logDebug("AideAgent", "HandleMesFromService()", "init.");
 			if (msg.getBody().equals(MesBody_Mes2Manager.ServiceResult)) {
-				
+
 				SimpleDateFormat df = new SimpleDateFormat(
 						"yyyy-MM-dd HH:mm:ss");
 				String mesTime = df.format(new Date());
@@ -462,8 +467,41 @@ public class AideAgent extends Agent implements AideAgentInterface {
 				context.sendBroadcast(broadcast_nda);
 			}
 		}
-		
+
 	}
 
+	/**
+	 * 发送位置信息给ServerAgent
+	 * 
+	 * @author whh
+	 * 
+	 */
+	private class SendLocationToServerAgent extends OneShotBehaviour {
+
+		private static final long serialVersionUID = -8674488872785177053L;
+		private Agent a;
+		private String userLocation;
+
+		public SendLocationToServerAgent(Agent a, String userLocation) {
+			super(a);
+			this.a = a;
+			this.userLocation = userLocation;
+		}
+
+		@Override
+		public void action() {
+			String content = a.getLocalName() + ":" + userLocation;
+
+			android.util.Log.i("MY_LOG",
+					"Send user location to server agent...content is: "
+							+ content);
+
+			ACLMessage aclmsg = new ACLMessage(ACLMessage.INFORM);
+			aclmsg.addReceiver(new AID("ServerAgent", AID.ISLOCALNAME));
+			aclmsg.setContent(content);
+			send(aclmsg);
+		}
+
+	}
 
 }

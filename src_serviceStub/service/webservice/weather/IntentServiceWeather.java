@@ -3,16 +3,13 @@
  */
 package service.webservice.weather;
 
-import jade.core.MicroRuntime;
-import jade.wrapper.ControllerException;
-import jade.wrapper.StaleProxyException;
-
 import org.ksoap2.SoapEnvelope;
 import org.ksoap2.serialization.SoapObject;
 import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.HttpTransportSE;
 
-import edu.fudan.se.agent.AideAgentInterface;
+import service.support.GetAgent;
+
 import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
 import edu.fudan.se.goalmachine.message.MesHeader_Mes2Manger;
 import edu.fudan.se.goalmachine.message.SGMMessage;
@@ -66,7 +63,7 @@ public class IntentServiceWeather extends IntentService {
 				MesBody_Mes2Manager.ServiceResult);
 		msg.setDescription("weatherInfo: " + weatherInfo);
 
-		getAideAgentInterface().handleMesFromService(msg);
+		GetAgent.getAideAgentInterface((SGMApplication) getApplication()).handleMesFromService(msg);
 
 		super.onDestroy();
 	}
@@ -79,16 +76,12 @@ public class IntentServiceWeather extends IntentService {
 	 * @return 这个城市的天气
 	 */
 	private String getWeather(String cityName) {
-		System.out.println("cityName: " + cityName);
+		
 		String ret = "";
 
-		/* 1.指定 WebService 的命名空间和调用方法 */
+		// 指定 WebService 的命名空间和调用方法
 		final String NAMESPACE = "http://webservice.se.fudan.edu/";
-		// final String NAMESPACE = "http://weather.service.se.fudan.edu/";
-
-		// web service地址，可以访问，然后可以看到有很多个查询天气的方法
 		String SERVICE_URL = "http://10.131.252.246:8080/WeatherService/WeatherPort";
-		// String SERVICE_URL = "http://10.131.253.133:8888/WeatherService";
 
 		// 调用的方法，通过城市名称获取天气情况
 		final String METHOD_NAME = "getWeatherByName";
@@ -99,7 +92,7 @@ public class IntentServiceWeather extends IntentService {
 
 			SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(
 					SoapEnvelope.VER11);
-
+			// 添加参数，name不重要，只要按照方法中的参数顺序添加即可
 			soapObject.addProperty("arg0", cityName);
 			// 设置与.Net提供的Web Serviceb保持较好的兼容性（true）
 			envelope.dotNet = false;
@@ -123,25 +116,6 @@ public class IntentServiceWeather extends IntentService {
 		}
 
 		return ret;
-	}
-
-	/**
-	 * 拿到agent的引用
-	 * 
-	 * @return agent
-	 */
-	private AideAgentInterface getAideAgentInterface() {
-		AideAgentInterface aideAgentInterface = null; // agent interface
-		try {
-			aideAgentInterface = MicroRuntime.getAgent(
-					((SGMApplication) getApplication()).getAgentNickname())
-					.getO2AInterface(AideAgentInterface.class);
-		} catch (StaleProxyException e) {
-			e.printStackTrace();
-		} catch (ControllerException e) {
-			e.printStackTrace();
-		}
-		return aideAgentInterface;
 	}
 
 }
