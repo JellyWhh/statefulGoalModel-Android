@@ -22,7 +22,7 @@ import edu.fudan.se.goalmachine.TaskMachine;
 
 /**
  * @author whh
- *
+ * 
  */
 public class GmXMLParser {
 
@@ -103,6 +103,7 @@ public class GmXMLParser {
 					int decomposition = 0, schedulerMethod = 0, priorityLevel = 0, waitingTimeLimit = 0;
 					boolean needDelegate = false, needPeopleInteraction = false;
 
+					String executingRequestedServiceName = "";
 					String preCondition = "", postCondition = "", invariantCondition = "", commitmentCondition = "", contextCondition = "";
 					boolean canRepairing = false;
 
@@ -138,10 +139,16 @@ public class GmXMLParser {
 										.parseBoolean(propertyNode
 												.getTextContent());
 								break;
+							case "executingRequestedServiceName":
+								executingRequestedServiceName = propertyNode
+										.getTextContent();
+								break;
+
 							case "waitingTimeLimit":
 								waitingTimeLimit = Integer
 										.parseInt(propertyNode.getTextContent());
 								break;
+
 							case "Condition":
 								// propertyNode又是一个有自己属性和子节点的节点
 								// 先获得它的属性
@@ -292,14 +299,15 @@ public class GmXMLParser {
 
 							}
 
-							@Override
-							public void executingDo_once() {
-								// TODO Auto-generated method stub
-
-							}
 						};
+						// 不需要人的参与，而是需要调用服务的
+						if (!needPeopleInteraction
+								&& executingRequestedServiceName != "") {
+							((TaskMachine) elementMachine)
+									.setExecutingRequestedServiceName(executingRequestedServiceName);
+						}
 					}
-					
+
 					elementMachine.setDescription(description);
 					if (waitingTimeLimit != 0) {
 						elementMachine.setWaitingTimeLimit(waitingTimeLimit);

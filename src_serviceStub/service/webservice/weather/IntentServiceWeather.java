@@ -14,6 +14,7 @@ import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
 import edu.fudan.se.goalmachine.message.MesHeader_Mes2Manger;
 import edu.fudan.se.goalmachine.message.SGMMessage;
 import edu.fudan.se.initial.SGMApplication;
+import edu.fudan.se.utils.NotificationUtil;
 
 import android.app.IntentService;
 import android.content.Intent;
@@ -47,23 +48,29 @@ public class IntentServiceWeather extends IntentService {
 	@Override
 	protected void onHandleIntent(Intent intent) {
 
-		String city = intent.getExtras().getString("CITY");
 		goalModelName = intent.getExtras().getString("GOAL_MODEL_NAME");
 		elementName = intent.getExtras().getString("ELEMENT_NAME");
-		weatherInfo = getWeather(city);
+		weatherInfo = getWeather("Shanghai");
 	}
 
 	@Override
 	public void onDestroy() {
 		System.out.println("onDestroy");
+
+		// 测试时用，弹出一个通知，显示这个web service调用完毕要返回了
+		NotificationUtil notificationUtil = new NotificationUtil(this);
+		notificationUtil.showNotification("Web service Done",
+				"intent service weather done!\nweatherInfo: " + weatherInfo,
+				"Web Service Done", 100);
+
 		// 在destory前把天气信息通过agent发送给manager
 		SGMMessage msg = new SGMMessage(
 				MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null, null,
 				null, goalModelName, elementName,
-				MesBody_Mes2Manager.ServiceResult);
-		msg.setDescription("weatherInfo: " + weatherInfo);
+				MesBody_Mes2Manager.ServiceExecutingDone);
 
-		GetAgent.getAideAgentInterface((SGMApplication) getApplication()).handleMesFromService(msg);
+		GetAgent.getAideAgentInterface((SGMApplication) getApplication())
+				.sendMesToManager(msg);
 
 		super.onDestroy();
 	}
@@ -76,7 +83,7 @@ public class IntentServiceWeather extends IntentService {
 	 * @return 这个城市的天气
 	 */
 	private String getWeather(String cityName) {
-		
+
 		String ret = "";
 
 		// 指定 WebService 的命名空间和调用方法

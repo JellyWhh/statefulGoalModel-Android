@@ -121,6 +121,8 @@ public class GoalModelManager implements Runnable {
 				break;
 			case EndTE:
 			case QuitTE:
+			case ServiceExecutingDone:
+			case ServiceExecutingFailed:
 				endTaskMachine((TaskMachine) targetElementMachine, msg);
 				break;
 			case QuitGM:
@@ -202,16 +204,14 @@ public class GoalModelManager implements Runnable {
 			case RequestPersonIA: // 需要用户反馈是否完成task的消息
 			case NoDelegatedAchieved: // 告诉主人自己完成了任务
 			case NoDelegatedFailed: // 告诉主人自己没有完成任务
+			case DelegateOut: // 告诉agent这个是要委托出去的任务
+			case RequestService: // 需要调用服务
 				getAideAgentInterface().handleMesFromManager(msg);
 				break;
 
 			case DelegatedAchieved: // 告诉委托方agent完成了任务
 			case DelegatedFailed: // 告诉委托方agent没有完成任务
 				getAideAgentInterface().sendMesToExternalAgent(msg);
-				break;
-				
-			case DelegateOut: // 告诉agent这个是要委托出去的任务
-				getAideAgentInterface().handleMesFromManager(msg);
 				break;
 
 			default:
@@ -320,10 +320,13 @@ public class GoalModelManager implements Runnable {
 		// taskMachine.getName(),
 		// mes);
 
-		if (msg.getBody().equals(MesBody_Mes2Manager.EndTE)) {
-			msg.setBody(MesBody_Mes2Machine.TASK_END);
-		} else if (msg.getBody().equals(MesBody_Mes2Manager.QuitTE)) {
-			msg.setBody(MesBody_Mes2Machine.TASK_QUIT);
+		if (msg.getBody().equals(MesBody_Mes2Manager.EndTE)
+				|| msg.getBody().equals(
+						MesBody_Mes2Manager.ServiceExecutingDone)) {
+			msg.setBody(MesBody_Mes2Machine.TASK_DONE);
+		} else if (msg.getBody().equals(MesBody_Mes2Manager.QuitTE)|| msg.getBody().equals(
+				MesBody_Mes2Manager.ServiceExecutingFailed)) {
+			msg.setBody(MesBody_Mes2Machine.TASK_FAILED);
 		}
 		if (taskMachine.getMsgPool().offer(msg)) {
 			Log.logMessage(msg, true);

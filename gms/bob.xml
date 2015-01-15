@@ -44,7 +44,9 @@
 		level="2" description="bob child 1">
 		<parentGoal>bob</parentGoal>
 		<priorityLevel>1</priorityLevel>
-		<needPeopleInteraction>true</needPeopleInteraction>
+		<needPeopleInteraction>false</needPeopleInteraction>
+		<!-- executingRequestedServiceName的格式必须是 AndroidManifest.xml中service标签中action name-->
+		<executingRequestedServiceName>service.intentservice.weather</executingRequestedServiceName>
 		<Condition type="Context">
 			<decription>Temperature</decription>
 			<relation>LARGER</relation>

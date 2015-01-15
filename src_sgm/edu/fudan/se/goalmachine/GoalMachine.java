@@ -172,7 +172,7 @@ public abstract class GoalMachine extends ElementMachine {
 	 * 如果是OR：按照优先级给其中已激活的subElements发送START消息
 	 */
 	@Override
-	public void executingEntry(SGMMessage msg) {
+	public void executingEntry() {
 		Log.logDebug(this.getName(), "executingEntry()", "init.");
 
 		if (this.isNeedDelegate()) { // 这个goal是需要委托给别人做的

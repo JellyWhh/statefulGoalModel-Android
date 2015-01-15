@@ -1,8 +1,8 @@
 package edu.fudan.se.initial;
 
 import edu.fudan.se.R;
-import edu.fudan.se.clientgui.SettingAgentActivity;
-import edu.fudan.se.clientgui.StartAgentActivity;
+import edu.fudan.se.activity.SettingAgentActivity;
+import edu.fudan.se.activity.StartAgentActivity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;

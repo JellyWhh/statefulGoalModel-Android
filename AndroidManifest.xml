@@ -75,11 +75,11 @@
         </activity>
         <activity android:name="edu.fudan.se.goalmodel.GoalModelActivity" >
         </activity>
-        <activity android:name="edu.fudan.se.clientgui.SettingAgentActivity" >
+        <activity android:name="edu.fudan.se.activity.SettingAgentActivity" >
         </activity>
-        <activity android:name="edu.fudan.se.clientgui.StartAgentActivity" >
+        <activity android:name="edu.fudan.se.activity.StartAgentActivity" >
         </activity>
-        <activity android:name="edu.fudan.se.clientgui.WorkingActivity" >
+        <activity android:name="edu.fudan.se.activity.WorkingActivity" >
         </activity>
     </application>
 

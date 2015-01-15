@@ -1,7 +1,7 @@
 /**
  * 
  */
-package edu.fudan.se.clientgui;
+package edu.fudan.se.activity;
 
 import edu.fudan.se.R;
 import jade.util.leap.Properties;

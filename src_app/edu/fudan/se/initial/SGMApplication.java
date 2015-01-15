@@ -251,7 +251,7 @@ public class SGMApplication extends Application implements Serializable {
 		};
 
 		TaskMachine aliceChild_1 = new TaskMachine("aliceChild_1", alice, 2,
-				true) {
+				false) {
 
 			@Override
 			public void checkPreCondition() {
@@ -285,12 +285,9 @@ public class SGMApplication extends Application implements Serializable {
 
 			}
 
-			@Override
-			public void executingDo_once() {
-				System.out
-						.println("aliceChild_1 is doing his executingDoAction...");
-			}
+			
 		};
+		aliceChild_1.setExecutingRequestedServiceName("service.intentservice.weather");
 
 		TaskMachine aliceChild_2 = new TaskMachine("aliceChild_2", alice, 2,
 				true) {
@@ -326,11 +323,7 @@ public class SGMApplication extends Application implements Serializable {
 
 			}
 
-			@Override
-			public void executingDo_once() {
-				System.out
-						.println("aliceChild_2 is doing his executingDoAction...");
-			}
+			
 		};
 
 		myGoal.addSubElement(alice, 1);
@@ -422,11 +415,6 @@ public class SGMApplication extends Application implements Serializable {
 
 			}
 
-			@Override
-			public void executingDo_once() {
-				System.out
-						.println("bobChild_1 is doing his executingDoAction...");
-			}
 		};
 
 		TaskMachine bobChild_2 = new TaskMachine("bobChild_2", bob, 2, true) {
@@ -465,11 +453,7 @@ public class SGMApplication extends Application implements Serializable {
 
 			}
 
-			@Override
-			public void executingDo_once() {
-				System.out
-						.println("bobChild_2 is doing his executingDoAction...");
-			}
+			
 		};
 		TaskMachine bobChild_3 = new TaskMachine("bobChild_3", bob, 2, true) {
 
@@ -507,11 +491,6 @@ public class SGMApplication extends Application implements Serializable {
 
 			}
 
-			@Override
-			public void executingDo_once() {
-				System.out
-						.println("bobChild_3 is doing his executingDoAction...");
-			}
 		};
 		// root.setCommitmentCondition(new Condition("COMMITMENT"));
 		// root.setTimeLimit(10); // 10S
@@ -652,7 +631,7 @@ public class SGMApplication extends Application implements Serializable {
 		};
 
 		TaskMachine aliceChild_1 = new TaskMachine("aliceChild_1", alice, 2,
-				true) {
+				false) {
 
 			@Override
 			public void checkPreCondition() {
@@ -686,12 +665,9 @@ public class SGMApplication extends Application implements Serializable {
 
 			}
 
-			@Override
-			public void executingDo_once() {
-				System.out
-						.println("aliceChild_1 is doing his executingDoAction...");
-			}
 		};
+		
+		aliceChild_1.setExecutingRequestedServiceName("service.intentservice.weather");
 
 		TaskMachine aliceChild_2 = new TaskMachine("aliceChild_2", alice, 2,
 				true) {
@@ -727,11 +703,6 @@ public class SGMApplication extends Application implements Serializable {
 
 			}
 
-			@Override
-			public void executingDo_once() {
-				System.out
-						.println("aliceChild_2 is doing his executingDoAction...");
-			}
 		};
 
 		TaskMachine bobChild_1 = new TaskMachine("bobChild_1", bob, 2, true) {
@@ -770,11 +741,7 @@ public class SGMApplication extends Application implements Serializable {
 
 			}
 
-			@Override
-			public void executingDo_once() {
-				System.out
-						.println("bobChild_1 is doing his executingDoAction...");
-			}
+			
 		};
 
 		TaskMachine bobChild_2 = new TaskMachine("bobChild_2", bob, 2, true) {
@@ -813,11 +780,6 @@ public class SGMApplication extends Application implements Serializable {
 
 			}
 
-			@Override
-			public void executingDo_once() {
-				System.out
-						.println("bobChild_2 is doing his executingDoAction...");
-			}
 		};
 		TaskMachine bobChild_3 = new TaskMachine("bobChild_3", bob, 2, true) {
 
@@ -855,11 +817,6 @@ public class SGMApplication extends Application implements Serializable {
 
 			}
 
-			@Override
-			public void executingDo_once() {
-				System.out
-						.println("bobChild_3 is doing his executingDoAction...");
-			}
 		};
 
 		bobChild_1.setContextCondition(new Condition("CONTEXT"));

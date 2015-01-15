@@ -1,7 +1,7 @@
 /**
  * 
  */
-package edu.fudan.se.clientgui;
+package edu.fudan.se.activity;
 
 import java.util.logging.Level;
 
@@ -98,8 +98,7 @@ public class StartAgentActivity extends Activity {
 					String host = settings.getString("defaultHost", "");
 					String port = settings.getString("defaultPort", "");
 					startChat(nickname, host, port, agentStartupCallback);
-					// Intent intent = new Intent(StartAgentActivity.this,
-					// WorkingActivity.class);
+
 					Intent intent = new Intent(StartAgentActivity.this,
 							MainActivity.class);
 					// intent.putExtra("agentname", nickname);

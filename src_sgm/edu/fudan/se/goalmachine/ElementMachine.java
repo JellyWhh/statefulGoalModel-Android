@@ -175,7 +175,7 @@ public abstract class ElementMachine implements Runnable {
 						}
 
 					} else {
-						executingEntry(msg);
+						executingEntry();
 						isExecutingEntryDone = true;
 					}
 				}
@@ -307,9 +307,9 @@ public abstract class ElementMachine implements Runnable {
 	}
 
 	/**
-	 * executing状态中entry所做的action：<code>GoalMachine</code>需要重写
+	 * executing状态中entry所做的action：<code>GoalMachine</code>和<code>TaskMachine</code>需要重写
 	 */
-	public void executingEntry(SGMMessage msg) {
+	public void executingEntry() {
 		Log.logDebug(this.getName(), "executingEntry()", "init.");
 
 	}

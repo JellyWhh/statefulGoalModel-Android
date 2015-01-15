@@ -9,6 +9,7 @@ import java.util.Date;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
 import edu.fudan.se.goalmachine.message.MesHeader_Mes2Manger;
 import edu.fudan.se.goalmachine.message.SGMMessage;
@@ -205,6 +206,18 @@ public class AideAgent extends Agent implements AideAgentInterface {
 				broadcast_nt.setAction("jade.task.NOTIFICATION");
 				broadcast_nt.putExtra("Content", description);
 				context.sendBroadcast(broadcast_nt);
+				break;
+
+			case RequestService:
+				String serviceName = msg.getDescription();
+				Intent serviceIntent = new Intent(serviceName);
+				Bundle bundle = new Bundle();
+				bundle.putString("GOAL_MODEL_NAME", msg.getSender()
+						.getGoalModelName());
+				bundle.putString("ELEMENT_NAME", msg.getSender()
+						.getElementName());
+				serviceIntent.putExtras(bundle);
+				context.startService(serviceIntent);
 				break;
 
 			case NoDelegatedAchieved:
@@ -487,18 +500,7 @@ public class AideAgent extends Agent implements AideAgentInterface {
 			aclmsg.addReceiver(new AID("ServerAgent", AID.ISLOCALNAME));
 			aclmsg.setContent(content);
 			send(aclmsg);
-
-			// // 发送 UI更新广播，在TaskFragment会监听这个广播然后弹出通知窗口
-			// String[] friends = new String[friendsArrayList.size()];
-			// friends = friendsArrayList.toArray(friends);
-			// Intent broadcast_fs = new Intent();
-			// broadcast_fs.setAction("jade.delegate.FRIENDS");
-			// broadcast_fs.putExtra("Friends", friends);
-			// broadcast_fs.putExtra("GoalModelName",
-			// userTask.getGoalModelName());
-			// broadcast_fs.putExtra("ElementName", userTask.getElementName());
-			// context.sendBroadcast(broadcast_fs);
-
+			//然后会一直等待server agent回复信息，在handleMesFromExternalAgent会对信息进行处理
 		}
 
 	}
@@ -518,20 +520,20 @@ public class AideAgent extends Agent implements AideAgentInterface {
 		@Override
 		public void action() {
 			Log.logDebug("AideAgent", "HandleMesFromService()", "init.");
-			if (msg.getBody().equals(MesBody_Mes2Manager.ServiceResult)) {
-
-				SimpleDateFormat df = new SimpleDateFormat(
-						"yyyy-MM-dd HH:mm:ss");
-				String mesTime = df.format(new Date());
-				UserMessage userMessage = new UserMessage(mesTime,
-						msg.getDescription());
-				userMessageList.add(userMessage);
-
-				Intent broadcast_nda = new Intent();
-				broadcast_nda.setAction("jade.mes.NOTIFICATION");
-				broadcast_nda.putExtra("Content", userMessage.getContent());
-				context.sendBroadcast(broadcast_nda);
-			}
+//			if (msg.getBody().equals(MesBody_Mes2Manager.ServiceResult)) {
+//
+//				SimpleDateFormat df = new SimpleDateFormat(
+//						"yyyy-MM-dd HH:mm:ss");
+//				String mesTime = df.format(new Date());
+//				UserMessage userMessage = new UserMessage(mesTime,
+//						msg.getDescription());
+//				userMessageList.add(userMessage);
+//
+//				Intent broadcast_nda = new Intent();
+//				broadcast_nda.setAction("jade.mes.NOTIFICATION");
+//				broadcast_nda.putExtra("Content", userMessage.getContent());
+//				context.sendBroadcast(broadcast_nda);
+//			}
 		}
 
 	}

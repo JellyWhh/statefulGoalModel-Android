@@ -93,9 +93,9 @@ public class MainActivity extends FragmentActivity {
 						"New Task From SGM!", Constant.Notification_New_Task);
 			}
 			if (action.equalsIgnoreCase("jade.mes.NOTIFICATION")) {
-				mNotificationUtil.showNotification("New Task", intent
+				mNotificationUtil.showNotification("New Mes", intent
 						.getExtras().getString("Content"),
-						"New Task From SGM!", Constant.Notification_New_Mes);
+						"New Mes From SGM!", Constant.Notification_New_Mes);
 			}
 		}
 	}

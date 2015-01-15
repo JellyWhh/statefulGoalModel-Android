@@ -19,6 +19,7 @@ import edu.fudan.se.log.Log;
 public abstract class TaskMachine extends ElementMachine {
 
 	private boolean needPeopleInteraction; // 是否需要人的交互
+	private String executingRequestedServiceName; // 执行这个task时具体需要调用的服务名称，如果需要人的交互，这个就为空了
 
 	/**
 	 * 构造方法
@@ -78,70 +79,57 @@ public abstract class TaskMachine extends ElementMachine {
 		}
 	}
 
-	boolean isSendUIMesDone = false; // 标记是否给用户发送提醒完毕
-
 	/**
-	 * executing状态中do所做的action：这个需要根据具体的task有不同的具体执行行为，所以这个是抽象方法，在实例化时具体实现
+	 * executing状态中entry所做的action：给manager发送消息，消息内容是需要人的参与或者是调用服务
 	 */
-	@Override
-	public void executingDo(SGMMessage msg) {
+	public void executingEntry() {
+		Log.logDebug(this.getName(), "executingEntry()", "init.");
 
+		SGMMessage msgToManager = null;
 		if (this.isNeedPeopleInteraction()) { // 需要人的参与
-			// 弹出窗口提示用户需要他的参与，然后进入等待end消息中
-			if (isSendUIMesDone) { // 发送提示完毕
-				executingDo_waitingEnd(msg);
-			} else {
-				// 发送消息给agent,让agent提醒用户需要他的参与
-				
-				SGMMessage msgToManager = new SGMMessage(MesHeader_Mes2Manger.ELEMENT_MESSAGE, null, this
-						.getGoalModel().getName(), this.getName(), null, null, null,
-						MesBody_Mes2Manager.RequestPersonIA);
-				msgToManager.setDescription(this.getDescription());
-				
-				sendMesToManager(msgToManager);
-				
-				isSendUIMesDone = true;
-			}
-		} else { // 不需要人的参与
-			// 执行完要做的事情后直接跳转
-			executingDo_once();
-			this.setCurrentState(this.transition(State.Executing,
-					this.getPostCondition()));
+			// 发送消息给agent,让agent提醒用户需要他的参与
+			msgToManager = new SGMMessage(MesHeader_Mes2Manger.ELEMENT_MESSAGE,
+					null, this.getGoalModel().getName(), this.getName(), null,
+					null, null, MesBody_Mes2Manager.RequestPersonIA);
+			msgToManager.setDescription(this.getDescription());
+		} else {// 不需要人的参与，而是需要调服务
+			msgToManager = new SGMMessage(MesHeader_Mes2Manger.ELEMENT_MESSAGE,
+					null, this.getGoalModel().getName(), this.getName(), null,
+					null, null, MesBody_Mes2Manager.RequestService);
+			// 将需要调用的服务名称附加在description里
+			msgToManager
+					.setDescription(this.getExecutingRequestedServiceName());
 		}
+
+		sendMesToManager(msgToManager);
 
 	}
 
-
 	/**
-	 * executing状态中do所做的action：不需要人的参与，直接根据具体的task有不同的具体执行行为，抽象方法，在实例化时具体实现
+	 * executing状态中do所做的action：等待TASK_END的消息到达
 	 */
-	public abstract void executingDo_once();
+	@Override
+	public void executingDo(SGMMessage msg) {
+		Log.logDebug(this.getName(), "executingDo()", "init.");
 
-	/**
-	 * executing状态中do所做的action：等待外部进程（比如UI）发来的END消息，这个方法在executingDo()方法的具体实现中调用<br>
-	 * 接到END消息后，尝试跳转到Achieved
-	 */
-	private void executingDo_waitingEnd(SGMMessage msg) {
-		Log.logDebug(this.getName(), "executingDo_waitingEnd()", "init.");
-
-		// SGMMessage msg = this.getMsgPool().poll(); // 拿出一条消息
 		if (msg != null) {
 			Log.logDebug(this.getName(), "executingDo_waitingEnd()",
 					"get a message from " + msg.getSender().toString()
 							+ "; body is: " + msg.getBody());
 
-			if (msg.getBody().equals(MesBody_Mes2Machine.TASK_END)) { // 收到外部UI的END消息
+			if (msg.getBody().equals(MesBody_Mes2Machine.TASK_DONE)) { // 收到外部UI的END消息
 				this.getMsgPool().poll();
 				this.setCurrentState(this.transition(State.Executing,
 						this.getPostCondition()));
 			} else if (msg.getBody().equals(MesBody_Mes2Machine.SUSPEND)) { // 收到父目标的SUSPEND消息
 				this.getMsgPool().poll();
 				this.setCurrentState(State.Suspended);
-			} else if (msg.getBody().equals(MesBody_Mes2Machine.TASK_QUIT)) { // 用户没有完成这个任务，放弃了
+			} else if (msg.getBody().equals(MesBody_Mes2Machine.TASK_FAILED)) { // 用户没有完成这个任务，放弃了
 				this.getMsgPool().poll();
 				this.setCurrentState(State.Failed);
 			}
 		}
+
 	}
 
 	/**
@@ -169,7 +157,6 @@ public abstract class TaskMachine extends ElementMachine {
 	 * 让TaskMachine重写，用来初始化里面的一个变量
 	 */
 	public void resetTaskMachine() {
-		isSendUIMesDone = false; // 标记是否给用户发送提醒完毕
 	}
 
 	public boolean isNeedPeopleInteraction() {
@@ -180,5 +167,13 @@ public abstract class TaskMachine extends ElementMachine {
 		this.needPeopleInteraction = needPeopleInteraction;
 	}
 
+	public String getExecutingRequestedServiceName() {
+		return executingRequestedServiceName;
+	}
+
+	public void setExecutingRequestedServiceName(
+			String executingRequestedServiceName) {
+		this.executingRequestedServiceName = executingRequestedServiceName;
+	}
 
 }
