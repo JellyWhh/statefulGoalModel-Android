@@ -120,10 +120,6 @@ public class TaskFragment extends ListFragment {
 	private Dialog onCreateFriendsDialog(final String[] friends,
 			final String goalModelName, final String elementName) {
 
-		// android.util.Log.i("MY_LOG",
-		// "selectedUserTask is: " + selectedUserTask.getGoalModelName()
-		// + "," + selectedUserTask.getElementName());
-
 		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 		final ChoiceOnClickListener choiceListener = new ChoiceOnClickListener();
 		builder.setTitle("Select a friend:");
@@ -135,7 +131,8 @@ public class TaskFragment extends ListFragment {
 			public void onClick(DialogInterface dialog, int which) {
 
 				// 获得选取的friend名字
-				String friendSelected = friends[choiceListener.getWhich()];
+				String friendSelected = friends[choiceListener.getWhich()]
+						.split(":")[0];
 
 				// 发送消息给agent
 				SGMMessage msgToExternalAgent = new SGMMessage(
@@ -194,27 +191,15 @@ public class TaskFragment extends ListFragment {
 	private AlertDialog onCreateNullFriendsDialog() {
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-		builder.setMessage("No Friends!")
-				.setPositiveButton("Retry",
-						new DialogInterface.OnClickListener() {
+		builder.setMessage("No Friends!").setNeutralButton("OK",
+				new DialogInterface.OnClickListener() {
 
-							@Override
-							public void onClick(DialogInterface dialog,
-									int which) {
-								// TODO Auto-generated method stub
-
-							}
-						})
-				.setNegativeButton("Cancel",
-						new DialogInterface.OnClickListener() {
-
-							@Override
-							public void onClick(DialogInterface dialog,
-									int which) {
-								dialog.cancel();
-							}
-						});
-
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.cancel();
+					}
+				});
+		
 		AlertDialog dialog = builder.create();
 
 		return dialog;

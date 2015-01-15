@@ -245,16 +245,16 @@ public class MobileLocatorService extends Service {
 			 */
 			int locType = location.getLocType();
 			StringBuffer sb = new StringBuffer(256);
-			sb.append("Time: ");
+			sb.append("Time:");
 			sb.append(location.getTime());
-			sb.append("\nError code: ");
+			sb.append("\nError code:");
 			sb.append(locType);
-			sb.append("\nLatitude: ");
+			sb.append("\nLatitude:");
 			sb.append(location.getLatitude());
-			sb.append("\nLongitude: ");
+			sb.append("\nLongitude:");
 			sb.append(location.getLongitude());
 			if (locType == BDLocation.TypeNetWorkLocation) { // 161
-				sb.append("\nAddr: ");
+				sb.append("\nAddr:");
 				sb.append(location.getAddrStr());
 			}
 
