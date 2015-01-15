@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<GoalModel name="myGoal" description="This is a goal model. Its name is bob.">
+<GoalModel name="myGoal" description="This is a goal model. Its name is myGoal. 这个goal model不需要委托，完全本地执行">
 
 	<ElementMachine id="0" type="GoalMachine" name="myGoal"
 		level="0" description="my goal">
@@ -21,7 +21,11 @@
 		level="2" description="alice child 1">
 		<parentGoal>alice</parentGoal>
 		<priorityLevel>1</priorityLevel>
-		<needPeopleInteraction>true</needPeopleInteraction>
+		<needPeopleInteraction>false</needPeopleInteraction>
+		<!-- executingRequestedServiceName的格式必须是 AndroidManifest.xml中service标签中action name-->
+		<executingRequestedServiceName>service.intentservice.weather</executingRequestedServiceName>
+		<Condition type="POST" valueType="Int" leftValueDes="Temperature" operator="BIGGERTHAN" rightValue = "0">
+		</Condition>
 	</ElementMachine>
 
 	<ElementMachine id="3" type="TaskMachine" name="aliceChild_2"
@@ -45,12 +49,8 @@
 		<parentGoal>bob</parentGoal>
 		<priorityLevel>1</priorityLevel>
 		<needPeopleInteraction>false</needPeopleInteraction>
-		<!-- executingRequestedServiceName的格式必须是 AndroidManifest.xml中service标签中action name-->
 		<executingRequestedServiceName>service.intentservice.weather</executingRequestedServiceName>
-		<Condition type="Context">
-			<decription>Temperature</decription>
-			<relation>LARGER</relation>
-			<value>20</value>
+		<Condition type="CONTEXT" valueType="Int" leftValueDes="Temperature" operator="SMALLERTHAN" rightValue = "0">
 		</Condition>
 	</ElementMachine>
 
@@ -60,11 +60,9 @@
 		<priorityLevel>2</priorityLevel>
 		<needPeopleInteraction>true</needPeopleInteraction>
 		<waitingTimeLimit>5</waitingTimeLimit>
-		<Condition type="PRE">
-			<canRepairing>false</canRepairing>
-			<decription>Temperature</decription>
-			<relation>LARGER</relation>
-			<value>20</value>
+		<Condition type="PRE" valueType="Int" leftValueDes="Temperature" operator="SMALLERTHAN" rightValue = "0">
+		    <!-- 只有pre condition需要设置是否能修复 -->
+		    <canRepairing>false</canRepairing>
 		</Condition>
 	</ElementMachine>
 
@@ -73,10 +71,7 @@
 		<parentGoal>bob</parentGoal>
 		<priorityLevel>3</priorityLevel>
 		<needPeopleInteraction>true</needPeopleInteraction>
-		<Condition type="POST">
-			<decription>Temperature</decription>
-			<relation>LARGER</relation>
-			<value>20</value>
+		<Condition type="POST" valueType="Int" leftValueDes="Temperature" operator="SMALLERTHAN" rightValue = "0">
 		</Condition>
 	</ElementMachine>
 

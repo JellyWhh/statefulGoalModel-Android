@@ -28,7 +28,7 @@ public class GoalModel {
 	private GoalModelManager goalModelManager;
 	
 	public GoalModel(){
-		
+		this.elementMachines = new ArrayList<>();
 	}
 
 	/**

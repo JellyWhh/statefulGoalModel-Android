@@ -6,6 +6,7 @@ package edu.fudan.se.goalmodel;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -15,6 +16,10 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import edu.fudan.se.contextmanager.CTemperature;
+import edu.fudan.se.contextmanager.CTime;
+import edu.fudan.se.contextmanager.CWeather;
+import edu.fudan.se.contextmanager.IContext;
 import edu.fudan.se.goalmachine.Condition;
 import edu.fudan.se.goalmachine.ElementMachine;
 import edu.fudan.se.goalmachine.GoalMachine;
@@ -26,7 +31,15 @@ import edu.fudan.se.goalmachine.TaskMachine;
  */
 public class GmXMLParser {
 
-	public static GoalModel newGoalModel(String filename) {
+	Hashtable<String, IContext> contextHashtable = new Hashtable<>();
+
+	public GmXMLParser() {
+		this.contextHashtable.put("Temperature", new CTemperature());
+		this.contextHashtable.put("Weather", new CWeather());
+		this.contextHashtable.put("Time", new CTime());
+	}
+
+	public GoalModel newGoalModel(String filename) {
 		GoalModel goalModel = new GoalModel();
 		try {
 			// 得到DOM解析器的工厂实例
@@ -104,11 +117,13 @@ public class GmXMLParser {
 					boolean needDelegate = false, needPeopleInteraction = false;
 
 					String executingRequestedServiceName = "";
-					String preCondition = "", postCondition = "", invariantCondition = "", commitmentCondition = "", contextCondition = "";
-					boolean canRepairing = false;
+					Condition preCondition = null, postCondition = null, invariantCondition = null, commitmentCondition = null, contextCondition = null;
 
 					for (int j = 0; j < propertyNodeList.getLength(); j++) {
 						Node propertyNode = propertyNodeList.item(j);
+
+						String conditionType = "", conditionValueType = "", conditionLeftValue = "", conditionOperator = "", conditionRightValue = "";
+						boolean canRepairing = false;
 
 						if (propertyNode.getNodeType() == Node.ELEMENT_NODE) {
 							// System.err.println(propertyNode.getNodeName());
@@ -155,32 +170,36 @@ public class GmXMLParser {
 								if (propertyNode.getAttributes().getLength() > 0) {
 									for (int x = 0; x < propertyNode
 											.getAttributes().getLength(); x++) {
-										if (propertyNode.getAttributes()
-												.item(x).getNodeName()
-												.equals("type")) {
-											switch (propertyNode
+										switch (propertyNode.getAttributes()
+												.item(x).getNodeName()) {
+										case "type":
+											conditionType = propertyNode
 													.getAttributes().item(x)
-													.getNodeValue()) {
-											case "PRE":
-												preCondition = "PRE";
-												break;
-											case "POST":
-												postCondition = "POST";
-												break;
-											case "CONTEXT":
-												contextCondition = "CONTEXT";
-												break;
-											case "COMMITMENT":
-												commitmentCondition = "COMMITMENT";
-												break;
-											case "INVARIANT":
-												invariantCondition = "INVARIANT";
-												break;
+													.getNodeValue();
+											break;
+										case "valueType":
+											conditionValueType = propertyNode
+													.getAttributes().item(x)
+													.getNodeValue();
+											break;
+										case "leftValueDes":
+											conditionLeftValue = propertyNode
+													.getAttributes().item(x)
+													.getNodeValue();
+											break;
+										case "operator":
+											conditionOperator = propertyNode
+													.getAttributes().item(x)
+													.getNodeValue();
+											break;
+										case "rightValue":
+											conditionRightValue = propertyNode
+													.getAttributes().item(x)
+													.getNodeValue();
+											break;
 
-											default:
-												break;
-											}
 										}
+
 									}
 								}
 
@@ -192,29 +211,68 @@ public class GmXMLParser {
 									Node conditionNode = conditionNodeList
 											.item(y);
 									if (conditionNode.getNodeType() == Node.ELEMENT_NODE) {
-										switch (conditionNode.getNodeName()) {
-										case "canRepairing":
+
+										if (conditionNode.getNodeName().equals(
+												"canRepairing")) {
 											canRepairing = Boolean
 													.parseBoolean(conditionNode
 															.getTextContent());
-											break;
-										case "decription":
-
-											break;
-										case "relation":
-
-											break;
-										case "value":
-
-											break;
-
-										default:
-											break;
 										}
+
 									}
 								}
 
-								break;
+								// new不同的condition
+								switch (conditionType) {
+								case "CONTEXT":
+									contextCondition = new Condition(
+											conditionType, conditionValueType,
+											conditionLeftValue,
+											conditionOperator,
+											conditionRightValue);
+									contextCondition
+											.setContextHashtable(contextHashtable);
+									break;
+								case "PRE":
+									preCondition = new Condition(conditionType,
+											conditionValueType,
+											conditionLeftValue,
+											conditionOperator,
+											conditionRightValue, canRepairing);
+									preCondition
+											.setContextHashtable(contextHashtable);
+									break;
+								case "POST":
+									postCondition = new Condition(
+											conditionType, conditionValueType,
+											conditionLeftValue,
+											conditionOperator,
+											conditionRightValue);
+									postCondition
+											.setContextHashtable(contextHashtable);
+									break;
+								case "COMMITMENT":
+									commitmentCondition = new Condition(
+											conditionType, conditionValueType,
+											conditionLeftValue,
+											conditionOperator,
+											conditionRightValue);
+									commitmentCondition
+											.setContextHashtable(contextHashtable);
+									break;
+								case "INVARIANT":
+									invariantCondition = new Condition(
+											conditionType, conditionValueType,
+											conditionLeftValue,
+											conditionOperator,
+											conditionRightValue);
+									invariantCondition
+											.setContextHashtable(contextHashtable);
+									break;
+
+								}
+
+								break; // end case "Condition":
 
 							default:
 								break;
@@ -231,75 +289,12 @@ public class GmXMLParser {
 					if (type.equals("GoalMachine")) {
 						elementMachine = new GoalMachine(name, decomposition,
 								schedulerMethod, parentElementMachine, level,
-								needDelegate) {
-
-							@Override
-							public void checkPreCondition() {
-								// TODO Auto-generated method stub
-
-							}
-
-							@Override
-							public void checkPostCondition() {
-								// TODO Auto-generated method stub
-
-							}
-
-							@Override
-							public void checkInvariantCondition() {
-								// TODO Auto-generated method stub
-
-							}
-
-							@Override
-							public void checkContextCondition() {
-								// TODO Auto-generated method stub
-
-							}
-
-							@Override
-							public void checkCommitmentCondition() {
-								// TODO Auto-generated method stub
-
-							}
-						};
+								needDelegate);
 
 					} else if (type.equals("TaskMachine")) {
 						elementMachine = new TaskMachine(name,
 								parentElementMachine, level,
-								needPeopleInteraction) {
-
-							@Override
-							public void checkPreCondition() {
-								// TODO Auto-generated method stub
-
-							}
-
-							@Override
-							public void checkPostCondition() {
-								// TODO Auto-generated method stub
-
-							}
-
-							@Override
-							public void checkInvariantCondition() {
-								// TODO Auto-generated method stub
-
-							}
-
-							@Override
-							public void checkContextCondition() {
-								// TODO Auto-generated method stub
-
-							}
-
-							@Override
-							public void checkCommitmentCondition() {
-								// TODO Auto-generated method stub
-
-							}
-
-						};
+								needPeopleInteraction);
 						// 不需要人的参与，而是需要调用服务的
 						if (!needPeopleInteraction
 								&& executingRequestedServiceName != "") {
@@ -314,24 +309,22 @@ public class GmXMLParser {
 					}
 
 					// 设置各种condition
-					if (preCondition != "") {
-						elementMachine.setPreCondition(new Condition("PRE",
-								canRepairing));
+					if (preCondition != null) {
+						elementMachine.setPreCondition(preCondition);
 					}
-					if (postCondition != "") {
-						elementMachine.setPostCondition(new Condition("POST"));
+					if (postCondition != null) {
+						elementMachine.setPostCondition(postCondition);
 					}
-					if (invariantCondition != "") {
-						elementMachine.setInvariantCondition(new Condition(
-								"INVARIANT"));
+					if (invariantCondition != null) {
+						elementMachine
+								.setInvariantCondition(invariantCondition);
 					}
-					if (commitmentCondition != "") {
-						elementMachine.setCommitmentCondition(new Condition(
-								"COMMITMENT"));
+					if (commitmentCondition != null) {
+						elementMachine
+								.setCommitmentCondition(commitmentCondition);
 					}
-					if (contextCondition != "") {
-						elementMachine.setContextCondition(new Condition(
-								"CONTEXT"));
+					if (contextCondition != null) {
+						elementMachine.setContextCondition(contextCondition);
 					}
 
 					if (parentElementMachine != null) {
@@ -343,9 +336,15 @@ public class GmXMLParser {
 			}
 
 		} catch (Exception e) {
+			System.err.println("GmXMLParser new goal model error!!!!");
 			e.printStackTrace();
 		}
 
+		//设置root goal
+		if (goalModel.getElementMachines().size()>0) {
+			goalModel.setRootGoal((GoalMachine)goalModel.getElementMachines().get(0));
+		}
+		
 		return goalModel;
 	}
 
@@ -358,11 +357,12 @@ public class GmXMLParser {
 	 *            名字
 	 * @return element machine
 	 */
-	private static ElementMachine getElementMachineByName(
+	private ElementMachine getElementMachineByName(
 			ArrayList<ElementMachine> elementMachines, String name) {
+
 		ElementMachine em = null;
-		if ((name != null || name != "")
-				&& (elementMachines != null || elementMachines.size() != 0)) {
+		if ((name != null && name != "")
+				&& (elementMachines != null && elementMachines.size() != 0)) {
 			for (ElementMachine elementMachine : elementMachines) {
 				if (elementMachine.getName().equals(name)) {
 					em = elementMachine;
@@ -370,6 +370,7 @@ public class GmXMLParser {
 				}
 			}
 		}
+
 		return em;
 	}
 

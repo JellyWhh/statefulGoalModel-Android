@@ -1,7 +1,7 @@
 /**
  * 
  */
-package service.webservice.weather;
+package service.async.webservice;
 
 import org.ksoap2.SoapEnvelope;
 import org.ksoap2.serialization.SoapObject;

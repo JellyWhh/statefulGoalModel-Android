@@ -40,7 +40,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <service android:name="jade.android.MicroRuntimeService" />
-        <service android:name="service.webservice.weather.IntentServiceWeather" >
+        <service android:name="service.async.webservice.IntentServiceWeather" >
             <intent-filter>
                 <action android:name="service.intentservice.weather" />
             </intent-filter>

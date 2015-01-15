@@ -192,8 +192,8 @@ public class MobileLocatorService extends Service {
 	 */
 	private void sendLocationToServer(String location) {
 
-		Log.logDebug("MobileLocatorService", "sendLocationToServer()",
-				"MobileLocatorService--sendLocationToServer()");
+//		Log.logDebug("MobileLocatorService", "sendLocationToServer()",
+//				"MobileLocatorService--sendLocationToServer()");
 		android.util.Log.i("MY_LOG",
 				"MobileLocatorService--sendLocationToServer()");
 		GetAgent.getAideAgentInterface((SGMApplication) getApplication())
@@ -208,8 +208,8 @@ public class MobileLocatorService extends Service {
 	 */
 	private void changeLocationInfo(String location) {
 
-		Log.logDebug("MobileLocatorService", "changeLocationInfo()",
-				"MobileLocatorService--changeLocationInfo()");
+//		Log.logDebug("MobileLocatorService", "changeLocationInfo()",
+//				"MobileLocatorService--changeLocationInfo()");
 		android.util.Log.i("MY_LOG",
 				"MobileLocatorService--changeLocationInfo()");
 		SGMApplication sgmApplication = (SGMApplication) getApplication();
@@ -230,8 +230,8 @@ public class MobileLocatorService extends Service {
 				return;
 			}
 
-			Log.logDebug("MobileLocatorService", "onReceiveLocation()",
-					"BDLocationListener--onReceiveLocation()");
+//			Log.logDebug("MobileLocatorService", "onReceiveLocation()",
+//					"BDLocationListener--onReceiveLocation()");
 			android.util.Log
 					.i("MY_LOG",
 							"MobileLocatorService--BDLocationListener--onReceiveLocation()");
@@ -258,8 +258,8 @@ public class MobileLocatorService extends Service {
 				sb.append(location.getAddrStr());
 			}
 
-			Log.logDebug("MobileLocatorService", "onReceiveLocation()", "sb: "
-					+ sb.toString());
+//			Log.logDebug("MobileLocatorService", "onReceiveLocation()", "sb: "
+//					+ sb.toString());
 			android.util.Log.i("MY_LOG",
 					"MobileLocatorService--sb: " + sb.toString());
 			// 61或者161，定位成功

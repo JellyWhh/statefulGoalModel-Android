@@ -5,14 +5,21 @@ package edu.fudan.se.initial;
 
 import jade.util.Logger;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.logging.Level;
 
+import edu.fudan.se.contextmanager.CTemperature;
+import edu.fudan.se.contextmanager.CTime;
+import edu.fudan.se.contextmanager.CWeather;
+import edu.fudan.se.contextmanager.IContext;
 import edu.fudan.se.goalmachine.Condition;
 import edu.fudan.se.goalmachine.GoalMachine;
 import edu.fudan.se.goalmachine.TaskMachine;
+import edu.fudan.se.goalmodel.GmXMLParser;
 import edu.fudan.se.goalmodel.GoalModel;
 import edu.fudan.se.goalmodel.GoalModelManager;
 import edu.fudan.se.userMes.UserMessage;
@@ -21,6 +28,7 @@ import edu.fudan.se.userMes.UserTask;
 
 import android.app.Application;
 import android.content.SharedPreferences;
+import android.os.Environment;
 
 /**
  * 重写Application，主要重写里面的onCreate方法，设置并初始化一些全局变量
@@ -58,16 +66,17 @@ public class SGMApplication extends Application implements Serializable {
 	private void initialData() {
 		this.userTaskList = new ArrayList<>();
 		this.userMessageList = new ArrayList<>();
+		
+		GmXMLParser gmXMLParser = new GmXMLParser();
+		File sdCardDir = Environment.getExternalStorageDirectory();
+		// 得到一个路径，内容是sdcard的文件夹路径和APP自身名字
+		String appDir = sdCardDir.getPath() + "/sgm/mygoal.xml";
+		GoalModel testGM = gmXMLParser.newGoalModel(appDir);
 
-		GoalModel testGM = newTestGoalModel(); // 一个完全本地没有委托的
-
-		GoalModel gm = newGoalModel(); // 需要把bob委托出去的
-		GoalModel gm_bob = newGoalModel_delegateBob(); // 接受委托的bob
+//		GoalModel testGM = newTestGoalModel(); // 一个完全本地没有委托的
 
 		goalModelManager = new GoalModelManager();
 		goalModelManager.addGoalModel(testGM);
-		goalModelManager.addGoalModel(gm);
-		goalModelManager.addGoalModel(gm_bob);
 		Thread gmm = new Thread(goalModelManager);
 		gmm.start();
 
@@ -136,719 +145,73 @@ public class SGMApplication extends Application implements Serializable {
 		this.location = location;
 	}
 
-	/**
-	 * 目前测试时只用这个方法添加了一个测试用的GoalModel
-	 * 
-	 * @return 测试用的GoalModel
-	 */
-	private GoalModel newGoalModel() {
 
-		GoalModel goalModel = new GoalModel("myGoal");
-
-		GoalMachine myGoal = new GoalMachine("myGoal", 0, 1, null, 0, false) {
-
-			@Override
-			public void checkPreCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkPostCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkInvariantCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkContextCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkCommitmentCondition() {
-				Date nowTime = new Date();
-				long runningTime = nowTime.getTime()
-						- this.getStartTime().getTime(); // 得到的差值单位是毫秒
-				// TODO 这里记得可能要在*1000前面加上*60，因为现在设的等待时间限制单位为秒，实际运行时可能需要设置为分钟
-				if (runningTime > (this.getTimeLimit() * 1000)) { // 超时
-					this.getCommitmentCondition().setSatisfied(false);
-				} else {
-					this.getCommitmentCondition().setSatisfied(true);
-				}
-			}
-		};
-
-		GoalMachine alice = new GoalMachine("alice", 0, 0, myGoal, 1, false) {
-
-			@Override
-			public void checkPreCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkPostCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkInvariantCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkContextCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkCommitmentCondition() {
-				// TODO Auto-generated method stub
-
-			}
-		};
-		GoalMachine bob = new GoalMachine("bob", 1, -1, myGoal, 1, true) {
-
-			@Override
-			public void checkPreCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkPostCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkInvariantCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkContextCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkCommitmentCondition() {
-				// TODO Auto-generated method stub
-
-			}
-		};
-
-		TaskMachine aliceChild_1 = new TaskMachine("aliceChild_1", alice, 2,
-				false) {
-
-			@Override
-			public void checkPreCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkPostCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkInvariantCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkContextCondition() {
-				if (true) {
-					this.getContextCondition().setSatisfied(false);
-				}
-
-			}
-
-			@Override
-			public void checkCommitmentCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			
-		};
-		aliceChild_1.setExecutingRequestedServiceName("service.intentservice.weather");
-
-		TaskMachine aliceChild_2 = new TaskMachine("aliceChild_2", alice, 2,
-				true) {
-
-			@Override
-			public void checkPreCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkPostCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkInvariantCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkContextCondition() {
-				if (true) {
-					this.getContextCondition().setSatisfied(false);
-				}
-			}
-
-			@Override
-			public void checkCommitmentCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			
-		};
-
-		myGoal.addSubElement(alice, 1);
-		myGoal.addSubElement(bob, 1);
-
-		alice.addSubElement(aliceChild_1, 1);
-		alice.addSubElement(aliceChild_2, 1);
-
-		goalModel.setDescription("This is the description of the goal model!");
-		goalModel.setRootGoal(myGoal);
-		goalModel.addElementMachine(myGoal);
-		goalModel.addElementMachine(alice);
-		goalModel.addElementMachine(aliceChild_1);
-		goalModel.addElementMachine(aliceChild_2);
-		goalModel.addElementMachine(bob);
-
-		return goalModel;
-
-	}
-
-	private GoalModel newGoalModel_delegateBob() {
-
-		GoalModel goalModel = new GoalModel("bob");
-
-		GoalMachine bob = new GoalMachine("bob", 1, -1, null, 1, false) {
-
-			@Override
-			public void checkPreCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkPostCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkInvariantCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkContextCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkCommitmentCondition() {
-				// TODO Auto-generated method stub
-
-			}
-		};
-
-		TaskMachine bobChild_1 = new TaskMachine("bobChild_1", bob, 2, true) {
-
-			@Override
-			public void checkPreCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkPostCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkInvariantCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkContextCondition() {
-				if (true) {
-					this.getContextCondition().setSatisfied(false);
-				}
-
-			}
-
-			@Override
-			public void checkCommitmentCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-		};
-
-		TaskMachine bobChild_2 = new TaskMachine("bobChild_2", bob, 2, true) {
-
-			@Override
-			public void checkPreCondition() {
-				if (true) {
-					this.getPreCondition().setSatisfied(false);
-				}
-
-			}
-
-			@Override
-			public void checkPostCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkInvariantCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkContextCondition() {
-				if (true) {
-					this.getContextCondition().setSatisfied(false);
-				}
-
-			}
-
-			@Override
-			public void checkCommitmentCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			
-		};
-		TaskMachine bobChild_3 = new TaskMachine("bobChild_3", bob, 2, true) {
-
-			@Override
-			public void checkPreCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkPostCondition() {
-				if (true) {
-					this.getPostCondition().setSatisfied(false);
-				}
-
-			}
-
-			@Override
-			public void checkInvariantCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkContextCondition() {
-				if (true) {
-					this.getContextCondition().setSatisfied(false);
-				}
-
-			}
-
-			@Override
-			public void checkCommitmentCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-		};
-		// root.setCommitmentCondition(new Condition("COMMITMENT"));
-		// root.setTimeLimit(10); // 10S
-
-		// aliceChild_1.setContextCondition(new Condition("CONTEXT"));
-
-		bobChild_1.setContextCondition(new Condition("CONTEXT"));
-
-		bobChild_2.setPreCondition(new Condition("PRE", false));
-		bobChild_2.setWaitingTimeLimit(5);// 5s
-
-		bobChild_3.setPostCondition(new Condition("POST"));
-
-		bob.addSubElement(bobChild_1, 1);
-		bob.addSubElement(bobChild_2, 2);
-		bob.addSubElement(bobChild_3, 3);
-
-		goalModel.setDescription("This is the description of the goal model!");
-		goalModel.setRootGoal(bob);
-
-		goalModel.addElementMachine(bob);
-		goalModel.addElementMachine(bobChild_1);
-		goalModel.addElementMachine(bobChild_2);
-		goalModel.addElementMachine(bobChild_3);
-
-		return goalModel;
-
-	}
-
-	private GoalModel newTestGoalModel() {
-
-		GoalModel goalModel = new GoalModel("my goal model test");
-
-		GoalMachine myGoal = new GoalMachine("my goal model test", 0, 1, null,
-				0, false) {
-
-			@Override
-			public void checkPreCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkPostCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkInvariantCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkContextCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkCommitmentCondition() {
-				Date nowTime = new Date();
-				long runningTime = nowTime.getTime()
-						- this.getStartTime().getTime(); // 得到的差值单位是毫秒
-				// TODO 这里记得可能要在*1000前面加上*60，因为现在设的等待时间限制单位为秒，实际运行时可能需要设置为分钟
-				if (runningTime > (this.getTimeLimit() * 1000)) { // 超时
-					this.getCommitmentCondition().setSatisfied(false);
-				} else {
-					this.getCommitmentCondition().setSatisfied(true);
-				}
-			}
-		};
-
-		GoalMachine alice = new GoalMachine("alice", 0, 0, myGoal, 1, false) {
-
-			@Override
-			public void checkPreCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkPostCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkInvariantCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkContextCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkCommitmentCondition() {
-				// TODO Auto-generated method stub
-
-			}
-		};
-		GoalMachine bob = new GoalMachine("bob", 1, -1, myGoal, 1, false) {
-
-			@Override
-			public void checkPreCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkPostCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkInvariantCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkContextCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkCommitmentCondition() {
-				// TODO Auto-generated method stub
-
-			}
-		};
-
-		TaskMachine aliceChild_1 = new TaskMachine("aliceChild_1", alice, 2,
-				false) {
-
-			@Override
-			public void checkPreCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkPostCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkInvariantCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkContextCondition() {
-				if (true) {
-					this.getContextCondition().setSatisfied(false);
-				}
-
-			}
-
-			@Override
-			public void checkCommitmentCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-		};
-		
-		aliceChild_1.setExecutingRequestedServiceName("service.intentservice.weather");
-
-		TaskMachine aliceChild_2 = new TaskMachine("aliceChild_2", alice, 2,
-				true) {
-
-			@Override
-			public void checkPreCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkPostCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkInvariantCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkContextCondition() {
-				if (true) {
-					this.getContextCondition().setSatisfied(false);
-				}
-			}
-
-			@Override
-			public void checkCommitmentCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-		};
-
-		TaskMachine bobChild_1 = new TaskMachine("bobChild_1", bob, 2, true) {
-
-			@Override
-			public void checkPreCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkPostCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkInvariantCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkContextCondition() {
-				// 这里改成查询天气，如果温度大于0度，上下文条件就是满足的
-
-				if (true) {
-					this.getContextCondition().setSatisfied(false);
-				}
-
-			}
-
-			@Override
-			public void checkCommitmentCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			
-		};
-
-		TaskMachine bobChild_2 = new TaskMachine("bobChild_2", bob, 2, true) {
-
-			@Override
-			public void checkPreCondition() {
-				if (true) {
-					this.getPreCondition().setSatisfied(false);
-				}
-
-			}
-
-			@Override
-			public void checkPostCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkInvariantCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkContextCondition() {
-				if (true) {
-					this.getContextCondition().setSatisfied(false);
-				}
-
-			}
-
-			@Override
-			public void checkCommitmentCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-		};
-		TaskMachine bobChild_3 = new TaskMachine("bobChild_3", bob, 2, true) {
-
-			@Override
-			public void checkPreCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkPostCondition() {
-				if (true) {
-					this.getPostCondition().setSatisfied(false);
-				}
-
-			}
-
-			@Override
-			public void checkInvariantCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-			@Override
-			public void checkContextCondition() {
-				if (true) {
-					this.getContextCondition().setSatisfied(false);
-				}
-
-			}
-
-			@Override
-			public void checkCommitmentCondition() {
-				// TODO Auto-generated method stub
-
-			}
-
-		};
-
-		bobChild_1.setContextCondition(new Condition("CONTEXT"));
-
-		bobChild_2.setPreCondition(new Condition("PRE", false));
-		bobChild_2.setWaitingTimeLimit(5);// 5s
-
-		bobChild_3.setPostCondition(new Condition("POST"));
-
-		myGoal.addSubElement(alice, 1);
-		myGoal.addSubElement(bob, 1);
-
-		alice.addSubElement(aliceChild_1, 1);
-		alice.addSubElement(aliceChild_2, 1);
-
-		bob.addSubElement(bobChild_1, 1);
-		bob.addSubElement(bobChild_2, 2);
-		bob.addSubElement(bobChild_3, 3);
-
-		goalModel.setDescription("This is the description of the goal model!");
-		goalModel.setRootGoal(myGoal);
-		goalModel.addElementMachine(myGoal);
-		goalModel.addElementMachine(alice);
-		goalModel.addElementMachine(aliceChild_1);
-		goalModel.addElementMachine(aliceChild_2);
-		goalModel.addElementMachine(bob);
-		goalModel.addElementMachine(bobChild_1);
-		goalModel.addElementMachine(bobChild_2);
-		goalModel.addElementMachine(bobChild_3);
-
-		return goalModel;
-
-	}
+//	private GoalModel newTestGoalModel() {
+//		
+//		Hashtable<String, IContext> contextHashtable = new Hashtable<>();
+//		contextHashtable.put("Temperature", new CTemperature());
+//		contextHashtable.put("Weather", new CWeather());
+//		contextHashtable.put("Time", new CTime());
+//
+//		GoalModel goalModel = new GoalModel("my goal model test");
+//
+//		GoalMachine myGoal = new GoalMachine("my goal model test", 0, 1, null,
+//				0, false);
+//
+//		GoalMachine alice = new GoalMachine("alice", 0, 0, myGoal, 1, false);
+//		GoalMachine bob = new GoalMachine("bob", 1, -1, myGoal, 1, false);
+//
+//		Condition postCondition1 = new Condition("POST", "Int", "Temperature", ">", "0");
+//		postCondition1.setContextHashtable(contextHashtable);
+//		
+//		TaskMachine aliceChild_1 = new TaskMachine("aliceChild_1", alice, 2,
+//				false);
+//		aliceChild_1.setPostCondition(postCondition1);
+//		
+//		aliceChild_1.setExecutingRequestedServiceName("service.intentservice.weather");
+//
+//		TaskMachine aliceChild_2 = new TaskMachine("aliceChild_2", alice, 2,
+//				true);
+//
+//		TaskMachine bobChild_1 = new TaskMachine("bobChild_1", bob, 2, true);
+//
+//		TaskMachine bobChild_2 = new TaskMachine("bobChild_2", bob, 2, true);
+//		TaskMachine bobChild_3 = new TaskMachine("bobChild_3", bob, 2, true);
+//
+//		Condition contextCondition = new Condition("CONTEXT", "Int", "Temperature", "<", "0");
+//		contextCondition.setContextHashtable(contextHashtable);
+//		
+//		bobChild_1.setContextCondition(contextCondition);
+//
+//		bobChild_2.setWaitingTimeLimit(5);// 5s
+//
+//		Condition postCondition = new Condition("POST", "Int", "Temperature", "<", "0");
+//		postCondition.setContextHashtable(contextHashtable);
+//		bobChild_3.setPostCondition(postCondition);
+//
+//		myGoal.addSubElement(alice, 1);
+//		myGoal.addSubElement(bob, 1);
+//
+//		alice.addSubElement(aliceChild_1, 1);
+//		alice.addSubElement(aliceChild_2, 1);
+//
+//		bob.addSubElement(bobChild_1, 1);
+//		bob.addSubElement(bobChild_2, 2);
+//		bob.addSubElement(bobChild_3, 3);
+//
+//		goalModel.setDescription("This is the description of the goal model!");
+//		goalModel.setRootGoal(myGoal);
+//		goalModel.addElementMachine(myGoal);
+//		goalModel.addElementMachine(alice);
+//		goalModel.addElementMachine(aliceChild_1);
+//		goalModel.addElementMachine(aliceChild_2);
+//		goalModel.addElementMachine(bob);
+//		goalModel.addElementMachine(bobChild_1);
+//		goalModel.addElementMachine(bobChild_2);
+//		goalModel.addElementMachine(bobChild_3);
+//
+//		return goalModel;
+//
+//	}
 
 }

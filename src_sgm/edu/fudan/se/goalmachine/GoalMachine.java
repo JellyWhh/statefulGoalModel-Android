@@ -24,7 +24,7 @@ import edu.fudan.se.log.Log;
  * @author whh
  * 
  */
-public abstract class GoalMachine extends ElementMachine {
+public class GoalMachine extends ElementMachine {
 
 	private ArrayList<ElementMachine> subElements = new ArrayList<ElementMachine>(); // subElements
 

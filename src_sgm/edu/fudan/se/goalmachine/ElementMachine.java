@@ -17,13 +17,12 @@ import edu.fudan.se.goalmodel.GoalModel;
 import edu.fudan.se.log.Log;
 
 /**
- * 抽象类<br>
  * 元素状态机，GoalMachine和TaskMachine继承此抽象类
  * 
  * @author whh
  * 
  */
-public abstract class ElementMachine implements Runnable {
+public class ElementMachine implements Runnable {
 
 	private GoalModel goalModel; // 这个element machine所属于的goal model
 
@@ -307,7 +306,8 @@ public abstract class ElementMachine implements Runnable {
 	}
 
 	/**
-	 * executing状态中entry所做的action：<code>GoalMachine</code>和<code>TaskMachine</code>需要重写
+	 * executing状态中entry所做的action：<code>GoalMachine</code>和
+	 * <code>TaskMachine</code>需要重写
 	 */
 	public void executingEntry() {
 		Log.logDebug(this.getName(), "executingEntry()", "init.");
@@ -752,28 +752,29 @@ public abstract class ElementMachine implements Runnable {
 
 	// *************结束一些辅助方法************************
 
-	// ***********************************************
-	// 下面的方法都是需要新建一个GoalMachine实例时根据具体要求实现的
-	// 主要做的各个状态相关的条件检查
-	// ***********************************************
+	// *************checkCondition方法**************
 
-	// *************checkCondition抽象方法**************
+	public void checkContextCondition() {
+		this.getContextCondition().check();
+	}
 
-	public abstract void checkContextCondition();
+	public void checkPreCondition() {
+		this.getPreCondition().check();
+	}
 
-	public abstract void checkPreCondition();
+	public void checkPostCondition() {
+		this.getPostCondition().check();
+	}
 
-	public abstract void checkPostCondition();
+	public void checkCommitmentCondition() {
+		this.getCommitmentCondition().check();
+	}
 
-	public abstract void checkCommitmentCondition();
+	public void checkInvariantCondition() {
+		this.getInvariantCondition().check();
+	}
 
-	public abstract void checkInvariantCondition();
-
-	// *************结束checkCondition抽象方法**********
-
-	// *********************************************
-	// 结束抽象方法声明
-	// *********************************************
+	// *************结束checkCondition方法**********
 
 	public String getName() {
 		return name;

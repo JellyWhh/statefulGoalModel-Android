@@ -10,13 +10,12 @@ import edu.fudan.se.goalmachine.message.SGMMessage;
 import edu.fudan.se.log.Log;
 
 /**
- * 抽象类<br>
  * Task Machine，继承自<code>ElementMachine</code>
  * 
  * @author whh
  * 
  */
-public abstract class TaskMachine extends ElementMachine {
+public class TaskMachine extends ElementMachine {
 
 	private boolean needPeopleInteraction; // 是否需要人的交互
 	private String executingRequestedServiceName; // 执行这个task时具体需要调用的服务名称，如果需要人的交互，这个就为空了
