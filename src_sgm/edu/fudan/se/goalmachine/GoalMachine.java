@@ -8,11 +8,11 @@ import java.util.Collections;
 import java.util.Comparator;
 
 import edu.fudan.se.goalmachine.message.MesBody_Mes2Machine;
-import edu.fudan.se.goalmachine.message.MesBody;
 import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
 import edu.fudan.se.goalmachine.message.MesHeader_Mes2Machine;
 import edu.fudan.se.goalmachine.message.MesHeader_Mes2Manger;
 import edu.fudan.se.goalmachine.message.SGMMessage;
+import edu.fudan.se.goalmachine.message.SGMMessage.MesBody;
 import edu.fudan.se.goalmachine.support.CauseToRepairing;
 import edu.fudan.se.goalmachine.support.RecordedState;
 import edu.fudan.se.log.Log;

@@ -3,6 +3,7 @@
  */
 package edu.fudan.se.agent;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -28,6 +29,7 @@ import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.UnreadableException;
 
 /**
  * @author qwy
@@ -70,7 +72,7 @@ public class AideAgent extends Agent implements AideAgentInterface {
 		// 在黄页服务中注册所有的goal model服务
 		DFAgentDescription dfd = new DFAgentDescription();
 		dfd.setName(getAID());
-		for (GoalModel gm : goalModelManager.getGoalModelList()) {
+		for (GoalModel gm : goalModelManager.getGoalModelList().values()) {
 			ServiceDescription sd = new ServiceDescription();
 			sd.setType("GOALMODEL");
 			sd.setName(gm.getName());
@@ -216,6 +218,14 @@ public class AideAgent extends Agent implements AideAgentInterface {
 						.getGoalModelName());
 				bundle.putString("ELEMENT_NAME", msg.getSender()
 						.getElementName());
+
+				if (msg.getContent() != null) {
+					bundle.putSerializable("REQUEST_DATA_CONTENT",
+							msg.getContent());
+					// bundle.putByteArray("REQUEST_DATA_CONTENT",
+					// msg.getContent());
+				}
+
 				serviceIntent.putExtras(bundle);
 				context.startService(serviceIntent);
 				break;
@@ -240,6 +250,10 @@ public class AideAgent extends Agent implements AideAgentInterface {
 						delegateOutTaskTime,
 						msg.getSender().getGoalModelName(), msg.getSender()
 								.getElementName(), false);
+				// 有需要在委托出去时顺便传输的数据
+				if (msg.getContent() != null) {
+					userDelegateOutTask.setRequestData(msg.getContent());
+				}
 				userTaskList.add(userDelegateOutTask);
 
 				String description2 = "You need to choose a friend to help you complete the goal:\n";
@@ -297,14 +311,28 @@ public class AideAgent extends Agent implements AideAgentInterface {
 				msg.setBody(MesBody_Mes2Manager.StartGM);
 			}
 
-			String content = msg.toString();
+			// String content = msg.toString();
 			Log.logMessage(msg, true);
 
+			android.util.Log.i(
+					"MY_LOG",
+					"Send mes to external agent...content is: "
+							+ msg.toString());
 			android.util.Log.i("MY_LOG",
-					"Send mes to external agent...content is: " + content);
+					"Send mes to external agent...if send request data? "
+							+ (msg.getContent() != null));
+
 			ACLMessage aclmsg = new ACLMessage(ACLMessage.INFORM);
 			aclmsg.addReceiver(new AID(targetAgent, AID.ISLOCALNAME));
-			aclmsg.setContent(content);
+			// aclmsg.setContent(content);
+			try {
+				aclmsg.setContentObject(msg);
+			} catch (IOException e) {
+				android.util.Log
+						.i("MY_LOG",
+								"Send mes to external agent...aclmsg.setContentObject(msg) error!!!");
+				e.printStackTrace();
+			}
 			send(aclmsg);
 
 		}
@@ -329,10 +357,10 @@ public class AideAgent extends Agent implements AideAgentInterface {
 						"init.");
 				android.util.Log.i("MY_LOG",
 						"Handle mes from external agent...");
-				String content = msg.getContent();
 
 				// 来自server agent的消息
 				if (msg.getPerformative() == ACLMessage.PROPOSE) {
+					String content = msg.getContent();
 
 					android.util.Log.i("MY_LOG", "server agent reply: "
 							+ content);
@@ -375,15 +403,25 @@ public class AideAgent extends Agent implements AideAgentInterface {
 				// 来自其他aide agent的ACLMessage.INFORM消息
 				if (msg.getPerformative() == ACLMessage.INFORM) {
 
-					String message[] = content.split("-");
-					SGMMessage inner_msg = new SGMMessage(
-							MesHeader_Mes2Manger.getMesHeader(message[0]),
-							message[1], message[2], message[3], message[4],
-							message[5], message[6],
-							MesBody_Mes2Manager.getMesBody(message[7]));
-					inner_msg.setDescription(message[8]);
+					SGMMessage inner_msg = null;
 
-					if (inner_msg.getHeader().equals(
+					try {
+						inner_msg = (SGMMessage) msg.getContentObject();
+					} catch (UnreadableException e) {
+						android.util.Log.i("MY_LOG",
+								"Handle mes from external agent...acl msg.getContentObject() error!");
+						e.printStackTrace();
+					}
+
+					// String message[] = content.split("-");
+					// SGMMessage inner_msg = new SGMMessage(
+					// MesHeader_Mes2Manger.getMesHeader(message[0]),
+					// message[1], message[2], message[3], message[4],
+					// message[5], message[6],
+					// MesBody_Mes2Manager.getMesBody(message[7]));
+					// inner_msg.setDescription(message[8]);
+
+					if (inner_msg!=null && inner_msg.getHeader().equals(
 							MesHeader_Mes2Manger.EXTERNAL_AGENT_MESSAGE)) {
 
 						SimpleDateFormat df = new SimpleDateFormat(
@@ -500,7 +538,7 @@ public class AideAgent extends Agent implements AideAgentInterface {
 			aclmsg.addReceiver(new AID("ServerAgent", AID.ISLOCALNAME));
 			aclmsg.setContent(content);
 			send(aclmsg);
-			//然后会一直等待server agent回复信息，在handleMesFromExternalAgent会对信息进行处理
+			// 然后会一直等待server agent回复信息，在handleMesFromExternalAgent会对信息进行处理
 		}
 
 	}
@@ -520,20 +558,20 @@ public class AideAgent extends Agent implements AideAgentInterface {
 		@Override
 		public void action() {
 			Log.logDebug("AideAgent", "HandleMesFromService()", "init.");
-//			if (msg.getBody().equals(MesBody_Mes2Manager.ServiceResult)) {
-//
-//				SimpleDateFormat df = new SimpleDateFormat(
-//						"yyyy-MM-dd HH:mm:ss");
-//				String mesTime = df.format(new Date());
-//				UserMessage userMessage = new UserMessage(mesTime,
-//						msg.getDescription());
-//				userMessageList.add(userMessage);
-//
-//				Intent broadcast_nda = new Intent();
-//				broadcast_nda.setAction("jade.mes.NOTIFICATION");
-//				broadcast_nda.putExtra("Content", userMessage.getContent());
-//				context.sendBroadcast(broadcast_nda);
-//			}
+			// if (msg.getBody().equals(MesBody_Mes2Manager.ServiceResult)) {
+			//
+			// SimpleDateFormat df = new SimpleDateFormat(
+			// "yyyy-MM-dd HH:mm:ss");
+			// String mesTime = df.format(new Date());
+			// UserMessage userMessage = new UserMessage(mesTime,
+			// msg.getDescription());
+			// userMessageList.add(userMessage);
+			//
+			// Intent broadcast_nda = new Intent();
+			// broadcast_nda.setAction("jade.mes.NOTIFICATION");
+			// broadcast_nda.putExtra("Content", userMessage.getContent());
+			// context.sendBroadcast(broadcast_nda);
+			// }
 		}
 
 	}

@@ -13,6 +13,8 @@ import service.support.GetAgent;
 import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
 import edu.fudan.se.goalmachine.message.MesHeader_Mes2Manger;
 import edu.fudan.se.goalmachine.message.SGMMessage;
+import edu.fudan.se.goalmodel.DecodeRequestData;
+import edu.fudan.se.goalmodel.RequestData;
 import edu.fudan.se.initial.SGMApplication;
 import edu.fudan.se.utils.NotificationUtil;
 
@@ -27,6 +29,8 @@ import android.util.Log;
  * 
  */
 public class IntentServiceWeather extends IntentService {
+	
+	private String cityName="";
 
 	private String weatherInfo = "";
 	private String goalModelName, elementName;
@@ -47,10 +51,13 @@ public class IntentServiceWeather extends IntentService {
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
+		RequestData requestData = (RequestData) intent.getSerializableExtra("REQUEST_DATA_CONTENT");
 
+		cityName = DecodeRequestData.decodeToString(requestData.getContent());
+		
 		goalModelName = intent.getExtras().getString("GOAL_MODEL_NAME");
 		elementName = intent.getExtras().getString("ELEMENT_NAME");
-		weatherInfo = getWeather("Shanghai");
+		weatherInfo = getWeather(cityName);
 	}
 
 	@Override

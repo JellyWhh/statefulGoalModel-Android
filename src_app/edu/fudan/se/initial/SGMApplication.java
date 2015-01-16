@@ -70,13 +70,19 @@ public class SGMApplication extends Application implements Serializable {
 		GmXMLParser gmXMLParser = new GmXMLParser();
 		File sdCardDir = Environment.getExternalStorageDirectory();
 		// 得到一个路径，内容是sdcard的文件夹路径和APP自身名字
-		String appDir = sdCardDir.getPath() + "/sgm/mygoal.xml";
-		GoalModel testGM = gmXMLParser.newGoalModel(appDir);
+		String appDir1 = sdCardDir.getPath() + "/sgm/mygoal.xml";
+		String appDir2 = sdCardDir.getPath() + "/sgm/needdelegatebob.xml";
+		String appDir3 = sdCardDir.getPath() + "/sgm/bob.xml";
+		GoalModel testGM = gmXMLParser.newGoalModel(appDir1);
+		GoalModel delegatebobGM=gmXMLParser.newGoalModel(appDir2);
+		GoalModel bob=gmXMLParser.newGoalModel(appDir3);
 
 //		GoalModel testGM = newTestGoalModel(); // 一个完全本地没有委托的
 
 		goalModelManager = new GoalModelManager();
 		goalModelManager.addGoalModel(testGM);
+		goalModelManager.addGoalModel(delegatebobGM);
+		goalModelManager.addGoalModel(bob);
 		Thread gmm = new Thread(goalModelManager);
 		gmm.start();
 

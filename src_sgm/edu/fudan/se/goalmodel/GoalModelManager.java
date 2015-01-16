@@ -5,9 +5,12 @@ import jade.wrapper.ControllerException;
 import jade.wrapper.StaleProxyException;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import com.baidu.location.f;
 
 import edu.fudan.se.agent.AideAgentInterface;
 import edu.fudan.se.goalmachine.ElementMachine;
@@ -24,18 +27,19 @@ public class GoalModelManager implements Runnable {
 
 	private BlockingQueue<SGMMessage> msgPool; // 消息池
 
-	private List<GoalModel> goalModelList; // 所有目标模型列表
-
+	/**
+	 * 所有目标模型列表，key是goal model name
+	 */
+	private Hashtable<String, GoalModel> goalModelList;
 	private String agentNickname;
 
 	public GoalModelManager() {
 		this.msgPool = new LinkedBlockingQueue<SGMMessage>();
-		this.goalModelList = new ArrayList<GoalModel>();
+		this.goalModelList = new Hashtable<>();
 	}
 
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
 
 		while (true) {
 			// 处理消息
@@ -82,25 +86,14 @@ public class GoalModelManager implements Runnable {
 	 */
 	private void handleLocalAgentMessage(SGMMessage msg) {
 		Log.logDebug("GoalModelManager", "handleLocalAgentMessage()", "init");
-		GoalModel targetGoalModel = null;
-		ElementMachine targetElementMachine = null;
-		// TaskMachine tm = null;
 
 		Messager receiver = msg.getReceiver();
 		String targetTaskName = receiver.getElementName();
 		String targetGoalModelName = receiver.getGoalModelName();
 
-		outer: for (GoalModel gm : goalModelList) {
-			if (gm.getName().equals(targetGoalModelName)) {
-				targetGoalModel = gm;
-				for (ElementMachine em : gm.getElementMachines()) {
-					if (em.getName().equals(targetTaskName)) {
-						targetElementMachine = em;
-						break outer;
-					}
-				}
-			}
-		}
+		GoalModel targetGoalModel = goalModelList.get(targetGoalModelName);
+		ElementMachine targetElementMachine = getEMFromGoalModelByName(
+				targetGoalModel, targetTaskName);
 
 		if (targetGoalModel != null) {
 			switch ((MesBody_Mes2Manager) msg.getBody()) {
@@ -121,7 +114,18 @@ public class GoalModelManager implements Runnable {
 				break;
 			case EndTE:
 			case QuitTE:
+				endTaskMachine((TaskMachine) targetElementMachine, msg);
+				break;
 			case ServiceExecutingDone:
+				// 看返回的信息中是否需要给某些数据赋值
+				if (msg.getContent() != null) {
+					targetGoalModel.getAssignmentHashtable()
+							.get(targetTaskName)
+							.setContent(msg.getContent().getContent());
+				}
+
+				endTaskMachine((TaskMachine) targetElementMachine, msg);
+				break;
 			case ServiceExecutingFailed:
 				endTaskMachine((TaskMachine) targetElementMachine, msg);
 				break;
@@ -149,28 +153,22 @@ public class GoalModelManager implements Runnable {
 			String agentFrom = msg.getSender().getAgentName();
 			String delegateGoalModelFrom = msg.getSender().getGoalModelName();
 
-			GoalModel targetGoalModel = null;
-			GoalMachine targerGoalMachine = null;
-
 			Messager receiver = msg.getReceiver();
 			String targetGoalName = receiver.getElementName();
 			String targetGoalModelName = receiver.getGoalModelName();
 
-			outer: for (GoalModel gm : goalModelList) {
-				if (gm.getName().equals(targetGoalModelName)) {
-					targetGoalModel = gm;
-					for (ElementMachine em : targetGoalModel
-							.getElementMachines()) {
-						if (em.getName().equals(targetGoalName)) {
-							targerGoalMachine = (GoalMachine) em;
-							break outer;
-						}
-					}
-				}
-			}
-
+			GoalModel targetGoalModel = goalModelList.get(targetGoalModelName);
+			GoalMachine targerGoalMachine = (GoalMachine) getEMFromGoalModelByName(
+					targetGoalModel, targetGoalName);
 			switch ((MesBody_Mes2Manager) msg.getBody()) {
 			case DelegatedAchieved:
+				// 如果有携带的数据，那么对本goal model的数据进行赋值，也就是对DELEGATERETURN条目的数据进行赋值
+				if (msg.getContent() != null) {
+					targetGoalModel.getAssignmentHashtable().get("DELEGATERETURN")
+							.setContent(msg.getContent().getContent());
+				}
+				endGoalMachine(targerGoalMachine, msg);
+				break;
 			case DelegatedFailed:
 				endGoalMachine(targerGoalMachine, msg);
 				break;
@@ -180,6 +178,13 @@ public class GoalModelManager implements Runnable {
 				targetGoalModel.getRootGoal().setAgentFrom(agentFrom);
 				targetGoalModel.getRootGoal().setDelegateGoalModelFrom(
 						delegateGoalModelFrom);
+
+				// 如果有携带的数据，那么对本goal model的数据进行赋值，也就是对DELEGATEIN条目的数据进行赋值
+				if (msg.getContent() != null) {
+					targetGoalModel.getAssignmentHashtable().get("DELEGATEIN")
+							.setContent(msg.getContent().getContent());
+				}
+
 				start(targetGoalModel, msg);
 				break;
 
@@ -204,14 +209,45 @@ public class GoalModelManager implements Runnable {
 			case RequestPersonIA: // 需要用户反馈是否完成task的消息
 			case NoDelegatedAchieved: // 告诉主人自己完成了任务
 			case NoDelegatedFailed: // 告诉主人自己没有完成任务
-			case DelegateOut: // 告诉agent这个是要委托出去的任务
-			case RequestService: // 需要调用服务
 				getAideAgentInterface().handleMesFromManager(msg);
 				break;
 
 			case DelegatedAchieved: // 告诉委托方agent完成了任务
+
+				// 查看这个任务完成的时候是否需要把数据也传递回去
+				String fromElementName = goalModelList
+						.get(msg.getSender().getGoalModelName())
+						.getParameterHashtable().get("DELEGATEOUT");
+				if (fromElementName != null) {
+					RequestData requestData = goalModelList
+							.get(msg.getSender().getGoalModelName())
+							.getAssignmentHashtable().get(fromElementName);
+					msg.setContent(requestData);
+				}
+
+				getAideAgentInterface().sendMesToExternalAgent(msg);
+				break;
 			case DelegatedFailed: // 告诉委托方agent没有完成任务
 				getAideAgentInterface().sendMesToExternalAgent(msg);
+				break;
+
+			case DelegateOut: // 告诉agent这个是要委托出去的任务
+				// 委托出去的时候也可能需要把数据传递出去，要看这个委托出去的任务是否需要数据
+			case RequestService: // 需要调用服务，要查询参数表
+				// 先从数据传输路径表中看这个element是否需要别的element赋值过的数据
+				String requestElementName = goalModelList
+						.get(msg.getSender().getGoalModelName())
+						.getParameterHashtable()
+						.get(msg.getSender().getElementName());
+				if (requestElementName != null) {
+					// 如果需要，就从数据赋值表里拿出这个它需要的数据
+					RequestData requestData = goalModelList
+							.get(msg.getSender().getGoalModelName())
+							.getAssignmentHashtable().get(requestElementName);
+					msg.setContent(requestData);
+				}
+
+				getAideAgentInterface().handleMesFromManager(msg);
 				break;
 
 			default:
@@ -324,8 +360,9 @@ public class GoalModelManager implements Runnable {
 				|| msg.getBody().equals(
 						MesBody_Mes2Manager.ServiceExecutingDone)) {
 			msg.setBody(MesBody_Mes2Machine.TASK_DONE);
-		} else if (msg.getBody().equals(MesBody_Mes2Manager.QuitTE)|| msg.getBody().equals(
-				MesBody_Mes2Manager.ServiceExecutingFailed)) {
+		} else if (msg.getBody().equals(MesBody_Mes2Manager.QuitTE)
+				|| msg.getBody().equals(
+						MesBody_Mes2Manager.ServiceExecutingFailed)) {
 			msg.setBody(MesBody_Mes2Machine.TASK_FAILED);
 		}
 		if (taskMachine.getMsgPool().offer(msg)) {
@@ -429,13 +466,33 @@ public class GoalModelManager implements Runnable {
 		return aideAgentInterface;
 	}
 
+	/**
+	 * 根据指定的element name，从goal model中取出对应的element machine
+	 * 
+	 * @param goalModel
+	 *            goal model
+	 * @param elementName
+	 *            指定的element name
+	 * @return 对应的element machine，如果没有返回null
+	 */
+	private ElementMachine getEMFromGoalModelByName(GoalModel goalModel,
+			String elementName) {
+		ElementMachine ret = null;
+		for (ElementMachine em : goalModel.getElementMachines()) {
+			if (em.getName().equals(elementName)) {
+				ret = em;
+			}
+		}
+		return ret;
+	}
+
 	public void addGoalModel(GoalModel gm) {
-		this.goalModelList.add(gm);
+		this.goalModelList.put(gm.getName(), gm);
 		gm.setGoalModelManager(this);
 	}
 
-	public List<GoalModel> getGoalModelList() {
-		return this.goalModelList;
+	public Hashtable<String, GoalModel> getGoalModelList() {
+		return goalModelList;
 	}
 
 	public BlockingQueue<SGMMessage> getMsgPool() {

@@ -3,6 +3,7 @@
  */
 package edu.fudan.se.mainfragments;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
@@ -33,7 +34,7 @@ public class MyGoalFragment extends ListFragment {
 
 	private MyGoalListAdapter<GoalModel> adapter;
 
-	// private ArrayList<String> goalmodels = new ArrayList<>();
+	private ArrayList<GoalModel> goalmodels;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -41,10 +42,11 @@ public class MyGoalFragment extends ListFragment {
 
 		application = (SGMApplication) getActivity().getApplication();
 
-		adapter = new MyGoalListAdapter(getActivity(),
-				R.layout.listview_mygoal, application.getGoalModelManager().getGoalModelList());
-		// setListAdapter(adapter);
-		// registerForContextMenu(getListView());
+		goalmodels = new ArrayList<>(application.getGoalModelManager()
+				.getGoalModelList().values());
+
+		adapter = new MyGoalListAdapter<GoalModel>(getActivity(),
+				R.layout.listview_mygoal, goalmodels);
 	}
 
 	@Override
@@ -54,7 +56,6 @@ public class MyGoalFragment extends ListFragment {
 		setListAdapter(adapter);
 
 		getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-		// showDetails(mCurCheckPosition);
 	}
 
 	@Override
@@ -63,7 +64,7 @@ public class MyGoalFragment extends ListFragment {
 
 		Intent intent = new Intent();
 		intent.setClass(getActivity(), GoalModelActivity.class);
-		intent.putExtra("goalmodelposition", position);
+		intent.putExtra("goalmodelname", goalmodels.get(position).getName());
 		startActivity(intent);
 	}
 

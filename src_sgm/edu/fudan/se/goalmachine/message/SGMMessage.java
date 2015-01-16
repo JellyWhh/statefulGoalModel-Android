@@ -5,6 +5,8 @@ package edu.fudan.se.goalmachine.message;
 
 import java.io.Serializable;
 
+import edu.fudan.se.goalmodel.RequestData;
+
 /**
  * 实现线程间的通信的消息格式，是可序列化对象
  * 
@@ -20,6 +22,7 @@ public class SGMMessage implements Serializable {
 	private Messager receiver; // 消息接收者，只有一个，如果一个Goal要发消息给多个接收者，就发多条信息，每条信息只有一个接收者
 	private MesBody body; // 消息主体
 	private String description; // 消息附加的描述，在需要人为参与的task时，发送消息给manager，要把任务描述附加上去
+	private RequestData content;
 
 	public SGMMessage(MesHeader header, String senderAgentName,
 			String senderGoalModelName, String senderElementName,
@@ -86,6 +89,14 @@ public class SGMMessage implements Serializable {
 		this.description = description;
 	}
 
+	public RequestData getContent() {
+		return content;
+	}
+
+	public void setContent(RequestData content) {
+		this.content = content;
+	}
+
 	public class Messager implements Serializable {
 
 		private static final long serialVersionUID = 8513804283789760689L;
@@ -128,6 +139,23 @@ public class SGMMessage implements Serializable {
 		public void setElementName(String elementName) {
 			this.elementName = elementName;
 		}
+	}
+	
+	/**
+	 * 消息头部
+	 * @author whh
+	 *
+	 */
+	public interface MesHeader {
+
+	}
+
+	
+	/**
+	 * @author whh
+	 *
+	 */
+	public interface MesBody {
 	}
 
 }

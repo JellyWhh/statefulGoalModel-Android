@@ -2,6 +2,8 @@ package edu.fudan.se.goalmachine.message;
 
 import java.io.Serializable;
 
+import edu.fudan.se.goalmachine.message.SGMMessage.MesBody;
+
 /**
  * agent与manager之间消息的Body部分
  * 

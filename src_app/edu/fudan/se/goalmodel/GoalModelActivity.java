@@ -26,18 +26,16 @@ public class GoalModelActivity extends FragmentActivity {
 
 		// 获取传递过来的intent中的goal model position，然后从全局变量中得到对应的goal model
 		Intent intent = getIntent();
-		int goalmodelposition = (Integer) intent
-				.getSerializableExtra("goalmodelposition");
+		String goalmodelname = intent.getStringExtra("goalmodelname");
 
 		GoalModel goalModel = ((SGMApplication) getApplication())
-				.getGoalModelManager().getGoalModelList()
-				.get(goalmodelposition);
+				.getGoalModelManager().getGoalModelList().get(goalmodelname);
 
 		if (savedInstanceState == null) {
 			FragmentTransaction transaction = getSupportFragmentManager()
 					.beginTransaction();
-			transaction.add(R.id.container,
-					new GoalModelFragment(goalModel)).commit();
+			transaction.add(R.id.container, new GoalModelFragment(goalModel))
+					.commit();
 		}
 	}
 

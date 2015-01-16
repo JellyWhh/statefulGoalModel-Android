@@ -34,6 +34,7 @@ import edu.fudan.se.agent.AideAgentInterface;
 import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
 import edu.fudan.se.goalmachine.message.MesHeader_Mes2Manger;
 import edu.fudan.se.goalmachine.message.SGMMessage;
+import edu.fudan.se.goalmodel.RequestData;
 import edu.fudan.se.initial.SGMApplication;
 import edu.fudan.se.userMes.UserDelegateOutTask;
 import edu.fudan.se.userMes.UserTask;
@@ -129,6 +130,18 @@ public class TaskFragment extends ListFragment {
 
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
+				
+				// 要把这个task设置成已做过状态
+				UserDelegateOutTask userDelegateOutTask = null;
+				for (UserTask ut : application.getUserTaskList()) {
+					if (ut.getGoalModelName().equals(goalModelName)
+							&& ut.getElementName().equals(elementName)) {
+						userDelegateOutTask = (UserDelegateOutTask) ut;
+						ut.setDone(true);
+						adapter.notifyDataSetChanged();
+						break;
+					}
+				}
 
 				// 获得选取的friend名字
 				String friendSelected = friends[choiceListener.getWhich()]
@@ -140,18 +153,13 @@ public class TaskFragment extends ListFragment {
 						goalModelName, elementName, friendSelected,
 						elementName, elementName,
 						MesBody_Mes2Manager.DelegateOut);
+				
+				//看是否有需要在委托出去的时候顺便传递出去的数据
+				if (userDelegateOutTask!=null && userDelegateOutTask.getRequestData()!=null) {
+					msgToExternalAgent.setContent(userDelegateOutTask.getRequestData());
+				}
 
 				aideAgentInterface.sendMesToExternalAgent(msgToExternalAgent);
-
-				// 要把这个task设置成已做过状态
-				for (UserTask ut : application.getUserTaskList()) {
-					if (ut.getGoalModelName().equals(goalModelName)
-							&& ut.getElementName().equals(elementName)) {
-						ut.setDone(true);
-						adapter.notifyDataSetChanged();
-						break;
-					}
-				}
 
 			}
 		});
@@ -217,6 +225,7 @@ public class TaskFragment extends ListFragment {
 						"GoalModelName");
 				String elementName = intent.getExtras()
 						.getString("ElementName");
+				
 
 				if (friends == null || friends.length == 0) {
 					android.util.Log

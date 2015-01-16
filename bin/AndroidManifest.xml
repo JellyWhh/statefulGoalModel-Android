@@ -46,6 +46,12 @@
             </intent-filter>
         </service>
         
+        <service android:name="service.async.webservice.TestIntentServiceSetCityName" >
+            <intent-filter>
+                <action android:name="service.intentservice.setcityname" />
+            </intent-filter>
+        </service>
+        
         <service android:name="edu.fudan.se.mobile.locator.MobileLocatorService" >
             <intent-filter>
                 <action android:name="service.appservice.locator" />
