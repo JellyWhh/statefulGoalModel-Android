@@ -8,7 +8,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
-import service.support.GetAgent;
 import android.app.IntentService;
 import android.content.Intent;
 import android.os.Environment;
@@ -18,6 +17,7 @@ import edu.fudan.se.goalmachine.message.SGMMessage;
 import edu.fudan.se.goalmodel.EncodeDecodeRequestData;
 import edu.fudan.se.goalmodel.RequestData;
 import edu.fudan.se.initial.SGMApplication;
+import edu.fudan.se.support.GetAgent;
 
 /**
  * 用来测试数据传递，这个服务给读取一张图片到程序内存中

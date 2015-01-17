@@ -3,12 +3,12 @@
  */
 package service.async.webservice;
 
-import service.support.GetAgent;
 import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
 import edu.fudan.se.goalmachine.message.MesHeader_Mes2Manger;
 import edu.fudan.se.goalmachine.message.SGMMessage;
 import edu.fudan.se.goalmodel.RequestData;
 import edu.fudan.se.initial.SGMApplication;
+import edu.fudan.se.support.GetAgent;
 import android.app.IntentService;
 import android.content.Intent;
 

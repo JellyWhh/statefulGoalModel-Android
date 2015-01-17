@@ -1,7 +1,7 @@
 /**
  * 
  */
-package service.support;
+package edu.fudan.se.support;
 
 import jade.core.MicroRuntime;
 import jade.wrapper.ControllerException;
@@ -11,10 +11,9 @@ import edu.fudan.se.initial.SGMApplication;
 
 /**
  * @author whh
- * 
+ *
  */
 public class GetAgent {
-
 	/**
 	 * 获得agent引用
 	 * @param sgmApplication application上下文

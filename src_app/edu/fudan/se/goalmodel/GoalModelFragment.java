@@ -5,9 +5,6 @@ package edu.fudan.se.goalmodel;
 
 import java.util.ArrayList;
 
-import jade.core.MicroRuntime;
-import jade.wrapper.ControllerException;
-import jade.wrapper.StaleProxyException;
 import edu.fudan.se.R;
 import edu.fudan.se.agent.AideAgentInterface;
 import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
@@ -15,13 +12,13 @@ import edu.fudan.se.goalmachine.message.MesHeader_Mes2Manger;
 import edu.fudan.se.goalmachine.message.SGMMessage;
 import edu.fudan.se.goalmodel.GoalModel;
 import edu.fudan.se.initial.SGMApplication;
+import edu.fudan.se.support.GetAgent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -50,8 +47,6 @@ public class GoalModelFragment extends Fragment {
 
 	private AideAgentInterface aideAgentInterface; // agent interface
 
-	// private String agentNickname;
-
 	public GoalModelFragment(GoalModel goalModel) {
 		this.goalModel = goalModel;
 	}
@@ -61,17 +56,9 @@ public class GoalModelFragment extends Fragment {
 		super.onCreate(savedInstanceState);
 
 		application = (SGMApplication) getActivity().getApplication();
-		try {
-			aideAgentInterface = MicroRuntime.getAgent(
-					application.getAgentNickname()).getO2AInterface(
-					AideAgentInterface.class);
-		} catch (StaleProxyException e) {
-			Log.e("GoalModelDetailsFragment", "StaleProxyException");
-			e.printStackTrace();
-		} catch (ControllerException e) {
-			Log.e("GoalModelDetailsFragment", "ControllerException");
-			e.printStackTrace();
-		}
+		
+		aideAgentInterface = GetAgent.getAideAgentInterface(application);
+		
 	}
 
 	@Override

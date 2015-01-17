@@ -60,17 +60,18 @@ public class SGMApplication extends Application implements Serializable {
 		GmXMLParser gmXMLParser = new GmXMLParser();
 		File sdCardDir = Environment.getExternalStorageDirectory();
 		// 得到一个路径，内容是sdcard的文件夹路径和APP自身名字
-		String mygoalDir1 = sdCardDir.getPath() + "/sgm/mygoal.xml";
+		String mygoalDir1 = sdCardDir.getPath() + "/sgm/fxml/mygoal.xml";
 		String needdelegatebobDir2 = sdCardDir.getPath()
-				+ "/sgm/needdelegatebob.xml";
-		String bobDir3 = sdCardDir.getPath() + "/sgm/bob.xml";
-		String testDir4 = sdCardDir.getPath() + "/sgm/test.xml";
+				+ "/sgm/fxml/needdelegatebob.xml";
+		String bobDir3 = sdCardDir.getPath() + "/sgm/fxml/bob.xml";
+		String testDir4 = sdCardDir.getPath() + "/sgm/fxml/test.xml";
+		String takePicDir4 = sdCardDir.getPath() + "/sgm/fxml/takepicture.xml";
 		GoalModel mygoal = gmXMLParser.newGoalModel(mygoalDir1);
 		GoalModel needdelegatebob = gmXMLParser
 				.newGoalModel(needdelegatebobDir2);
 		GoalModel bob = gmXMLParser.newGoalModel(bobDir3);
 		GoalModel test = gmXMLParser.newGoalModel(testDir4);
-
+		GoalModel takepicture = gmXMLParser.newGoalModel(takePicDir4);
 		// GoalModel testGM = newTestGoalModel(); // 一个完全本地没有委托的
 
 		goalModelManager = new GoalModelManager();
@@ -78,6 +79,7 @@ public class SGMApplication extends Application implements Serializable {
 		goalModelManager.addGoalModel(needdelegatebob);
 		goalModelManager.addGoalModel(bob);
 		goalModelManager.addGoalModel(test);
+		goalModelManager.addGoalModel(takepicture);
 		Thread gmm = new Thread(goalModelManager);
 		gmm.start();
 

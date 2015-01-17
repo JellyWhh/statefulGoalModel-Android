@@ -8,7 +8,6 @@ import org.ksoap2.serialization.SoapObject;
 import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.HttpTransportSE;
 
-import service.support.GetAgent;
 
 import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
 import edu.fudan.se.goalmachine.message.MesHeader_Mes2Manger;
@@ -16,6 +15,7 @@ import edu.fudan.se.goalmachine.message.SGMMessage;
 import edu.fudan.se.goalmodel.EncodeDecodeRequestData;
 import edu.fudan.se.goalmodel.RequestData;
 import edu.fudan.se.initial.SGMApplication;
+import edu.fudan.se.support.GetAgent;
 import edu.fudan.se.utils.NotificationUtil;
 
 import android.app.IntentService;

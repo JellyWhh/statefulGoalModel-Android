@@ -7,6 +7,8 @@ import jade.core.MicroRuntime;
 import jade.wrapper.ControllerException;
 import jade.wrapper.StaleProxyException;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import android.app.AlertDialog;
@@ -18,6 +20,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -36,10 +39,13 @@ import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
 import edu.fudan.se.goalmachine.message.MesHeader_Mes2Manger;
 import edu.fudan.se.goalmachine.message.SGMMessage;
 import edu.fudan.se.goalmodel.EncodeDecodeRequestData;
+import edu.fudan.se.goalmodel.GoalModelActivity;
 import edu.fudan.se.goalmodel.RequestData;
 import edu.fudan.se.initial.SGMApplication;
+import edu.fudan.se.support.TakePictureActivity;
 import edu.fudan.se.userMes.UserDelegateOutTask;
 import edu.fudan.se.userMes.UserShowContentTask;
+import edu.fudan.se.userMes.UserTakePictureTask;
 import edu.fudan.se.userMes.UserTask;
 
 /**
@@ -375,6 +381,27 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 					}
 				});
 
+			} else if (usertask instanceof UserTakePictureTask) { // 要用户拍照的user
+																	// task
+				holder.done.setText("camera");
+				// 跳转到CameraActivity
+				holder.done.setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						usertask.setDone(true);
+						notifyDataSetChanged();
+
+						Intent intent = new Intent();
+						intent.setClass(mContext, TakePictureActivity.class);
+						intent.putExtra("goalmodelname",
+								usertask.getGoalModelName());
+						intent.putExtra("elementname",
+								usertask.getElementName());
+						mContext.startActivity(intent);
+					}
+				});
+
 			} else {// 普通的user task
 				holder.done.setOnClickListener(new OnClickListener() {
 
@@ -426,6 +453,9 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 			} else if (usertask instanceof UserShowContentTask) {
 				holder.taskLayout.setBackgroundColor(mContext.getResources()
 						.getColor(R.color.nodone_pink));
+			} else if (usertask instanceof UserTakePictureTask) {
+				holder.taskLayout.setBackgroundColor(mContext.getResources()
+						.getColor(R.color.nodone_purple));
 			} else {
 				holder.taskLayout.setBackgroundColor(mContext.getResources()
 						.getColor(R.color.nodone_white));

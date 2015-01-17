@@ -29,6 +29,14 @@
     <!-- 允许应用读取低级别的系统日志文件 -->
     <uses-permission android:name="android.permission.READ_LOGS" />
 
+    <!-- 摄像头权限 -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature
+        android:name="android.hardware.camera.autofocus"
+        android:required="false" />
+
     <uses-sdk
         android:minSdkVersion="14"
         android:targetSdkVersion="19" />
@@ -45,31 +53,31 @@
                 <action android:name="service.intentservice.weather" />
             </intent-filter>
         </service>
-        
         <service android:name="service.async.webservice.TestIntentServiceSetCityName" >
             <intent-filter>
                 <action android:name="service.intentservice.setcityname" />
             </intent-filter>
         </service>
-        
-         <service android:name="service.async.webservice.TestIntentServiceSetImage" >
+        <service android:name="service.async.webservice.TestIntentServiceSetImage" >
             <intent-filter>
                 <action android:name="service.intentservice.readimage" />
             </intent-filter>
         </service>
-        
         <service android:name="service.async.webservice.IntentServiceShowContent" >
             <intent-filter>
                 <action android:name="service.intentservice.showcontent" />
             </intent-filter>
         </service>
-        
-        <service android:name="edu.fudan.se.mobile.locator.MobileLocatorService" >
+        <service android:name="service.async.webservice.IntentServiceTakePicture" >
+            <intent-filter>
+                <action android:name="service.intentservice.takepicture" />
+            </intent-filter>
+        </service>
+        <service android:name="edu.fudan.se.support.MobileLocatorService" >
             <intent-filter>
                 <action android:name="service.appservice.locator" />
             </intent-filter>
         </service>
-       
         <service
             android:name="com.baidu.location.f"
             android:enabled="true"
@@ -98,6 +106,8 @@
         <activity android:name="edu.fudan.se.activity.StartAgentActivity" >
         </activity>
         <activity android:name="edu.fudan.se.activity.WorkingActivity" >
+        </activity>
+        <activity android:name="edu.fudan.se.support.TakePictureActivity" >
         </activity>
     </application>
 

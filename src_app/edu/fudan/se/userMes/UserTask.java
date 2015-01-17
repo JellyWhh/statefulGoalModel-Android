@@ -3,6 +3,8 @@
  */
 package edu.fudan.se.userMes;
 
+import edu.fudan.se.goalmodel.RequestData;
+
 /**
  * 用户要做的任务
  * 
@@ -16,6 +18,11 @@ public class UserTask {
 	private String elementName;
 	private String description;
 	private boolean isDone; // 用户是否做过了
+	
+	/**
+	 * 有些user task可能需要request data
+	 */
+	private RequestData requestData;
 	
 	public UserTask(String time,String goalModelName, String elementName, boolean isDone) {
 		this.time = time;
@@ -64,4 +71,12 @@ public class UserTask {
 		this.description = description;
 	}
 
+	public RequestData getRequestData() {
+		return requestData;
+	}
+
+	public void setRequestData(RequestData requestData) {
+		this.requestData = requestData;
+	}
+	
 }

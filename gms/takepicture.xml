@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GoalModel name="takePicture" description="This is a goal model. Its name is test. 这个goal model用来测试拍照">
+
+	<ElementMachine id="0" type="GoalMachine" name="takePicture"
+		level="0" description="take picture">
+		<decomposition>0</decomposition>
+		<schedulerMethod>1</schedulerMethod>
+		<needDelegate>false</needDelegate>
+	</ElementMachine>
+	
+	<ElementMachine id="1" type="TaskMachine" name="setPictureDes"
+		level="1" description="set picture description">
+		<parentGoal>takePicture</parentGoal>
+		<priorityLevel>1</priorityLevel>
+		<needPeopleInteraction>false</needPeopleInteraction>
+		<executingRequestedServiceName>service.intentservice.setcityname</executingRequestedServiceName>
+	</ElementMachine>
+
+	
+	<ElementMachine id="2" type="TaskMachine" name="takePic"
+		level="1" description="take picture">
+		<parentGoal>takePicture</parentGoal>
+		<priorityLevel>1</priorityLevel>
+		<needPeopleInteraction>false</needPeopleInteraction>
+		<!-- executingRequestedServiceName的格式必须是 AndroidManifest.xml中service标签中action name-->
+		<executingRequestedServiceName>service.intentservice.takepicture</executingRequestedServiceName>
+	</ElementMachine>
+	
+	<ElementMachine id="3" type="TaskMachine" name="showImage"
+		level="1" description="show image">
+		<parentGoal>takePicture</parentGoal>
+		<priorityLevel>1</priorityLevel>
+		<needPeopleInteraction>false</needPeopleInteraction>
+		<!-- executingRequestedServiceName的格式必须是 AndroidManifest.xml中service标签中action name-->
+		<executingRequestedServiceName>service.intentservice.showcontent</executingRequestedServiceName>
+	</ElementMachine>
+	
+	<RequestData name="imageDes" from="setPictureDes" to="takePic" contentType="Text"></RequestData>
+	<RequestData name="image" from="takePic" to="showImage" contentType="Image"></RequestData>
+
+</GoalModel>

@@ -150,7 +150,7 @@ public class Log {
 			// 创建一个文件夹对象，赋值为外部存储器的目录
 			File sdCardDir = Environment.getExternalStorageDirectory();
 			// 得到一个路径，内容是sdcard的文件夹路径和APP自身名字
-			String appDir = sdCardDir.getPath() + "/sgm";
+			String appDir = sdCardDir.getPath() + "/sgm/log/";
 			File appPathFile = new File(appDir);
 			// 如果路径不存在，创建一个目录
 			if (!appPathFile.exists()) {

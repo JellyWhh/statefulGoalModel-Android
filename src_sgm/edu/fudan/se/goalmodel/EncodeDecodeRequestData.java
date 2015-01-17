@@ -48,6 +48,18 @@ public class EncodeDecodeRequestData {
 	}
 
 	/**
+	 * 将Bitmap转换成byte[]
+	 * 
+	 * @param bitmap
+	 * @return
+	 */
+	public static byte[] encodeBitmap(Bitmap bitmap) {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+		return baos.toByteArray();
+	}
+
+	/**
 	 * 将byte[]解码成文本信息
 	 * 
 	 * @param content

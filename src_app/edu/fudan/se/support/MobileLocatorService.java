@@ -1,9 +1,8 @@
 /**
  * 
  */
-package edu.fudan.se.mobile.locator;
+package edu.fudan.se.support;
 
-import service.support.GetAgent;
 
 import com.baidu.location.BDLocation;
 import com.baidu.location.BDLocationListener;
