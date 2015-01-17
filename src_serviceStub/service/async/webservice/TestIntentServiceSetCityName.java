@@ -43,22 +43,20 @@ public class TestIntentServiceSetCityName extends IntentService {
 
 	@Override
 	public void onDestroy() {
-		System.out.println("onDestroy");
+		System.out.println("TestIntentServiceSetCityName onDestroy");
 
 		// 在destory前把天气信息通过agent发送给manager
 		SGMMessage msg = new SGMMessage(
 				MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null, null,
 				null, goalModelName, elementName,
 				MesBody_Mes2Manager.ServiceExecutingDone);
-		RequestData requestData = new RequestData("String");
+		RequestData requestData = new RequestData("Text");
 		requestData.setContent(retCityName.getBytes());
 		msg.setContent(requestData);
 
 		GetAgent.getAideAgentInterface((SGMApplication) getApplication())
 				.sendMesToManager(msg);
 		
-		
-
 		super.onDestroy();
 	}
 

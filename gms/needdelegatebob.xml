@@ -61,7 +61,7 @@
 		<executingRequestedServiceName>service.intentservice.weather</executingRequestedServiceName>
 	</ElementMachine>
 	
-	<RequestData name="cityName" from="aliceChild_1" to="bob" contentType="String"></RequestData>
-	<RequestData name="cityName2" from="DELEGATERETURN" to="tomChild_1" contentType="String"></RequestData>
+	<RequestData name="cityName" from="aliceChild_1" to="bob" contentType="Text"></RequestData>
+	<RequestData name="cityName2" from="DELEGATERETURN" to="tomChild_1" contentType="Text"></RequestData>
 
 </GoalModel>

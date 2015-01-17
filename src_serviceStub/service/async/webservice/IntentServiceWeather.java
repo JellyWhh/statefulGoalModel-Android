@@ -13,7 +13,7 @@ import service.support.GetAgent;
 import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
 import edu.fudan.se.goalmachine.message.MesHeader_Mes2Manger;
 import edu.fudan.se.goalmachine.message.SGMMessage;
-import edu.fudan.se.goalmodel.DecodeRequestData;
+import edu.fudan.se.goalmodel.EncodeDecodeRequestData;
 import edu.fudan.se.goalmodel.RequestData;
 import edu.fudan.se.initial.SGMApplication;
 import edu.fudan.se.utils.NotificationUtil;
@@ -53,7 +53,7 @@ public class IntentServiceWeather extends IntentService {
 	protected void onHandleIntent(Intent intent) {
 		RequestData requestData = (RequestData) intent.getSerializableExtra("REQUEST_DATA_CONTENT");
 
-		cityName = DecodeRequestData.decodeToString(requestData.getContent());
+		cityName = EncodeDecodeRequestData.decodeToText(requestData.getContent());
 		
 		goalModelName = intent.getExtras().getString("GOAL_MODEL_NAME");
 		elementName = intent.getExtras().getString("ELEMENT_NAME");
@@ -62,7 +62,7 @@ public class IntentServiceWeather extends IntentService {
 
 	@Override
 	public void onDestroy() {
-		System.out.println("onDestroy");
+		System.out.println("IntentServiceWeather onDestroy");
 
 		// 测试时用，弹出一个通知，显示这个web service调用完毕要返回了
 		NotificationUtil notificationUtil = new NotificationUtil(this);

@@ -41,7 +41,7 @@
 		</Condition>
 	</ElementMachine>
 	
-	<RequestData name="cityName" from="DELEGATEIN" to="bobChild_3" contentType="String"></RequestData>
-	<RequestData name="cityName" from="bobChild_1" to="DELEGATEOUT" contentType="String"></RequestData>
+	<RequestData name="cityName" from="DELEGATEIN" to="bobChild_3" contentType="Text"></RequestData>
+	<RequestData name="cityName" from="bobChild_1" to="DELEGATEOUT" contentType="Text"></RequestData>
 
 </GoalModel>

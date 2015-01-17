@@ -75,6 +75,6 @@
 		</Condition>
 	</ElementMachine>
 	
-	<RequestData name="cityName" from="aliceChild_1" to="bobChild_3" contentType="String"></RequestData>
+	<RequestData name="cityName" from="aliceChild_1" to="bobChild_3" contentType="Text"></RequestData>
 
 </GoalModel>

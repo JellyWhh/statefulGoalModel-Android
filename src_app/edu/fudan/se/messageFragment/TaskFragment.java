@@ -26,6 +26,7 @@ import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -34,9 +35,11 @@ import edu.fudan.se.agent.AideAgentInterface;
 import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
 import edu.fudan.se.goalmachine.message.MesHeader_Mes2Manger;
 import edu.fudan.se.goalmachine.message.SGMMessage;
+import edu.fudan.se.goalmodel.EncodeDecodeRequestData;
 import edu.fudan.se.goalmodel.RequestData;
 import edu.fudan.se.initial.SGMApplication;
 import edu.fudan.se.userMes.UserDelegateOutTask;
+import edu.fudan.se.userMes.UserShowContentTask;
 import edu.fudan.se.userMes.UserTask;
 
 /**
@@ -130,7 +133,7 @@ public class TaskFragment extends ListFragment {
 
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				
+
 				// 要把这个task设置成已做过状态
 				UserDelegateOutTask userDelegateOutTask = null;
 				for (UserTask ut : application.getUserTaskList()) {
@@ -153,10 +156,12 @@ public class TaskFragment extends ListFragment {
 						goalModelName, elementName, friendSelected,
 						elementName, elementName,
 						MesBody_Mes2Manager.DelegateOut);
-				
-				//看是否有需要在委托出去的时候顺便传递出去的数据
-				if (userDelegateOutTask!=null && userDelegateOutTask.getRequestData()!=null) {
-					msgToExternalAgent.setContent(userDelegateOutTask.getRequestData());
+
+				// 看是否有需要在委托出去的时候顺便传递出去的数据
+				if (userDelegateOutTask != null
+						&& userDelegateOutTask.getRequestData() != null) {
+					msgToExternalAgent.setContent(userDelegateOutTask
+							.getRequestData());
 				}
 
 				aideAgentInterface.sendMesToExternalAgent(msgToExternalAgent);
@@ -207,7 +212,7 @@ public class TaskFragment extends ListFragment {
 						dialog.cancel();
 					}
 				});
-		
+
 		AlertDialog dialog = builder.create();
 
 		return dialog;
@@ -225,7 +230,6 @@ public class TaskFragment extends ListFragment {
 						"GoalModelName");
 				String elementName = intent.getExtras()
 						.getString("ElementName");
-				
 
 				if (friends == null || friends.length == 0) {
 					android.util.Log
@@ -350,20 +354,45 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 
 			description += "You need to choose a friend to help you complete the goal:\n";
 
-		} else { // 普通的user task
-			holder.done.setOnClickListener(new OnClickListener() {
+		} else {
+			if (usertask instanceof UserShowContentTask) { // 展示内容的user task
+				holder.done.setText("show");
+				// 弹出一个对话框显示某些内容
+				holder.done.setOnClickListener(new OnClickListener() {
 
-				@Override
-				public void onClick(View v) {
-					aideAgentInterface.sendMesToManager(new SGMMessage(
-							MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
-							null, null, null, usertask.getGoalModelName(),
-							usertask.getElementName(),
-							MesBody_Mes2Manager.EndTE));
-					usertask.setDone(true);
-					notifyDataSetChanged();
-				}
-			});
+					@Override
+					public void onClick(View v) {
+						showContentDialog(((UserShowContentTask) usertask)
+								.getRequestData());
+						// 只要点击了show按钮就表示这个“展示任务”完成了
+						aideAgentInterface.sendMesToManager(new SGMMessage(
+								MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
+								null, null, null, usertask.getGoalModelName(),
+								usertask.getElementName(),
+								MesBody_Mes2Manager.EndTE));
+						usertask.setDone(true);
+						notifyDataSetChanged();
+					}
+				});
+
+			} else {// 普通的user task
+				holder.done.setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						aideAgentInterface.sendMesToManager(new SGMMessage(
+								MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
+								null, null, null, usertask.getGoalModelName(),
+								usertask.getElementName(),
+								MesBody_Mes2Manager.EndTE));
+						usertask.setDone(true);
+						notifyDataSetChanged();
+					}
+				});
+
+				description += "You need to do:\n";
+			}
+
 			holder.quit.setOnClickListener(new OnClickListener() {
 
 				@Override
@@ -377,8 +406,6 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 					notifyDataSetChanged();
 				}
 			});
-
-			description += "You need to do:\n";
 
 		}
 
@@ -396,6 +423,9 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 			if (usertask instanceof UserDelegateOutTask) {
 				holder.taskLayout.setBackgroundColor(mContext.getResources()
 						.getColor(R.color.nodone_green));
+			} else if (usertask instanceof UserShowContentTask) {
+				holder.taskLayout.setBackgroundColor(mContext.getResources()
+						.getColor(R.color.nodone_pink));
 			} else {
 				holder.taskLayout.setBackgroundColor(mContext.getResources()
 						.getColor(R.color.nodone_white));
@@ -418,6 +448,42 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 		holder.description.setText(description);
 
 		return convertView;
+	}
+
+	/**
+	 * 创建一个显示RequestData的对话框，显示的可以是Text或者Image
+	 * 
+	 * @param requestData
+	 *            要显示的requestData
+	 */
+	private void showContentDialog(RequestData requestData) {
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+		builder.setTitle("Content:");
+
+		if (requestData.getContentType().equals("Text")) {
+			builder.setMessage(EncodeDecodeRequestData.decodeToText(requestData
+					.getContent()));
+		} else if (requestData.getContentType().equals("Image")) {
+			View view = LayoutInflater.from(mContext).inflate(
+					R.layout.dialog_showcontent, null);
+			ImageView imageView = (ImageView) view
+					.findViewById(R.id.iv_dialog_content);
+			imageView.setImageBitmap(EncodeDecodeRequestData
+					.decodeToBitmap(requestData.getContent()));
+			builder.setView(view);
+		}
+
+		builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.cancel();
+			}
+		});
+
+		AlertDialog dialog = builder.create();
+		dialog.show();
 	}
 
 	private class ViewHolder {

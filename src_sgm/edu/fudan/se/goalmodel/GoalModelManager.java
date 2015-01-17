@@ -119,6 +119,9 @@ public class GoalModelManager implements Runnable {
 			case ServiceExecutingDone:
 				// 看返回的信息中是否需要给某些数据赋值
 				if (msg.getContent() != null) {
+					System.out
+							.println("handleLocalAgentMessage--ServiceExecutingDone--assignmentHashtable: "
+									+ targetTaskName);
 					targetGoalModel.getAssignmentHashtable()
 							.get(targetTaskName)
 							.setContent(msg.getContent().getContent());
@@ -164,7 +167,8 @@ public class GoalModelManager implements Runnable {
 			case DelegatedAchieved:
 				// 如果有携带的数据，那么对本goal model的数据进行赋值，也就是对DELEGATERETURN条目的数据进行赋值
 				if (msg.getContent() != null) {
-					targetGoalModel.getAssignmentHashtable().get("DELEGATERETURN")
+					targetGoalModel.getAssignmentHashtable()
+							.get("DELEGATERETURN")
 							.setContent(msg.getContent().getContent());
 				}
 				endGoalMachine(targerGoalMachine, msg);
