@@ -11,6 +11,8 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.DisplayMetrics;
@@ -128,6 +130,7 @@ public class MainFragment extends Fragment {
 		fragmentsList.add(mygoalFragment);
 		fragmentsList.add(downloadFragment);
 		fragmentsList.add(settingFragment);
+
 
 		mPager.setAdapter(new MyFragmentPagerAdapter(getChildFragmentManager(),
 				fragmentsList));
@@ -272,14 +275,6 @@ public class MainFragment extends Fragment {
 		 * @param fm
 		 *            FragmentManager
 		 */
-		public MyFragmentPagerAdapter(FragmentManager fm) {
-			super(fm);
-		}
-
-		/**
-		 * @param fm
-		 *            FragmentManager
-		 */
 		public MyFragmentPagerAdapter(FragmentManager fm,
 				ArrayList<Fragment> fragments) {
 			super(fm);
@@ -298,7 +293,7 @@ public class MainFragment extends Fragment {
 
 		@Override
 		public int getItemPosition(Object object) {
-			return super.getItemPosition(object);
+			return POSITION_NONE; // To make notifyDataSetChanged() do something
 		}
 
 	}

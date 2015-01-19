@@ -41,17 +41,18 @@ public class MyGoalFragment extends ListFragment {
 		super.onCreate(savedInstanceState);
 
 		application = (SGMApplication) getActivity().getApplication();
-
-		goalmodels = new ArrayList<>(application.getGoalModelManager()
-				.getGoalModelList().values());
-
-		adapter = new MyGoalListAdapter<GoalModel>(getActivity(),
-				R.layout.listview_mygoal, goalmodels);
 	}
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
+		
+		//将adapter的初始化移到onActivityCreated中后，manager中goal model发生变化时，这里会触发notifyDataChanged()
+		goalmodels = new ArrayList<>(application.getGoalModelManager()
+				.getGoalModelList().values());
+
+		adapter = new MyGoalListAdapter<GoalModel>(getActivity(),
+				R.layout.listview_mygoal, goalmodels);
 
 		setListAdapter(adapter);
 

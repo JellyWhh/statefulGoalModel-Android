@@ -46,8 +46,6 @@ public class GoalModelDetailsFragment extends ListFragment {
 		initialData();
 		treeViewAdapter = new TreeViewAdapter(getActivity(),
 				R.layout.listview_goalmodeldetails, allTreeElements);
-		// setListAdapter(treeViewAdapter);
-		// registerForContextMenu(getListView());
 	}
 
 	private void initialData() {
@@ -61,7 +59,6 @@ public class GoalModelDetailsFragment extends ListFragment {
 		setListAdapter(treeViewAdapter);
 
 		getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-		// showDetails(mCurCheckPosition);
 	}
 
 	@Override

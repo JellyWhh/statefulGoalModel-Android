@@ -25,30 +25,24 @@ import android.widget.TextView;
  * 
  */
 public class MesFragment extends ListFragment {
-	
+
 	private SGMApplication application; // 获取应用程序，以得到里面的全局变量
 	private UserMessageAdapter adapter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
 		application = (SGMApplication) getActivity().getApplication();
-		
-		adapter = new UserMessageAdapter(getActivity(),
-				R.layout.listview_usermessage, application.getUserMessageList()
-				);
-
-		adapter.notifyDataSetChanged();
-
 	}
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 
+		adapter = new UserMessageAdapter(getActivity(),
+				R.layout.listview_usermessage, application.getUserMessageList());
+
 		setListAdapter(adapter);
-		adapter.notifyDataSetChanged();
 
 		getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 	}
@@ -74,7 +68,7 @@ class UserMessageAdapter extends ArrayAdapter<UserMessage> {
 		this.mResource = resource;
 		this.mObjects = objects;
 	}
-	
+
 	@Override
 	public int getCount() {
 		return this.mObjects.size();
@@ -104,7 +98,8 @@ class UserMessageAdapter extends ArrayAdapter<UserMessage> {
 			convertView = mInflater.inflate(resource, parent, false);
 
 			holder.time = (TextView) convertView.findViewById(R.id.tv_mes_time);
-			holder.content = (TextView) convertView.findViewById(R.id.tv_mes_content);
+			holder.content = (TextView) convertView
+					.findViewById(R.id.tv_mes_content);
 			holder.del = (Button) convertView.findViewById(R.id.bt_mes_del);
 
 			convertView.setTag(holder);
@@ -118,7 +113,7 @@ class UserMessageAdapter extends ArrayAdapter<UserMessage> {
 		holder.time.setText(usertask.getTime());
 		holder.content.setText(usertask.getContent());
 		holder.del.setOnClickListener(new OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
 				mObjects.remove(usertask);
@@ -128,7 +123,7 @@ class UserMessageAdapter extends ArrayAdapter<UserMessage> {
 
 		return convertView;
 	}
-	
+
 	class ViewHolder {
 		TextView time;
 		TextView content;

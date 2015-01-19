@@ -53,16 +53,14 @@ public class DownloadFragment extends ListFragment {
 
 		application = (SGMApplication) getActivity().getApplication();
 
-		adapter = new DownloadListAdapter(getActivity(),
-				R.layout.listview_download, application.getDownloadTaskList(),
-				application.getGoalModelManager());
-
 	}
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-
+		adapter = new DownloadListAdapter(getActivity(),
+				R.layout.listview_download, application.getDownloadTaskList(),
+				application.getGoalModelManager());
 		setListAdapter(adapter);
 
 		getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
@@ -149,36 +147,43 @@ class DownloadListAdapter extends ArrayAdapter<DownloadTask> {
 		// 下面部分不可缺少，是设置每个item具体显示的地方！
 		final DownloadTask downloadTask = getItem(position);
 		holder.text.setText(downloadTask.getName());
-		if (downloadTask.isDownload()) {
-			holder.icon.setImageResource(R.drawable.goal_download_image);
+		if (downloadTask.isAlreadyDownload() == true) {
+			holder.icon.setImageResource(R.drawable.goal_alreadydownload_image);
 			holder.icon.setClickable(false);
 		} else {
-			holder.icon.setImageResource(R.drawable.goal_nodownload_image);
+			holder.icon.setImageResource(R.drawable.goal_todownload_image);
 			// 还没有下载的要添加下载按钮的监听器，点击后下载
 			holder.icon.setClickable(true);
 			holder.icon.setOnClickListener(new OnClickListener() {
 
 				@Override
 				public void onClick(View v) {
-					ExecutorService executorService = Executors.newCachedThreadPool();
-					DownLoadGoalModelTask task = new DownLoadGoalModelTask(downloadTask);
-					Future<Integer> result=executorService.submit(task);
+					ExecutorService executorService = Executors
+							.newCachedThreadPool();
+					DownLoadGoalModelTask task = new DownLoadGoalModelTask(
+							downloadTask);
+					Future<Integer> result = executorService.submit(task);
 					try {
 						System.out.println("下载成功： " + result.get());
 					} catch (InterruptedException | ExecutionException e) {
 						e.printStackTrace();
 					}
+					// 把downloadTask标记为已下载
+					downloadTask.setAlreadyDownload(true);
+					notifyDataSetChanged();
+
 				}
 			});
 		}
 
 		return convertView;
 	}
-	
-	class DownLoadGoalModelTask implements Callable<Integer>{
-		
+
+	class DownLoadGoalModelTask implements Callable<Integer> {
+
 		private DownloadTask downloadTask;
-		private DownLoadGoalModelTask(DownloadTask downloadTask){
+
+		private DownLoadGoalModelTask(DownloadTask downloadTask) {
 			this.downloadTask = downloadTask;
 		}
 
@@ -187,7 +192,7 @@ class DownloadListAdapter extends ArrayAdapter<DownloadTask> {
 			downloadGoalModel(downloadTask);
 			return 1;
 		}
-		
+
 	}
 
 	/**
@@ -200,6 +205,7 @@ class DownloadListAdapter extends ArrayAdapter<DownloadTask> {
 		String sdCardDir = Environment.getExternalStorageDirectory().getPath()
 				+ "/sgm/fxml/";
 		try {
+			System.err.println("DownloadFragment--downloadGoalModel()--开始下载");
 			URL url = new URL(downloadTask.getUrl());
 			HttpURLConnection connection = (HttpURLConnection) url
 					.openConnection();
@@ -224,9 +230,6 @@ class DownloadListAdapter extends ArrayAdapter<DownloadTask> {
 						+ downloadTask.getName());
 				goalModelManager.addGoalModel(goalModel);
 
-				// 把downloadTask标记为已下载
-				downloadTask.setDownload(true);
-				notifyDataSetChanged();
 			} else {
 				System.err
 						.println("DownloadFragment--downloadGoalModel()--网络连接失败, Error Code: "

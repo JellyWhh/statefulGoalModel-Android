@@ -110,9 +110,9 @@ public class SGMApplication extends Application implements Serializable {
 				if (localFileList.containsKey(fileName)) { // 本地文件中有这个文件，说明这个是已经被下载的
 					System.out.println("SGMApplication--localFileList.containsKey():"
 							+ fileName);
-					downloadTask.setDownload(true);
+					downloadTask.setAlreadyDownload(true);
 				} else {
-					downloadTask.setDownload(false);
+					downloadTask.setAlreadyDownload(false);
 				}
 				this.downloadTaskList.add(downloadTask);
 			}

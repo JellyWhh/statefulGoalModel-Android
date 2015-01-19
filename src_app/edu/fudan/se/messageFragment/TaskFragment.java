@@ -7,12 +7,8 @@ import jade.core.MicroRuntime;
 import jade.wrapper.ControllerException;
 import jade.wrapper.StaleProxyException;
 
-import java.io.File;
-import java.io.IOException;
-import java.security.PublicKey;
 import java.util.List;
 
-import com.baidu.location.u;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -23,7 +19,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -38,13 +33,11 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import edu.fudan.se.R;
-import edu.fudan.se.R.layout;
 import edu.fudan.se.agent.AideAgentInterface;
 import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
 import edu.fudan.se.goalmachine.message.MesHeader_Mes2Manger;
 import edu.fudan.se.goalmachine.message.SGMMessage;
 import edu.fudan.se.goalmodel.EncodeDecodeRequestData;
-import edu.fudan.se.goalmodel.GoalModelActivity;
 import edu.fudan.se.goalmodel.RequestData;
 import edu.fudan.se.initial.SGMApplication;
 import edu.fudan.se.support.TakePictureActivity;
@@ -89,12 +82,6 @@ public class TaskFragment extends ListFragment {
 
 		progressDialog = onCreateProgressDialog();
 
-		adapter = new UserTaskAdapter(getActivity(),
-				R.layout.listview_usertask, application.getUserTaskList(),
-				aideAgentInterface, progressDialog);
-
-		adapter.notifyDataSetChanged();
-
 		// 设置接受agent发来的friends列表的receiver
 		MyFriendsReceiver receiver = new MyFriendsReceiver();
 		IntentFilter refreshChatFilter = new IntentFilter();
@@ -105,9 +92,11 @@ public class TaskFragment extends ListFragment {
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
+		adapter = new UserTaskAdapter(getActivity(),
+				R.layout.listview_usertask, application.getUserTaskList(),
+				aideAgentInterface, progressDialog);
 
 		setListAdapter(adapter);
-		adapter.notifyDataSetChanged();
 
 		getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 	}
@@ -576,7 +565,7 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 								.getElementName(), MesBody_Mes2Manager.EndTE));
 				userTask.setDone(true);
 				notifyDataSetChanged();
-				
+
 				dialog.cancel();
 			}
 		});

@@ -13,7 +13,10 @@ public class DownloadTask {
 
 	private String name;
 	private String url;
-	private boolean isDownload; // 是否已经被下载
+	/**
+	 * true表示已经被下载，显示对号；false表示还没有被下载，显示下载按钮
+	 */
+	private boolean isAlreadyDownload;
 
 	public DownloadTask(String name, String url) {
 		this.name = name;
@@ -36,12 +39,17 @@ public class DownloadTask {
 		this.url = url;
 	}
 
-	public boolean isDownload() {
-		return isDownload;
+	/**
+	 * 
+	 * @return true表示已经被下载，显示对号；false表示还没有被下载，显示下载按钮
+	 */
+	public boolean isAlreadyDownload() {
+		return isAlreadyDownload;
 	}
 
-	public void setDownload(boolean isDownload) {
-		this.isDownload = isDownload;
+	public void setAlreadyDownload(boolean isAlreadyDownload) {
+		this.isAlreadyDownload = isAlreadyDownload;
 	}
+
 
 }
