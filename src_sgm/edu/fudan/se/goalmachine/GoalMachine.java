@@ -13,6 +13,7 @@ import edu.fudan.se.goalmachine.message.MesHeader_Mes2Machine;
 import edu.fudan.se.goalmachine.message.MesHeader_Mes2Manger;
 import edu.fudan.se.goalmachine.message.SGMMessage;
 import edu.fudan.se.goalmachine.message.SGMMessage.MesBody;
+import edu.fudan.se.goalmachine.support.CauseToFailed;
 import edu.fudan.se.goalmachine.support.CauseToRepairing;
 import edu.fudan.se.goalmachine.support.RecordedState;
 import edu.fudan.se.log.Log;
@@ -34,7 +35,9 @@ public class GoalMachine extends ElementMachine {
 	private boolean isDelegated = false; // 任务是否是被委托的，也就是是否是别人委托给本机的，只有是root
 											// goal的时候需要设置
 	private String agentFrom; // 如果是别人委托过来的，需要设置委托来源
-	private String delegateGoalModelFrom;	//委托来源的goal model的名字，把结果发回去的时候需要找到原来的goal model
+	private String delegateGoalModelFrom; // 委托来源的goal
+											// model的名字，把结果发回去的时候需要找到原来的goal
+											// model
 
 	private boolean needDelegate; // 任务是否要委托出去，也就是委托给别人做，如果是，则它应该是没有subElements的
 
@@ -52,7 +55,7 @@ public class GoalMachine extends ElementMachine {
 	 *            当前目标的父目标，如果当前目标是root goal，这个值可以设置为null
 	 */
 	public GoalMachine(String name, int decomposition, int schedulerMethod,
-			ElementMachine parentGoal, int level,boolean needDelegate) {
+			ElementMachine parentGoal, int level, boolean needDelegate) {
 		super(name, parentGoal, level);
 		this.decomposition = decomposition;
 		this.schedulerMethod = schedulerMethod;
@@ -183,9 +186,9 @@ public class GoalMachine extends ElementMachine {
 			// 怎么知道委托给谁做，也就是receiver的设置
 			SGMMessage msgToManager = new SGMMessage(
 					MesHeader_Mes2Manger.ELEMENT_MESSAGE, null, this
-							.getGoalModel().getName(), this.getName(),
-					null, this.getName(),
-					this.getName(), MesBody_Mes2Manager.DelegateOut);
+							.getGoalModel().getName(), this.getName(), null,
+					this.getName(), this.getName(),
+					MesBody_Mes2Manager.DelegateOut);
 			sendMesToManager(msgToManager);
 
 		} else {
@@ -421,41 +424,17 @@ public class GoalMachine extends ElementMachine {
 		if (this.getSubElements() != null) {
 
 			for (ElementMachine element : this.getSubElements()) {
-				if (element.getContextCondition() == null) {
-					if (sendMessageToSub(element, MesBody_Mes2Machine.ACTIVATE)) { // 发送成功
-						Log.logDebug(this.getName(),
-								"activatedEntry_sendMesToAllSub_AND()",
-								"send \"ACTIVATE\" msg to " + element.getName()
-										+ " succeed!");
-					} else {
-						Log.logError(this.getName(),
-								"activatedEntry_sendMesToAllSub_AND()",
-								"send ACTIVATE msg to " + element.getName()
-										+ " error!");
-					}
+				// 给所有子目标发送激活消息
+				if (sendMessageToSub(element, MesBody_Mes2Machine.ACTIVATE)) { // 发送成功
+					Log.logDebug(this.getName(),
+							"activatedEntry_sendMesToAllSub_AND()",
+							"send \"ACTIVATE\" msg to " + element.getName()
+									+ " succeed!");
 				} else {
-					element.checkContextCondition();
-					if (element.getContextCondition().isSatisfied()) {
-						if (sendMessageToSub(element,
-								MesBody_Mes2Machine.ACTIVATE)) { // 发送成功
-							Log.logDebug(
-									this.getName(),
-									"activatedEntry_sendMesToAllSub_AND()",
-									"send \"ACTIVATE\" msg to "
-											+ element.getName() + " succeed!");
-						} else {
-							Log.logError(this.getName(),
-									"activatedEntry_sendMesToAllSub_AND()",
-									"send ACTIVATE msg to " + element.getName()
-											+ " error!");
-						}
-					} else {
-						// 只要不满足，就直接stop状态机，同时发送ACTIVATEDFAILED消息给父目标；如果自己是root
-						// goal，直接stop状态机，同时告诉agent通知用户激活失败
-						notifyParentActivatedFailed();
-						// 只要一个子目标不能激活，就跳出循环了，不再接着检查了
-						break;
-					}
+					Log.logError(this.getName(),
+							"activatedEntry_sendMesToAllSub_AND()",
+							"send ACTIVATE msg to " + element.getName()
+									+ " error!");
 				}
 
 			}
@@ -465,7 +444,7 @@ public class GoalMachine extends ElementMachine {
 					"getSubElements() == null");
 		}
 	}
-	
+
 	/**
 	 * OR分解</br> activated状态entry所做的action:给所有子目标发送激活消息，然后开始等待子目标的反馈
 	 */
@@ -480,62 +459,29 @@ public class GoalMachine extends ElementMachine {
 				// 找到下一个处于initial状态的subElement，给其发送activate消息，然后break，跳出循环
 				if (element.getRecordedState() == RecordedState.Initial) {
 
-					if (element.getContextCondition() == null) {
-						if (sendMessageToSub(element,
-								MesBody_Mes2Machine.ACTIVATE)) {
-							Log.logDebug(this.getName(),
-									"activatedEntryDo_sendMesToOneSub_OR()",
-									"send ACTIVATE msg to " + element.getName()
-											+ " succeed!");
-							isSendActivateMesToOneSubDone = true;
-							break;
-						} else {
-							Log.logError(this.getName(),
-									"activatedEntryDo_sendMesToOneSub_OR()",
-									"send ACTIVATE msg to " + element.getName()
-											+ " error!");
-						}
+					if (sendMessageToSub(element, MesBody_Mes2Machine.ACTIVATE)) {
+						Log.logDebug(this.getName(),
+								"activatedEntryDo_sendMesToOneSub_OR()",
+								"send ACTIVATE msg to " + element.getName()
+										+ " succeed!");
+						isSendActivateMesToOneSubDone = true;
+						break;
 					} else {
-						element.checkContextCondition();
-						// 如果上下文条件满足，就给它发送激活消息，然后跳出循环
-						if (element.getContextCondition().isSatisfied()) {
-							if (sendMessageToSub(element,
-									MesBody_Mes2Machine.ACTIVATE)) {
-								Log.logDebug(
-										this.getName(),
-										"activatedEntryDo_sendMesToOneSub_OR()",
-										"send ACTIVATE msg to "
-												+ element.getName()
-												+ " succeed!");
-								isSendActivateMesToOneSubDone = true;
-								break;
-							} else {
-								Log.logError(
-										this.getName(),
-										"activatedEntryDo_sendMesToOneSub_OR()",
-										"send ACTIVATE msg to "
-												+ element.getName() + " error!");
-							}
-						} else {
-							// 如果上下文条件不满足，就把它标记为激活失败，然后给下一个initial状态的发送激活消息
-							setSubElementRecordedState(element.getName(),
-									MesBody_Mes2Machine.ACTIVATEDFAILED);
-							failedCount++;
-						}
+						Log.logError(this.getName(),
+								"activatedEntryDo_sendMesToOneSub_OR()",
+								"send ACTIVATE msg to " + element.getName()
+										+ " error!");
 					}
-
 				} else {
-					failedCount++; // 如果不是激活状态，也代表失败了
+					failedCount++;
 				}
+
 			}
 
-			// 检查是不是所有的都激活失败了，如果是，就停止自己，然后告诉父目标自己失败；如果自己就是父目标，直接stop，然后告诉agent通知用户
+			// 检查是不是所有的都激活失败了，如果是，自己直接进入failed状态
 			if (failedCount == this.getSubElements().size()) {
-				if (isRepaired) {
-					notifyParentFailed(); // 如果是经过修复后又失败，直接告诉父目标Failed,而不是activatedFailed
-				} else {
-					notifyParentActivatedFailed();
-				}
+				this.setCurrentState(State.Failed);
+				this.setCauseToFailed(CauseToFailed.ActivatedFail);
 			}
 		} else {
 			Log.logError(this.getName(),
@@ -543,49 +489,6 @@ public class GoalMachine extends ElementMachine {
 					"getSubElements() == null.");
 		}
 	}
-
-	/**
-	 * 直接告诉父目标失败
-	 */
-	private void notifyParentFailed() {
-		if (this.getParentGoal() != null) { // 不是root goal
-			if (this.sendMessageToParent(MesBody_Mes2Machine.FAILED)) {
-				Log.logDebug(this.getName(), "notifyParentFailed()",
-						"send FAILED msg to parent.");
-			} else {
-				Log.logError(this.getName(), "notifyParentFailed()",
-						"send FAILED msg to parent error!");
-			}
-
-			this.setCurrentState(State.Stop);
-			this.stopMachine();
-		} else {// 是root goal
-			this.setCurrentState(State.Failed);
-		}
-	}
-
-	/**
-	 * 只要激活失败，就直接stop状态机，同时发送ACTIVATEDFAILED消息给父目标；如果自己是root
-	 * goal，直接stop状态机，同时告诉agent通知用户激活失败
-	 * 
-	 */
-	private void notifyParentActivatedFailed() {
-		if (this.getParentGoal() != null) { // 不是root goal
-			if (this.sendMessageToParent(MesBody_Mes2Machine.ACTIVATEDFAILED)) {
-				Log.logDebug(this.getName(), "notifyParentActivatedFailed()",
-						"send ACTIVATEDFAILED msg to parent.");
-			} else {
-				Log.logError(this.getName(), "notifyParentActivatedFailed()",
-						"send ACTIVATEDFAILED msg to parent error!");
-			}
-
-			this.setCurrentState(State.Stop);
-			this.stopMachine();
-		} else {// 是root goal
-			this.setCurrentState(State.Failed);
-		}
-	}
-
 
 	/**
 	 * AND分解</br>
@@ -612,12 +515,13 @@ public class GoalMachine extends ElementMachine {
 				this.getMsgPool().poll();
 				setSubElementRecordedState(msg.getSender().getElementName(),
 						(MesBody_Mes2Machine) msg.getBody());
-				// 只要收到了激活失败消息，就告诉父目标激活失败了,然后返回
-				notifyParentActivatedFailed();
+				// 只要收到了激活失败消息，自己就激活失败了
+				this.setCurrentState(State.Failed);
+				this.setCauseToFailed(CauseToFailed.ActivatedFail);
 				return;
 			}
 
-			// 只要得到了所有子目标的反馈，不管反馈的是什么，都可以告诉父目标可以进入下个步骤了
+			// 所有子目标都激活，可以进入下一步骤
 			int count = 0;
 			for (ElementMachine element : this.getSubElements()) {
 				if (element.getRecordedState() == RecordedState.Activated) { // 激活
@@ -691,12 +595,7 @@ public class GoalMachine extends ElementMachine {
 				setSubElementRecordedState(msg.getSender().getElementName(),
 						(MesBody_Mes2Machine) msg.getBody());
 
-				failedCount++;
-				// 检查是不是所有的都激活失败了，如果是，就停止自己，然后告诉父目标自己失败；如果自己就是父目标，直接stop，然后告诉agent通知用户
-				if (failedCount == this.getSubElements().size()) {
-					notifyParentActivatedFailed();
-				}
-
+				// 两个都设置成false，下次循环时会再次执行activatedEntryDo_sendMesToOneSub_OR();
 				isActivatedDo_waitingSubReplyDone = false;
 				isSendActivateMesToOneSubDone = false;
 			}
@@ -825,6 +724,11 @@ public class GoalMachine extends ElementMachine {
 			if (msg.getBody().equals(MesBody_Mes2Machine.ACHIEVEDDONE)) {
 				this.getMsgPool().poll();
 				this.setCurrentState(State.Achieved);
+			} else if (msg.getBody()
+					.equals(MesBody_Mes2Machine.ACTIVATEDFAILED)) {
+				this.getMsgPool().poll();
+				this.setCurrentState(State.Failed);
+				this.setCauseToFailed(CauseToFailed.ActivatedFail);
 			} else if (msg.getBody().equals(MesBody_Mes2Machine.FAILED)) {
 				this.getMsgPool().poll();
 				this.setCurrentState(State.Failed);
@@ -857,7 +761,9 @@ public class GoalMachine extends ElementMachine {
 				// 检查是否全部已完成
 				this.setCurrentState(State.ProgressChecking);
 
-			} else if (msg.getBody().equals(MesBody_Mes2Machine.FAILED)) {
+			} else if (msg.getBody().equals(MesBody_Mes2Machine.FAILED)
+					|| msg.getBody()
+							.equals(MesBody_Mes2Machine.ACTIVATEDFAILED)) {
 				this.getMsgPool().poll();
 				setSubElementRecordedState(msg.getSender().getElementName(),
 						(MesBody_Mes2Machine) msg.getBody());
@@ -895,7 +801,9 @@ public class GoalMachine extends ElementMachine {
 				// 检查是不是所有的都已完成
 				this.setCurrentState(State.ProgressChecking);
 
-			} else if (msg.getBody().equals(MesBody_Mes2Machine.FAILED)) {
+			} else if (msg.getBody().equals(MesBody_Mes2Machine.FAILED)
+					|| msg.getBody()
+							.equals(MesBody_Mes2Machine.ACTIVATEDFAILED)) {
 				this.getMsgPool().poll();
 				setSubElementRecordedState(msg.getSender().getElementName(),
 						(MesBody_Mes2Machine) msg.getBody());
@@ -929,7 +837,9 @@ public class GoalMachine extends ElementMachine {
 				setSubElementRecordedState(msg.getSender().getElementName(),
 						(MesBody_Mes2Machine) msg.getBody());
 				this.setCurrentState(State.ProgressChecking);
-			} else if (msg.getBody().equals(MesBody_Mes2Machine.FAILED)) {
+			} else if (msg.getBody().equals(MesBody_Mes2Machine.FAILED)
+					|| msg.getBody()
+							.equals(MesBody_Mes2Machine.ACTIVATEDFAILED)) {
 				this.getMsgPool().poll();
 				setSubElementRecordedState(msg.getSender().getElementName(),
 						(MesBody_Mes2Machine) msg.getBody());
@@ -951,10 +861,11 @@ public class GoalMachine extends ElementMachine {
 		this.setFinish(true);
 
 		if (this.getSubElements() != null) {
-			// 给所有subElements里面不是Failed状态或者Achieved状态，或者是没有记录RecordedState的目标发送STOP消息
+			// 给所有subElements里面不是Failed,ActivatedFailed状态或者Achieved状态，或者是没有记录RecordedState的目标发送STOP消息
 			for (ElementMachine element : this.getSubElements()) {
-				if ((element.getRecordedState() != RecordedState.Failed && element
-						.getRecordedState() != RecordedState.Achieved)
+				if ((element.getRecordedState() != RecordedState.Failed
+						&& element.getRecordedState() != RecordedState.Achieved && element
+						.getRecordedState() != RecordedState.ActivatedFailed)
 						|| element.getRecordedState() == null) {
 					if (sendMessageToSub(element, MesBody_Mes2Machine.STOP)) {
 						Log.logDebug(this.getName(), "stopMachine()",

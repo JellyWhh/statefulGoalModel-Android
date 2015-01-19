@@ -11,6 +11,7 @@ import edu.fudan.se.goalmachine.message.MesBody_Mes2Machine;
 import edu.fudan.se.goalmachine.message.MesHeader_Mes2Machine;
 import edu.fudan.se.goalmachine.message.SGMMessage;
 import edu.fudan.se.goalmachine.message.SGMMessage.MesBody;
+import edu.fudan.se.goalmachine.support.CauseToFailed;
 import edu.fudan.se.goalmachine.support.CauseToRepairing;
 import edu.fudan.se.goalmachine.support.RecordedState;
 import edu.fudan.se.goalmodel.GoalModel;
@@ -56,6 +57,7 @@ public class ElementMachine implements Runnable {
 	private Condition invariantCondition; // 整个shouldDo符合状态里都有可能不满足的，要一直检查
 
 	private CauseToRepairing causeToRepairing;
+	private CauseToFailed causeToFailed;
 
 	/* 标记各种状态的entry动作是否完成 */
 	boolean isInitialEntryDone = false;
@@ -251,8 +253,9 @@ public class ElementMachine implements Runnable {
 			// 收到消息后的行为处理
 			if (msg.getBody().equals(MesBody_Mes2Machine.ACTIVATE)) {
 				this.getMsgPool().poll();
-				this.setCurrentState(State.Activated);
-
+				// this.setCurrentState(State.Activated);
+				this.setCurrentState(this.transition(State.Initial,
+						this.getContextCondition()));
 			}
 		}
 	}
@@ -384,14 +387,38 @@ public class ElementMachine implements Runnable {
 	 */
 	public void failedEntry() {
 		Log.logDebug(this.getName(), "failedEntry()", "init.");
-		// 先告诉父目标自己进入executing状态了
+		// 告诉父目标自己failed
 		if (this.getParentGoal() != null) {
-			if (sendMessageToParent(MesBody_Mes2Machine.FAILED)) {
-				Log.logDebug(this.getName(), "failedEntry()",
-						"send FAILED msg to parent succeed!");
+			if (this.getCauseToFailed() == null) {
+				if (sendMessageToParent(MesBody_Mes2Machine.FAILED)) {
+					Log.logDebug(this.getName(), "failedEntry()",
+							"send FAILED msg to parent succeed!");
+				} else {
+					Log.logError(this.getName(), "failedEntry()",
+							"send FAILED msg to parent error!");
+				}
 			} else {
-				Log.logError(this.getName(), "failedEntry()",
-						"send FAILED msg to parent error!");
+				switch (this.getCauseToFailed()) {
+				case ActivatedFail:
+					if (sendMessageToParent(MesBody_Mes2Machine.ACTIVATEDFAILED)) {
+						Log.logDebug(this.getName(), "failedEntry()",
+								"send ACTIVATEDFAILED msg to parent succeed!");
+					} else {
+						Log.logError(this.getName(), "failedEntry()",
+								"send ACTIVATEDFAILED msg to parent error!");
+					}
+					break;
+
+				default:
+					if (sendMessageToParent(MesBody_Mes2Machine.FAILED)) {
+						Log.logDebug(this.getName(), "failedEntry()",
+								"send FAILED msg to parent succeed!");
+					} else {
+						Log.logError(this.getName(), "failedEntry()",
+								"send FAILED msg to parent error!");
+					}
+					break;
+				}
 			}
 		}
 	}
@@ -477,6 +504,24 @@ public class ElementMachine implements Runnable {
 		State ret = currentState;
 
 		switch (currentState) {
+
+		case Initial:
+			// 检查context condition
+			if (condition == null) {
+				ret = State.Activated;
+			} else {
+				if (condition.getType().equals("CONTEXT")) {
+					checkContextCondition();
+					if (condition.isSatisfied()) {
+						ret = State.Activated;
+					} else {
+						// context condition不满足，直接failed
+						ret = State.Failed;
+						this.setCauseToFailed(CauseToFailed.ActivatedFail);
+					}
+				}
+			}
+			break;
 
 		case Activated: // 1(activated)
 
@@ -918,6 +963,14 @@ public class ElementMachine implements Runnable {
 
 	public void setCauseToRepairing(CauseToRepairing causeToRepairing) {
 		this.causeToRepairing = causeToRepairing;
+	}
+
+	public CauseToFailed getCauseToFailed() {
+		return causeToFailed;
+	}
+
+	public void setCauseToFailed(CauseToFailed causeToFailed) {
+		this.causeToFailed = causeToFailed;
 	}
 
 	public GoalModel getGoalModel() {
