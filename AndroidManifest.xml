@@ -73,6 +73,11 @@
                 <action android:name="service.intentservice.takepicture" />
             </intent-filter>
         </service>
+        <service android:name="service.async.webservice.IntentServiceUserInput" >
+            <intent-filter>
+                <action android:name="service.intentservice.userinput" />
+            </intent-filter>
+        </service>
         <service android:name="edu.fudan.se.support.MobileLocatorService" >
             <intent-filter>
                 <action android:name="service.appservice.locator" />

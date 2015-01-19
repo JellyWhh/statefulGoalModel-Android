@@ -32,17 +32,20 @@ public class MainFragment extends Fragment {
 
 	private ViewPager mPager;
 	private ArrayList<Fragment> fragmentsList;
-	private LinearLayout ll_tab_home, ll_tab_mygoal, ll_tab_setting;
-	private ImageView iv_tab_home, iv_tab_mygoal, iv_tab_setting;
+	private LinearLayout ll_tab_message, ll_tab_mygoal, ll_tab_download,
+			ll_tab_setting;
+	private ImageView iv_tab_message, iv_tab_mygoal, iv_tab_download,
+			iv_tab_setting;
 
 	private ImageView iv_bottom_line;
 
-	public final static int num = 3;
+	public final static int num = 4;
 	private int currIndex;// 当前页卡编号
 	private int bmpW;// 横线图片宽度
 	private int offset;// 图片移动的偏移量
 
-	Fragment homeFragment, mygoalFragment, settingFragment;
+	Fragment messageFragment, mygoalFragment, downloadFragment,
+			settingFragment;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -57,18 +60,24 @@ public class MainFragment extends Fragment {
 				false);
 
 		// initTabLayout
-		ll_tab_home = (LinearLayout) rootView.findViewById(R.id.ll_tab_home);
+		ll_tab_message = (LinearLayout) rootView
+				.findViewById(R.id.ll_tab_message);
 		ll_tab_mygoal = (LinearLayout) rootView
 				.findViewById(R.id.ll_tab_mygoal);
+		ll_tab_download = (LinearLayout) rootView
+				.findViewById(R.id.ll_tab_download);
 		ll_tab_setting = (LinearLayout) rootView
 				.findViewById(R.id.ll_tab_setting);
 
-		ll_tab_home.setOnClickListener(new MyOnClickListener(0));
+		ll_tab_message.setOnClickListener(new MyOnClickListener(0));
 		ll_tab_mygoal.setOnClickListener(new MyOnClickListener(1));
-		ll_tab_setting.setOnClickListener(new MyOnClickListener(2));
+		ll_tab_download.setOnClickListener(new MyOnClickListener(2));
+		ll_tab_setting.setOnClickListener(new MyOnClickListener(3));
 
-		iv_tab_home = (ImageView) rootView.findViewById(R.id.iv_tab_home);
+		iv_tab_message = (ImageView) rootView.findViewById(R.id.iv_tab_message);
 		iv_tab_mygoal = (ImageView) rootView.findViewById(R.id.iv_tab_mygoal);
+		iv_tab_download = (ImageView) rootView
+				.findViewById(R.id.iv_tab_download);
 		iv_tab_setting = (ImageView) rootView.findViewById(R.id.iv_tab_setting);
 
 		initWidth(rootView);
@@ -110,12 +119,14 @@ public class MainFragment extends Fragment {
 		mPager = (ViewPager) parentView.findViewById(R.id.vp_main);
 		fragmentsList = new ArrayList<Fragment>();
 
-		homeFragment = new MessageFragment();
+		messageFragment = new MessageFragment();
 		mygoalFragment = new MyGoalFragment();
+		downloadFragment = new DownloadFragment();
 		settingFragment = new SettingFragment();
 
-		fragmentsList.add(homeFragment);
+		fragmentsList.add(messageFragment);
 		fragmentsList.add(mygoalFragment);
+		fragmentsList.add(downloadFragment);
 		fragmentsList.add(settingFragment);
 
 		mPager.setAdapter(new MyFragmentPagerAdapter(getChildFragmentManager(),
@@ -168,36 +179,67 @@ public class MainFragment extends Fragment {
 			// 设置按钮的显示
 			switch (arg0) {
 			case 0:
-				ll_tab_home.setBackgroundResource(R.drawable.home_btn_bg);
+				ll_tab_message.setBackgroundResource(R.drawable.home_btn_bg);
 				ll_tab_mygoal
+						.setBackgroundResource(R.drawable.maintab_toolbar_bg);
+				ll_tab_download
 						.setBackgroundResource(R.drawable.maintab_toolbar_bg);
 				ll_tab_setting
 						.setBackgroundResource(R.drawable.maintab_toolbar_bg);
-				iv_tab_home.setBackgroundResource(R.drawable.icon_home_sel);
+				iv_tab_message
+						.setBackgroundResource(R.drawable.icon_message_sel);
 				iv_tab_mygoal.setBackgroundResource(R.drawable.icon_mygoal_nor);
+				iv_tab_download
+						.setBackgroundResource(R.drawable.icon_download_nor);
 				iv_tab_setting
 						.setBackgroundResource(R.drawable.icon_setting_nor);
 				break;
 
 			case 1:
-				ll_tab_home
+				ll_tab_message
 						.setBackgroundResource(R.drawable.maintab_toolbar_bg);
 				ll_tab_mygoal.setBackgroundResource(R.drawable.home_btn_bg);
+				ll_tab_download
+						.setBackgroundResource(R.drawable.maintab_toolbar_bg);
 				ll_tab_setting
 						.setBackgroundResource(R.drawable.maintab_toolbar_bg);
-				iv_tab_home.setBackgroundResource(R.drawable.icon_home_nor);
+				iv_tab_message
+						.setBackgroundResource(R.drawable.icon_message_nor);
 				iv_tab_mygoal.setBackgroundResource(R.drawable.icon_mygoal_sel);
+				iv_tab_download
+						.setBackgroundResource(R.drawable.icon_download_nor);
 				iv_tab_setting
 						.setBackgroundResource(R.drawable.icon_setting_nor);
 				break;
 			case 2:
-				ll_tab_home
+				ll_tab_message
 						.setBackgroundResource(R.drawable.maintab_toolbar_bg);
 				ll_tab_mygoal
 						.setBackgroundResource(R.drawable.maintab_toolbar_bg);
-				ll_tab_setting.setBackgroundResource(R.drawable.home_btn_bg);
-				iv_tab_home.setBackgroundResource(R.drawable.icon_home_nor);
+				ll_tab_download.setBackgroundResource(R.drawable.home_btn_bg);
+				ll_tab_setting
+						.setBackgroundResource(R.drawable.maintab_toolbar_bg);
+				iv_tab_message
+						.setBackgroundResource(R.drawable.icon_message_nor);
 				iv_tab_mygoal.setBackgroundResource(R.drawable.icon_mygoal_nor);
+				iv_tab_download
+						.setBackgroundResource(R.drawable.icon_download_sel);
+				iv_tab_setting
+						.setBackgroundResource(R.drawable.icon_setting_nor);
+				break;
+			case 3:
+				ll_tab_message
+						.setBackgroundResource(R.drawable.maintab_toolbar_bg);
+				ll_tab_mygoal
+						.setBackgroundResource(R.drawable.maintab_toolbar_bg);
+				ll_tab_download
+						.setBackgroundResource(R.drawable.maintab_toolbar_bg);
+				ll_tab_setting.setBackgroundResource(R.drawable.home_btn_bg);
+				iv_tab_message
+						.setBackgroundResource(R.drawable.icon_message_nor);
+				iv_tab_mygoal.setBackgroundResource(R.drawable.icon_mygoal_nor);
+				iv_tab_download
+						.setBackgroundResource(R.drawable.icon_download_nor);
 				iv_tab_setting
 						.setBackgroundResource(R.drawable.icon_setting_sel);
 				break;
@@ -244,21 +286,11 @@ public class MainFragment extends Fragment {
 			this.fragmentsList = fragments;
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see android.support.v4.app.FragmentPagerAdapter#getItem(int)
-		 */
 		@Override
 		public Fragment getItem(int arg0) {
 			return fragmentsList.get(arg0);
 		}
 
-		/*
-		 * (non-Javadoc)
-		 * 
-		 * @see android.support.v4.view.PagerAdapter#getCount()
-		 */
 		@Override
 		public int getCount() {
 			return fragmentsList.size();

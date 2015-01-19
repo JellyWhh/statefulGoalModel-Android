@@ -9,7 +9,10 @@ import jade.wrapper.StaleProxyException;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.PublicKey;
 import java.util.List;
+
+import com.baidu.location.u;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -29,11 +32,13 @@ import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import edu.fudan.se.R;
+import edu.fudan.se.R.layout;
 import edu.fudan.se.agent.AideAgentInterface;
 import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
 import edu.fudan.se.goalmachine.message.MesHeader_Mes2Manger;
@@ -44,6 +49,7 @@ import edu.fudan.se.goalmodel.RequestData;
 import edu.fudan.se.initial.SGMApplication;
 import edu.fudan.se.support.TakePictureActivity;
 import edu.fudan.se.userMes.UserDelegateOutTask;
+import edu.fudan.se.userMes.UserInputTextTask;
 import edu.fudan.se.userMes.UserShowContentTask;
 import edu.fudan.se.userMes.UserTakePictureTask;
 import edu.fudan.se.userMes.UserTask;
@@ -329,111 +335,20 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 		holder.time.setText(usertask.getTime());
 		String description = "";
 
+		holder.done.setOnClickListener(new UserTaskDoneListener(usertask));
+		holder.quit.setOnClickListener(new UserTaskQuitListener(usertask));
+
 		if (usertask instanceof UserDelegateOutTask) { // 如果是需要用户选择委托去向的任务
 			holder.done.setText("Friends");
-			holder.done.setOnClickListener(new OnClickListener() {
-
-				@Override
-				public void onClick(View v) {
-					// 调用agent从platform上搜索可委托对象
-					aideAgentInterface.obtainFriends(usertask);
-
-					// 把进度条对话框显示出来
-					progressDialog.show();
-
-				}
-			});
-
-			holder.quit.setOnClickListener(new OnClickListener() {
-
-				@Override
-				public void onClick(View v) {
-					aideAgentInterface.sendMesToManager(new SGMMessage(
-							MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
-							null, null, null, usertask.getGoalModelName(),
-							usertask.getElementName(),
-							MesBody_Mes2Manager.QuitGM));
-					usertask.setDone(true);
-					notifyDataSetChanged();
-				}
-			});
-
 			description += "You need to choose a friend to help you complete the goal:\n";
-
-		} else {
-			if (usertask instanceof UserShowContentTask) { // 展示内容的user task
-				holder.done.setText("show");
-				// 弹出一个对话框显示某些内容
-				holder.done.setOnClickListener(new OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-						showContentDialog(((UserShowContentTask) usertask)
-								.getRequestData());
-						// 只要点击了show按钮就表示这个“展示任务”完成了
-						aideAgentInterface.sendMesToManager(new SGMMessage(
-								MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
-								null, null, null, usertask.getGoalModelName(),
-								usertask.getElementName(),
-								MesBody_Mes2Manager.EndTE));
-						usertask.setDone(true);
-						notifyDataSetChanged();
-					}
-				});
-
-			} else if (usertask instanceof UserTakePictureTask) { // 要用户拍照的user
-																	// task
-				holder.done.setText("camera");
-				// 跳转到CameraActivity
-				holder.done.setOnClickListener(new OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-						usertask.setDone(true);
-						notifyDataSetChanged();
-
-						Intent intent = new Intent();
-						intent.setClass(mContext, TakePictureActivity.class);
-						intent.putExtra("goalmodelname",
-								usertask.getGoalModelName());
-						intent.putExtra("elementname",
-								usertask.getElementName());
-						mContext.startActivity(intent);
-					}
-				});
-
-			} else {// 普通的user task
-				holder.done.setOnClickListener(new OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-						aideAgentInterface.sendMesToManager(new SGMMessage(
-								MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
-								null, null, null, usertask.getGoalModelName(),
-								usertask.getElementName(),
-								MesBody_Mes2Manager.EndTE));
-						usertask.setDone(true);
-						notifyDataSetChanged();
-					}
-				});
-
-				description += "You need to do:\n";
-			}
-
-			holder.quit.setOnClickListener(new OnClickListener() {
-
-				@Override
-				public void onClick(View v) {
-					aideAgentInterface.sendMesToManager(new SGMMessage(
-							MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
-							null, null, null, usertask.getGoalModelName(),
-							usertask.getElementName(),
-							MesBody_Mes2Manager.QuitTE));
-					usertask.setDone(true);
-					notifyDataSetChanged();
-				}
-			});
-
+		} else if (usertask instanceof UserShowContentTask) {// 展示内容的user task
+			holder.done.setText("show");
+		} else if (usertask instanceof UserTakePictureTask) {// 让用户拍照的task
+			holder.done.setText("camera");
+		} else if (usertask instanceof UserInputTextTask) {// 让用户输入一段文本的task
+			holder.done.setText("input");
+		} else {// 普通的user task
+			description += "You need to do:\n";
 		}
 
 		// 必须把setClickable放在setOnClickListener后面，否则不起作用
@@ -456,6 +371,9 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 			} else if (usertask instanceof UserTakePictureTask) {
 				holder.taskLayout.setBackgroundColor(mContext.getResources()
 						.getColor(R.color.nodone_purple));
+			} else if (usertask instanceof UserInputTextTask) {
+				holder.taskLayout.setBackgroundColor(mContext.getResources()
+						.getColor(R.color.nodone_yellow));
 			} else {
 				holder.taskLayout.setBackgroundColor(mContext.getResources()
 						.getColor(R.color.nodone_white));
@@ -481,12 +399,154 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 	}
 
 	/**
+	 * 用户点击done按钮时的监听器，根据不同的UserTask类型有不同的响应
+	 * 
+	 * @author whh
+	 * 
+	 */
+	private class UserTaskDoneListener implements OnClickListener {
+		private UserTask userTask;
+
+		public UserTaskDoneListener(UserTask userTask) {
+			this.userTask = userTask;
+		}
+
+		@Override
+		public void onClick(View v) {
+			// 让用户输入文本的task
+			if (userTask instanceof UserInputTextTask) {
+				showInputTextDialog(userTask);
+			}
+			// 是需要用户选择委托去向的任务
+			else if (userTask instanceof UserDelegateOutTask) {
+				// 调用agent从platform上搜索可委托对象
+				aideAgentInterface.obtainFriends(userTask);
+				// 把进度条对话框显示出来
+				progressDialog.show();
+			}
+			// 展示内容的user task
+			else if (userTask instanceof UserShowContentTask) {
+				showContentDialog(userTask);
+			}
+			// 让用户拍照的task
+			else if (userTask instanceof UserTakePictureTask) {
+				userTask.setDone(true);
+				notifyDataSetChanged();
+
+				Intent intent = new Intent();
+				intent.setClass(mContext, TakePictureActivity.class);
+				intent.putExtra("goalmodelname", userTask.getGoalModelName());
+				intent.putExtra("elementname", userTask.getElementName());
+				mContext.startActivity(intent);
+			}
+			// 普通的user task
+			else {
+				aideAgentInterface.sendMesToManager(new SGMMessage(
+						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null,
+						null, null, userTask.getGoalModelName(), userTask
+								.getElementName(), MesBody_Mes2Manager.EndTE));
+				userTask.setDone(true);
+				notifyDataSetChanged();
+			}
+		}
+
+	}
+
+	/**
+	 * 用户点击quit按钮时的监听器，只有委托出去的任务是结束一个goal machine，其余都是结束一个task machine
+	 * 
+	 * @author whh
+	 * 
+	 */
+	private class UserTaskQuitListener implements OnClickListener {
+		private UserTask userTask;
+
+		public UserTaskQuitListener(UserTask userTask) {
+			this.userTask = userTask;
+		}
+
+		@Override
+		public void onClick(View v) {
+			if (userTask instanceof UserDelegateOutTask) { // 如果是需要用户选择委托去向的任务
+				aideAgentInterface.sendMesToManager(new SGMMessage(
+						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null,
+						null, null, userTask.getGoalModelName(), userTask
+								.getElementName(), MesBody_Mes2Manager.QuitGM));
+
+			} else {
+				aideAgentInterface.sendMesToManager(new SGMMessage(
+						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null,
+						null, null, userTask.getGoalModelName(), userTask
+								.getElementName(), MesBody_Mes2Manager.QuitTE));
+			}
+			userTask.setDone(true);
+			notifyDataSetChanged();
+		}
+
+	}
+
+	private class ViewHolder {
+		LinearLayout taskLayout;
+		TextView time;
+		TextView description;
+		Button done;
+		Button quit;
+	}
+
+	/**
+	 * 让用户输入文本的task
+	 * 
+	 * @param userTask
+	 *            UserInputTextTask
+	 */
+	private void showInputTextDialog(final UserTask userTask) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+		builder.setTitle("Input:");
+
+		View view = LayoutInflater.from(mContext).inflate(
+				R.layout.dialog_userinput, null);
+		final EditText editText = (EditText) view
+				.findViewById(R.id.et_userinput);
+
+		builder.setView(view);
+		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				String userInput = editText.getText().toString();
+
+				SGMMessage msg = new SGMMessage(
+						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null,
+						null, null, userTask.getGoalModelName(), userTask
+								.getElementName(),
+						MesBody_Mes2Manager.ServiceExecutingDone);
+				RequestData requestData = new RequestData("Text");
+				requestData.setContent(userInput.getBytes());
+				msg.setContent(requestData);
+
+				aideAgentInterface.sendMesToManager(msg);
+
+				userTask.setDone(true);
+				notifyDataSetChanged();
+
+				dialog.cancel();
+			}
+
+		});
+
+		AlertDialog dialog = builder.create();
+		dialog.show();
+	}
+
+	/**
 	 * 创建一个显示RequestData的对话框，显示的可以是Text或者Image
 	 * 
 	 * @param requestData
 	 *            要显示的requestData
 	 */
-	private void showContentDialog(RequestData requestData) {
+	private void showContentDialog(final UserTask userTask) {
+
+		RequestData requestData = userTask.getRequestData();
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
 		builder.setTitle("Content:");
@@ -508,20 +568,21 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
+
+				// 只要点击了show按钮就表示这个“展示任务”完成了
+				aideAgentInterface.sendMesToManager(new SGMMessage(
+						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null,
+						null, null, userTask.getGoalModelName(), userTask
+								.getElementName(), MesBody_Mes2Manager.EndTE));
+				userTask.setDone(true);
+				notifyDataSetChanged();
+				
 				dialog.cancel();
 			}
 		});
 
 		AlertDialog dialog = builder.create();
 		dialog.show();
-	}
-
-	private class ViewHolder {
-		LinearLayout taskLayout;
-		TextView time;
-		TextView description;
-		Button done;
-		Button quit;
 	}
 
 }

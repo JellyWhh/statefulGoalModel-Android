@@ -118,7 +118,6 @@ class MyGoalListAdapter<T> extends ArrayAdapter<T> {
 		return createViewFromResource(position, convertView, parent, mResource);
 	}
 
-	@SuppressWarnings("unchecked")
 	private View createViewFromResource(int position, View convertView,
 			ViewGroup parent, int resource) {
 		ViewHolder holder;

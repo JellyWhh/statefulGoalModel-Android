@@ -6,13 +6,24 @@ package edu.fudan.se.initial;
 import jade.util.Logger;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 
 import edu.fudan.se.goalmodel.GmXMLParser;
 import edu.fudan.se.goalmodel.GoalModel;
 import edu.fudan.se.goalmodel.GoalModelManager;
+import edu.fudan.se.support.DownloadTask;
 import edu.fudan.se.userMes.UserMessage;
 import edu.fudan.se.userMes.UserTask;
 
@@ -34,6 +45,7 @@ public class SGMApplication extends Application implements Serializable {
 
 	private ArrayList<UserTask> userTaskList;
 	private ArrayList<UserMessage> userMessageList;
+	private ArrayList<DownloadTask> downloadTaskList;
 
 	private String agentNickname;
 
@@ -56,36 +68,136 @@ public class SGMApplication extends Application implements Serializable {
 	private void initialData() {
 		this.userTaskList = new ArrayList<>();
 		this.userMessageList = new ArrayList<>();
-
-		GmXMLParser gmXMLParser = new GmXMLParser();
-		File sdCardDir = Environment.getExternalStorageDirectory();
-		// 得到一个路径，内容是sdcard的文件夹路径和APP自身名字
-		String mygoalDir1 = sdCardDir.getPath() + "/sgm/fxml/mygoal.xml";
-		String needdelegatebobDir2 = sdCardDir.getPath()
-				+ "/sgm/fxml/needdelegatebob.xml";
-		String bobDir3 = sdCardDir.getPath() + "/sgm/fxml/bob.xml";
-		String testDir4 = sdCardDir.getPath() + "/sgm/fxml/test.xml";
-		String takePicDir4 = sdCardDir.getPath() + "/sgm/fxml/takepicture.xml";
-		GoalModel mygoal = gmXMLParser.newGoalModel(mygoalDir1);
-		GoalModel needdelegatebob = gmXMLParser
-				.newGoalModel(needdelegatebobDir2);
-		GoalModel bob = gmXMLParser.newGoalModel(bobDir3);
-		GoalModel test = gmXMLParser.newGoalModel(testDir4);
-		GoalModel takepicture = gmXMLParser.newGoalModel(takePicDir4);
-		// GoalModel testGM = newTestGoalModel(); // 一个完全本地没有委托的
+		this.downloadTaskList = new ArrayList<>();
 
 		goalModelManager = new GoalModelManager();
-		goalModelManager.addGoalModel(mygoal);
-		goalModelManager.addGoalModel(needdelegatebob);
-		goalModelManager.addGoalModel(bob);
-		goalModelManager.addGoalModel(test);
-		goalModelManager.addGoalModel(takepicture);
+		GmXMLParser gmXMLParser = new GmXMLParser();
+
+		/* 先读取本地sdCard上sgm/fxml目录下的文件，这里存储的是已经下载的goal model xml文件，如果有，直接解析 */
+		String sdCardDir = Environment.getExternalStorageDirectory().getPath()
+				+ "/sgm/fxml/";
+		File file = new File(sdCardDir);
+		HashMap<String, String> localFileList = new HashMap<String, String>();
+		getLocalFileList(file, localFileList);
+
+		if (!localFileList.isEmpty()) {
+			for (String filePath : localFileList.values()) {
+				GoalModel goalModel = gmXMLParser.newGoalModel(filePath);
+				goalModelManager.addGoalModel(goalModel);
+			}
+		}
+
+		/*
+		 * 读取服务器上的goal model xml文件列表，添加DownloadTask
+		 * 由于不能在主线程中直接进行网络连接，所以另外开一个线程连接网络
+		 */
+		ExecutorService executor = Executors.newCachedThreadPool();
+		GetServerFileListTask getServerFileListTask = new GetServerFileListTask();
+		Future<HashMap<String, String>> result = executor
+				.submit(getServerFileListTask);
+
+		// HashMap<String, String> serverFileList = getServerFileList();
+		HashMap<String, String> serverFileList = new HashMap<String, String>();
+		try {
+			serverFileList = result.get();
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+		}
+		if (!serverFileList.isEmpty()) {
+			for (String fileName : serverFileList.keySet()) {
+				DownloadTask downloadTask = new DownloadTask(fileName,
+						serverFileList.get(fileName));
+				if (localFileList.containsKey(fileName)) { // 本地文件中有这个文件，说明这个是已经被下载的
+					System.out.println("SGMApplication--localFileList.containsKey():"
+							+ fileName);
+					downloadTask.setDownload(true);
+				} else {
+					downloadTask.setDownload(false);
+				}
+				this.downloadTaskList.add(downloadTask);
+			}
+		}
+
 		Thread gmm = new Thread(goalModelManager);
 		gmm.start();
 
-		// this.goalModelController = new
-		// GoalModelController(this.goalModelList);
+	}
 
+	/**
+	 * 迭代函数，读取文件夹中的文件列表，把文件名和文件绝对路径储存在一个HashMap中
+	 * 
+	 * @param path
+	 *            文件夹路径
+	 * @param localFileList
+	 *            储存着文件名和文件绝对路径的HashMap
+	 */
+	private void getLocalFileList(File path,
+			HashMap<String, String> localFileList) {
+		// 如果是文件夹
+		if (path.isDirectory()) {
+			// 返回文件夹中有的数据
+			File[] files = path.listFiles();
+			// 先判断下有没有权限，如果没有权限的话，就不执行了
+			if (files == null) {
+				return;
+			}
+			for (int i = 0; i < files.length; i++) {
+				getLocalFileList(files[i], localFileList);
+			}
+		} else {// 如果是文件的话直接加入
+			String filePath = path.getAbsolutePath();
+			// 文件名
+			String fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
+			localFileList.put(fileName, filePath);
+		}
+	}
+
+	class GetServerFileListTask implements Callable<HashMap<String, String>> {
+
+		@Override
+		public HashMap<String, String> call() throws Exception {
+			return getServerFileList();
+		}
+
+	}
+
+	/**
+	 * 从服务器端获取goal model xml列表
+	 * 
+	 * @return 储存着文件名和文件下载链接的HashMap
+	 */
+	private HashMap<String, String> getServerFileList() {
+		HashMap<String, String> serverFileList = new HashMap<String, String>();
+		try {
+			URL url = new URL(
+					"http://10.131.252.246:8080/sgmfiles/filelist.txt");
+			HttpURLConnection connection = (HttpURLConnection) url
+					.openConnection();
+			connection.setRequestMethod("GET");
+			connection.setConnectTimeout(5000);// 超时时间为5s
+			if (connection.getResponseCode() == 200) {
+				InputStream inputStream = connection.getInputStream();
+				byte[] buffer = new byte[1024];
+				inputStream.read(buffer);
+				String[] filenames = new String(buffer).split(",");
+				for (int i = 0; i < filenames.length - 1; i++) {
+					System.out.println("SGMApplication---"+filenames[i] + ".xml");
+					serverFileList.put(filenames[i] + ".xml",
+							"http://10.131.252.246:8080/sgmfiles/xml/"
+									+ filenames[i] + ".xml");
+				}
+				inputStream.close();
+			} else {
+				System.err
+						.println("SGMApplication--getServerFileList()--网络连接失败, Error Code: "
+								+ connection.getResponseCode());
+			}
+		} catch (IOException e) {
+			System.err
+					.println("SGMApplication--getServerFileList()--IOException");
+			e.printStackTrace();
+		}
+		return serverFileList;
 	}
 
 	/**
@@ -148,75 +260,8 @@ public class SGMApplication extends Application implements Serializable {
 		this.location = location;
 	}
 
-	// private GoalModel newTestGoalModel() {
-	//
-	// Hashtable<String, IContext> contextHashtable = new Hashtable<>();
-	// contextHashtable.put("Temperature", new CTemperature());
-	// contextHashtable.put("Weather", new CWeather());
-	// contextHashtable.put("Time", new CTime());
-	//
-	// GoalModel goalModel = new GoalModel("my goal model test");
-	//
-	// GoalMachine myGoal = new GoalMachine("my goal model test", 0, 1, null,
-	// 0, false);
-	//
-	// GoalMachine alice = new GoalMachine("alice", 0, 0, myGoal, 1, false);
-	// GoalMachine bob = new GoalMachine("bob", 1, -1, myGoal, 1, false);
-	//
-	// Condition postCondition1 = new Condition("POST", "Int", "Temperature",
-	// ">", "0");
-	// postCondition1.setContextHashtable(contextHashtable);
-	//
-	// TaskMachine aliceChild_1 = new TaskMachine("aliceChild_1", alice, 2,
-	// false);
-	// aliceChild_1.setPostCondition(postCondition1);
-	//
-	// aliceChild_1.setExecutingRequestedServiceName("service.intentservice.weather");
-	//
-	// TaskMachine aliceChild_2 = new TaskMachine("aliceChild_2", alice, 2,
-	// true);
-	//
-	// TaskMachine bobChild_1 = new TaskMachine("bobChild_1", bob, 2, true);
-	//
-	// TaskMachine bobChild_2 = new TaskMachine("bobChild_2", bob, 2, true);
-	// TaskMachine bobChild_3 = new TaskMachine("bobChild_3", bob, 2, true);
-	//
-	// Condition contextCondition = new Condition("CONTEXT", "Int",
-	// "Temperature", "<", "0");
-	// contextCondition.setContextHashtable(contextHashtable);
-	//
-	// bobChild_1.setContextCondition(contextCondition);
-	//
-	// bobChild_2.setWaitingTimeLimit(5);// 5s
-	//
-	// Condition postCondition = new Condition("POST", "Int", "Temperature",
-	// "<", "0");
-	// postCondition.setContextHashtable(contextHashtable);
-	// bobChild_3.setPostCondition(postCondition);
-	//
-	// myGoal.addSubElement(alice, 1);
-	// myGoal.addSubElement(bob, 1);
-	//
-	// alice.addSubElement(aliceChild_1, 1);
-	// alice.addSubElement(aliceChild_2, 1);
-	//
-	// bob.addSubElement(bobChild_1, 1);
-	// bob.addSubElement(bobChild_2, 2);
-	// bob.addSubElement(bobChild_3, 3);
-	//
-	// goalModel.setDescription("This is the description of the goal model!");
-	// goalModel.setRootGoal(myGoal);
-	// goalModel.addElementMachine(myGoal);
-	// goalModel.addElementMachine(alice);
-	// goalModel.addElementMachine(aliceChild_1);
-	// goalModel.addElementMachine(aliceChild_2);
-	// goalModel.addElementMachine(bob);
-	// goalModel.addElementMachine(bobChild_1);
-	// goalModel.addElementMachine(bobChild_2);
-	// goalModel.addElementMachine(bobChild_3);
-	//
-	// return goalModel;
-	//
-	// }
+	public ArrayList<DownloadTask> getDownloadTaskList() {
+		return downloadTaskList;
+	}
 
 }

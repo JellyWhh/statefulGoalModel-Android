@@ -26,6 +26,8 @@ import edu.fudan.se.goalmachine.GoalMachine;
 import edu.fudan.se.goalmachine.TaskMachine;
 
 /**
+ * 解析表示一个goal model的xml文件，返回一个<code>GoalModel</code>
+ * 
  * @author whh
  * 
  */
@@ -33,10 +35,27 @@ public class GmXMLParser {
 
 	Hashtable<String, IContext> contextHashtable = new Hashtable<>();
 
+	ArrayList<String> allIntentServiceNameArrayList = new ArrayList<>();
+
 	public GmXMLParser() {
+		// 初始化条件检查时可能用到的上下文
 		this.contextHashtable.put("Temperature", new CTemperature());
 		this.contextHashtable.put("Weather", new CWeather());
 		this.contextHashtable.put("Time", new CTime());
+
+		// 初始化所有可能用到的intent service
+		this.allIntentServiceNameArrayList.add("service.intentservice.weather");
+		this.allIntentServiceNameArrayList
+				.add("service.intentservice.setcityname");
+		this.allIntentServiceNameArrayList
+				.add("service.intentservice.readimage");
+		this.allIntentServiceNameArrayList
+				.add("service.intentservice.showcontent");
+		this.allIntentServiceNameArrayList
+				.add("service.intentservice.takepicture");
+		this.allIntentServiceNameArrayList
+				.add("service.intentservice.userinput");
+
 	}
 
 	public GoalModel newGoalModel(String filename) {
@@ -164,8 +183,10 @@ public class GmXMLParser {
 													.getTextContent());
 									break;
 								case "executingRequestedServiceName":
-									executingRequestedServiceName = propertyNode
-											.getTextContent();
+									// 要把xml中的短的service name映射成完成的服务地址
+									executingRequestedServiceName = bindRequestServiceToIntentService(
+											propertyNode.getTextContent(),
+											allIntentServiceNameArrayList);
 									break;
 
 								case "waitingTimeLimit":
@@ -364,7 +385,7 @@ public class GmXMLParser {
 								switch (emNode.getAttributes().item(j)
 										.getNodeName()) {
 								case "name":
-									name =emNode.getAttributes().item(j)
+									name = emNode.getAttributes().item(j)
 											.getNodeValue();
 									break;
 								case "from":
@@ -378,14 +399,16 @@ public class GmXMLParser {
 									break;
 
 								case "contentType":
-									contentType = emNode.getAttributes().item(j)
-									.getNodeValue();
-								
+									contentType = emNode.getAttributes()
+											.item(j).getNodeValue();
+
 								}
 							}
 						}
-						RequestData requestData = new RequestData(name, contentType);
-						goalModel.getAssignmentHashtable().put(from, requestData);
+						RequestData requestData = new RequestData(name,
+								contentType);
+						goalModel.getAssignmentHashtable().put(from,
+								requestData);
 						goalModel.getParameterHashtable().put(to, from);
 					}
 
@@ -430,6 +453,27 @@ public class GmXMLParser {
 		}
 
 		return em;
+	}
+
+	/**
+	 * 把xml文件中需要的服务，绑定到我们实现的具体的intent service，采用字符串匹配的方法
+	 * 
+	 * @param requestServiceName
+	 *            xml文件中需要的服务的描述
+	 * @param intentServiceNames
+	 *            所有的已经实现的intent service的名字
+	 * @return 对应的已经实现的intent service的名字
+	 */
+	private String bindRequestServiceToIntentService(String requestServiceName,
+			ArrayList<String> intentServiceNames) {
+		String ret = "";
+		for (String intentService : intentServiceNames) {
+			if (intentService.contains(requestServiceName)) {
+				ret = intentService;
+				break;
+			}
+		}
+		return ret;
 	}
 
 }
