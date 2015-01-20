@@ -18,7 +18,7 @@ public class Condition {
 
 	private String type; // 条件类型，具体有CONTEXT,PRE,POST,COMMITMENT,INVARIANT
 	private boolean satisfied = true; // 条件是否被满足，true为被满足
-	private boolean canRepairing; // 标志这个条件是否可通过主动做一些事来修复，使之满足，只针对PreCondition
+	private boolean waitable; // 这个条件是否可以通过等待，重新改变是否满足的状态，只有pre condition需要设置
 
 	private String valueType;
 	private String leftValueDes;
@@ -37,13 +37,13 @@ public class Condition {
 	}
 
 	public Condition(String type, String valueType, String leftValueDes,
-			String operator, String rightValue, boolean canRepairing) {
+			String operator, String rightValue, boolean waitable) {
 		this.type = type;
 		this.valueType = valueType;
 		this.leftValueDes = leftValueDes;
 		this.operator = operator;
 		this.rightValue = rightValue;
-		this.canRepairing = canRepairing;
+		this.waitable = waitable;
 	}
 
 	public String getType() {
@@ -54,8 +54,8 @@ public class Condition {
 		return satisfied;
 	}
 
-	public boolean isCanRepairing() {
-		return canRepairing;
+	public boolean isWaitable() {
+		return waitable;
 	}
 
 	public Hashtable<String, IContext> getContextHashtable() {
@@ -89,6 +89,34 @@ public class Condition {
 			case "SMALLERTHAN":
 				this.satisfied = (leftValueInt < Integer
 						.parseInt(this.rightValue));
+				break;
+			}
+			break;
+
+		case "Double":
+			double leftValuedouble = (double) contextManager.getValue();
+			switch (this.operator) {
+			case "BIGGERTHAN":
+				this.satisfied = (leftValuedouble > Double
+						.parseDouble(this.rightValue));
+				break;
+			case "EQUAL":
+				this.satisfied = (leftValuedouble == Double
+						.parseDouble(this.rightValue));
+				break;
+			case "SMALLERTHAN":
+				this.satisfied = (leftValuedouble < Double
+						.parseDouble(this.rightValue));
+				break;
+			}
+			break;
+			
+		case "Boolean":
+			boolean leftValueBoolean = (boolean) contextManager.getValue();
+			switch (this.operator) {
+			case "EQUAL":
+				this.satisfied = (leftValueBoolean == Boolean
+						.parseBoolean(this.rightValue));
 				break;
 			}
 			break;

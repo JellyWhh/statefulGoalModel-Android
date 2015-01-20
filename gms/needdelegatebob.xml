@@ -35,6 +35,7 @@
 		<needPeopleInteraction>true</needPeopleInteraction>
 	</ElementMachine>
 
+	<!-- 所有委托出去的goal都设置成AND分解，这样在修复的时候会直接跳到failed -->
 	<ElementMachine id="4" type="GoalMachine" name="bob"
 		level="1" description="bob">
 		<parentGoal>delegateBob</parentGoal>

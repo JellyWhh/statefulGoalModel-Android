@@ -228,17 +228,17 @@ public class GoalMachine extends ElementMachine {
 		} else {
 			if (this.getDecomposition() == 0) { // AND分解
 				if (this.getSchedulerMethod() == 0) { // 并行
-					executingDo_waitingSubReply_AND_PARALLERL(msg);
+					executingDo_waitingSubReply(msg);
 				} else { // 串行
 					if (isSendMesToOneSubDone) { // 已经给其中一个sub发过消息了，要进入等待反馈状态中
-						executingDo_waitingSubReply_AND_SERIAL(msg);
+						executingDo_waitingSubReply(msg);
 					} else { // 给下一个sub发消息
 						executingEntryDo_sendMesToOneSub_AND_SERIAL();
 					}
 				}
 			} else { // OR分解
 				if (isSendMesToOneSubDone) { // 已经给其中一个已激活状态的sub发过消息了，进入等待反馈中
-					executingDo_waitingSubReply_OR(msg);
+					executingDo_waitingSubReply(msg);
 				} else {
 					executingEntryDo_sendMesToOneSub_OR();
 				}
@@ -516,8 +516,8 @@ public class GoalMachine extends ElementMachine {
 				setSubElementRecordedState(msg.getSender().getElementName(),
 						(MesBody_Mes2Machine) msg.getBody());
 				// 只要收到了激活失败消息，自己就激活失败了
-				this.setCurrentState(State.Failed);
-				this.setCauseToFailed(CauseToFailed.ActivatedFail);
+				this.setCurrentState(State.Repairing);
+				this.setCauseToRepairing(CauseToRepairing.SubActivatedFail);
 				return;
 			}
 
@@ -563,8 +563,6 @@ public class GoalMachine extends ElementMachine {
 					"get a message from " + msg.getSender() + "; body is: "
 							+ msg.getBody());
 
-			int failedCount = 0;
-
 			// 消息内容是ACTIVATEDDONE，表示发送这条消息的子目标已激活
 			if (msg.getBody().equals(MesBody_Mes2Machine.ACTIVATEDDONE)) {
 				this.getMsgPool().poll();
@@ -595,9 +593,12 @@ public class GoalMachine extends ElementMachine {
 				setSubElementRecordedState(msg.getSender().getElementName(),
 						(MesBody_Mes2Machine) msg.getBody());
 
+				this.setCurrentState(State.Repairing);
+				this.setCauseToRepairing(CauseToRepairing.SubActivatedFail);
+
 				// 两个都设置成false，下次循环时会再次执行activatedEntryDo_sendMesToOneSub_OR();
-				isActivatedDo_waitingSubReplyDone = false;
-				isSendActivateMesToOneSubDone = false;
+				// isActivatedDo_waitingSubReplyDone = false;
+				// isSendActivateMesToOneSubDone = false;
 			}
 		}
 	}
@@ -724,26 +725,23 @@ public class GoalMachine extends ElementMachine {
 			if (msg.getBody().equals(MesBody_Mes2Machine.ACHIEVEDDONE)) {
 				this.getMsgPool().poll();
 				this.setCurrentState(State.Achieved);
-			} else if (msg.getBody()
-					.equals(MesBody_Mes2Machine.ACTIVATEDFAILED)) {
-				this.getMsgPool().poll();
-				this.setCurrentState(State.Failed);
-				this.setCauseToFailed(CauseToFailed.ActivatedFail);
 			} else if (msg.getBody().equals(MesBody_Mes2Machine.FAILED)) {
 				this.getMsgPool().poll();
-				this.setCurrentState(State.Failed);
+				// this.setCurrentState(State.Failed);
+				this.setCurrentState(State.Repairing);
+				this.setCauseToRepairing(CauseToRepairing.SubExecutingFail);
 			}
 
 		}
 	}
 
 	/**
-	 * AND分解而且是并行<br>
+	 * 包括所有情形：AND分解并行、AND分解串行、OR分解<br>
 	 * executing状态中do所做的action：等待所有subElements反馈消息ACHIEVED，必须是所有的子目标都反馈完成，
 	 * 如果所有子目标都完成了，自己可以尝试发生跳转到achieved；<br>
 	 * 如果得到的反馈消息是FAILED，直接进入failed状态
 	 */
-	private void executingDo_waitingSubReply_AND_PARALLERL(SGMMessage msg) {
+	private void executingDo_waitingSubReply(SGMMessage msg) {
 		Log.logDebug(this.getName(),
 				"executingDo_waitingSubReply_AND_PARALLERL()", "init.");
 
@@ -761,96 +759,25 @@ public class GoalMachine extends ElementMachine {
 				// 检查是否全部已完成
 				this.setCurrentState(State.ProgressChecking);
 
-			} else if (msg.getBody().equals(MesBody_Mes2Machine.FAILED)
-					|| msg.getBody()
-							.equals(MesBody_Mes2Machine.ACTIVATEDFAILED)) {
+			} else if (msg.getBody().equals(MesBody_Mes2Machine.FAILED)) {
 				this.getMsgPool().poll();
 				setSubElementRecordedState(msg.getSender().getElementName(),
 						(MesBody_Mes2Machine) msg.getBody());
 				// 进入修复状态，并且设置导致进入修复状态的原因
 				this.setCurrentState(State.Repairing);
-				this.setCauseToRepairing(CauseToRepairing.SubFail);
-			}
-
-		}
-
-	}
-
-	/**
-	 * AND分解而且是串行<br>
-	 * executing状态中do所做的action：等待subElement反馈完成的消息，得到消息后，把它标记为achieved，
-	 * 然后重新进入SendMesToOneSub_AND_SERIAL，给下个未完成状态的subElement发消息
-	 * ，如此循环，直到最后一个subElement完成，可以尝试发生跳转。<br>
-	 * 如果得到的反馈消息是FAILED，直接进入failed状态
-	 */
-	private void executingDo_waitingSubReply_AND_SERIAL(SGMMessage msg) {
-		Log.logDebug(this.getName(),
-				"executingDo_waitingSubReply_AND_SERIAL()", "init.");
-
-		// SGMMessage msg = this.getMsgPool().poll(); // 拿出一条消息
-		if (msg != null) { // 收到了一条消息
-			Log.logDebug(this.getName(),
-					"executingDo_waitingSubReply_AND_SERIAL()",
-					"get a message from " + msg.getSender() + "; body is: "
-							+ msg.getBody());
-			// 如果子目标反馈的是ACHIEVED
-			if (msg.getBody().equals(MesBody_Mes2Machine.ACHIEVEDDONE)) {
-				this.getMsgPool().poll();
-				setSubElementRecordedState(msg.getSender().getElementName(),
-						(MesBody_Mes2Machine) msg.getBody());
-				// 检查是不是所有的都已完成
-				this.setCurrentState(State.ProgressChecking);
-
-			} else if (msg.getBody().equals(MesBody_Mes2Machine.FAILED)
-					|| msg.getBody()
-							.equals(MesBody_Mes2Machine.ACTIVATEDFAILED)) {
+				this.setCauseToRepairing(CauseToRepairing.SubExecutingFail);
+			} else if (msg.getBody()
+					.equals(MesBody_Mes2Machine.ACTIVATEDFAILED)) {
 				this.getMsgPool().poll();
 				setSubElementRecordedState(msg.getSender().getElementName(),
 						(MesBody_Mes2Machine) msg.getBody());
 				// 进入修复状态，并且设置导致进入修复状态的原因
 				this.setCurrentState(State.Repairing);
-				this.setCauseToRepairing(CauseToRepairing.SubFail);
+				this.setCauseToRepairing(CauseToRepairing.SubActivatedFail);
 			}
 
 		}
 
-	}
-
-	/**
-	 * OR分解<br>
-	 * executing状态中do所做的action：已经给一个激活状态的subElement发过START消息了，等待反馈中。<br>
-	 * 如果收到的是ACHIEVEDDONE,表示子目标完成了，那么自己也就完成了，尝试发生跳转到achieved；<br>
-	 * 如果收到的是WAITING
-	 */
-	private void executingDo_waitingSubReply_OR(SGMMessage msg) {
-		Log.logDebug(this.getName(), "executingDo_waitingSubReply_OR()",
-				"init.");
-
-		// SGMMessage msg = this.getMsgPool().poll(); // 拿出一条消息
-		if (msg != null) { // 收到了一条消息
-			Log.logDebug(this.getName(), "executingDo_waitingSubReply_OR()",
-					"get a message from " + msg.getSender().toString()
-							+ "; body is: " + msg.getBody());
-
-			if (msg.getBody().equals(MesBody_Mes2Machine.ACHIEVEDDONE)) { // 如果子目标反馈的是ACHIEVED，进入progressChecking状态
-				this.getMsgPool().poll();
-				setSubElementRecordedState(msg.getSender().getElementName(),
-						(MesBody_Mes2Machine) msg.getBody());
-				this.setCurrentState(State.ProgressChecking);
-			} else if (msg.getBody().equals(MesBody_Mes2Machine.FAILED)
-					|| msg.getBody()
-							.equals(MesBody_Mes2Machine.ACTIVATEDFAILED)) {
-				this.getMsgPool().poll();
-				setSubElementRecordedState(msg.getSender().getElementName(),
-						(MesBody_Mes2Machine) msg.getBody());
-
-				// 进入修复状态，并且设置导致进入修复状态的原因
-				this.setCurrentState(State.Repairing);
-				this.setCauseToRepairing(CauseToRepairing.SubFail);
-
-			}
-
-		}
 	}
 
 	/**
@@ -887,7 +814,7 @@ public class GoalMachine extends ElementMachine {
 	/**
 	 * 让GoalMachine重写，用来初始化里面的两个变量
 	 */
-	public void resetGoalMachine() {
+	public void resetElementMachine() {
 		isActivatedDo_waitingSubReplyDone = false;
 		isSendMesToOneSubDone = false;
 		isSendActivateMesToOneSubDone = false;
@@ -895,8 +822,13 @@ public class GoalMachine extends ElementMachine {
 		isDelegated = false;
 	}
 
+	public void resetElementMachineExecuting() {
+
+		isSendMesToOneSubDone = false;
+	}
+
 	/**
-	 * 对SubFail情况进行修复，需要根据是AND分解还是OR分解分别判断。<br>
+	 * 对SubActivatedFail和SubExecutingFail情况进行修复，需要根据是AND分解还是OR分解分别判断。<br>
 	 * AND分解：直接进入failed<br>
 	 * OR分解：如果subElements没有一个处于激活状态（全部是failed或者initial），说明没有可选的了，进入failed；否则，
 	 * 进入executing状态，给下一个处于activated状态的subElement发Start消息
@@ -904,10 +836,13 @@ public class GoalMachine extends ElementMachine {
 	 * @return 返回修复后的状态，默认返回repairing状态
 	 */
 	@Override
-	public State subFailRepairing() {
+	public State subFailRepairing(CauseToRepairing causeToRepairing) {
 		Log.logDebug(this.getName(), "subFailRepairing()", "init.");
 
 		if (this.getDecomposition() == 0) { // AND分解
+			if (causeToRepairing.equals(CauseToRepairing.SubActivatedFail)) {
+				this.setCauseToFailed(CauseToFailed.ActivatedFail);
+			}
 			return State.Failed;
 		} else { // OR分解
 			// 收到failed消息后，先检查是否所有的subElements都是failed或者ActivatedFailed，如果是说明没有可选的了，进入failed
@@ -920,6 +855,9 @@ public class GoalMachine extends ElementMachine {
 			}
 			if (count == this.getSubElements().size()) { // 全部是全部是failed或者activatedFailed
 				isSendMesToOneSubDone = true;
+				if (causeToRepairing.equals(CauseToRepairing.SubActivatedFail)) {
+					this.setCauseToFailed(CauseToFailed.ActivatedFail);
+				}
 				return State.Failed; // 进入failed状态
 			} else {
 				// 重新进入Activated，给下个处于初始化状态的subElement发送激活消息

@@ -155,7 +155,7 @@ public class TaskMachine extends ElementMachine {
 	/**
 	 * 让TaskMachine重写，用来初始化里面的一个变量
 	 */
-	public void resetTaskMachine() {
+	public void resetElementMachine() {
 	}
 
 	public boolean isNeedPeopleInteraction() {

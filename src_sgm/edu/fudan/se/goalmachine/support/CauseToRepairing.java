@@ -11,5 +11,5 @@ package edu.fudan.se.goalmachine.support;
  *
  */
 public enum CauseToRepairing{
-	InvViolated, CcViolated, SubFail, PreCondition, PostCondition
+	PostCondition,SubExecutingFail,SubActivatedFail;
 }

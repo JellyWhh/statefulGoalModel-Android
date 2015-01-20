@@ -46,6 +46,7 @@ public class ElementMachine implements Runnable {
 
 	private Date startWaitingTime; // 开始等待的时间
 	private int waitingTimeLimit; // 等待时间限制
+	private int retryTimes;// 可重试次数，也就是一共可以执行的次数
 
 	private boolean finish; // 标识当前machine是否运行结束，结束后run()里面的while循环将停止
 
@@ -67,7 +68,8 @@ public class ElementMachine implements Runnable {
 	boolean isAchievedEntryDone = false;
 	boolean isWaitingEntryDone = false;
 	boolean isSuspendedEntryDone = false;
-	boolean isRepairingEntryDone = false;
+
+	int currentExecutingIndex = 0; // 当前进入执行的次数，
 
 	/**
 	 * 构造方法
@@ -177,6 +179,7 @@ public class ElementMachine implements Runnable {
 
 					} else {
 						executingEntry();
+						currentExecutingIndex++; // 每次进入executing，代表了执行了一次，执行次数加一
 						isExecutingEntryDone = true;
 					}
 				}
@@ -536,13 +539,10 @@ public class ElementMachine implements Runnable {
 					if (condition.isSatisfied()) {
 						ret = State.Executing; // pre condition满足，跳转到Executing
 					} else {
-						if (condition.isCanRepairing()) {
-							ret = State.Repairing; // pre
-													// condition不满足，但是能够被修复，跳转到Repairing
-							this.setCauseToRepairing(CauseToRepairing.PreCondition);
-						} else {
-							ret = State.Waiting; // pre
-													// condition不满足，而且不能够被修复，跳转到Waiting
+						if (condition.isWaitable()) {// 不满足但是可以等待
+							ret = State.Waiting;
+						} else { // 不满足，不可以等待
+							ret = State.Failed;
 						}
 					}
 				}
@@ -588,26 +588,22 @@ public class ElementMachine implements Runnable {
 	 * @return 修复结束后要跳转到的状态
 	 */
 	private State doRepairing(CauseToRepairing cause) {
-		// TODO
 		State retState = State.Repairing; // 默认返回repairing状态，以防出现异常修复失败
 		switch (cause) {
-		case InvViolated:
-			retState = State.Failed;
-			break;
-		case CcViolated:
-			retState = State.Failed;
-			break;
-		case SubFail:
-			retState = subFailRepairing();
-			break;
-		case PreCondition:
-			retState = State.Failed;
-			break;
-		case PostCondition:
-			retState = State.Failed;
-			break;
 
-		default:
+		case PostCondition:
+			// 检查已经执行的次数是否小于设定的可重试次数，如果小于，可重新进入执行，否则表示已经重试完毕，进入failed。
+			if (currentExecutingIndex < this.getRetryTimes()) {
+				retState = State.Executing;
+			} else {
+				retState = State.Failed;
+			}
+			break;
+		case SubActivatedFail:
+			retState = subFailRepairing(CauseToRepairing.SubActivatedFail);
+			break;
+		case SubExecutingFail:
+			retState = subFailRepairing(CauseToRepairing.SubExecutingFail);
 			break;
 		}
 
@@ -615,22 +611,23 @@ public class ElementMachine implements Runnable {
 	}
 
 	/**
-	 * 对SubFail情况进行修复，<code>GoalMachine</code>需要重写；<code>TaskMachine</code>
-	 * 不需要，因为Task不会收到SubFail消息
+	 * 对SubActivatedFail和SubExecutingFail情况进行修复，<code>GoalMachine</code>需要重写；
+	 * <code>TaskMachine</code>
+	 * 不需要，因为Task不会收到SubActivatedFail或者SubExecutingFail消息
 	 * 
 	 * @return 默认返回repairing状态
 	 */
-	public State subFailRepairing() {
+	public State subFailRepairing(CauseToRepairing causeToRepairing) {
 		return State.Repairing;
 	}
 
 	/**
 	 * 在ShouldDo复合状态中队commitment condition和invariant
-	 * condition进行检查，如果违反，跳到repairing状态，并设置ConditionCauseToRepairing
+	 * condition进行检查，如果违反，跳到failed状态
 	 * 
 	 * @return true 检测到违反；false 没有检测到违反
 	 */
-	public boolean doCCandInvCChecking() {
+	private boolean doCCandInvCChecking() {
 
 		// 先判断commitment condition是否为null
 		if (this.getCommitmentCondition() != null) {
@@ -638,8 +635,7 @@ public class ElementMachine implements Runnable {
 			if (!this.getCommitmentCondition().isSatisfied()) { // 检测到违反
 				Log.logDebug(this.getName(), "doCCandInvCChecking()",
 						"commitment condition violation is detected!!!");
-				this.setCurrentState(State.Repairing);
-				this.setCauseToRepairing(CauseToRepairing.CcViolated);
+				this.setCurrentState(State.Failed);
 				return true;
 			}
 		}
@@ -650,8 +646,7 @@ public class ElementMachine implements Runnable {
 			if (!this.getInvariantCondition().isSatisfied()) { // 检测到违反
 				Log.logDebug(this.getName(), "doCCandInvCChecking()",
 						"invariant condition violation is detected!!!");
-				this.setCurrentState(State.Repairing);
-				this.setCauseToRepairing(CauseToRepairing.InvViolated);
+				this.setCurrentState(State.Failed);
 				return true;
 			}
 		}
@@ -724,26 +719,29 @@ public class ElementMachine implements Runnable {
 		isAchievedEntryDone = false;
 		isWaitingEntryDone = false;
 		isSuspendedEntryDone = false;
-		isRepairingEntryDone = false;
 
 		recordedState = RecordedState.Initial; // 让父目标用来记录当前element的状态
 
 		// 把GoalMachine、TaskMachine里面的变量也设置为初始化
-		resetGoalMachine();
-		resetTaskMachine();
+		resetElementMachine();
 	}
 
 	/**
-	 * 让GoalMachine重写，用来初始化里面的两个变量
+	 * 让GoalMachine和TaskMachine重写，用来初始化里面的两个变量
 	 */
-	public void resetGoalMachine() {
+	public void resetElementMachine() {
 
 	}
 
+	public void resetExecuting() {
+		isExecutingEntryDone = false;
+		resetElementMachineExecuting();
+	}
+
 	/**
-	 * 让TaskMachine重写，用来初始化里面的一个变量
+	 * 让GoalMachine和TaskMachine重写，用来初始化里面的两个变量
 	 */
-	public void resetTaskMachine() {
+	public void resetElementMachineExecuting() {
 
 	}
 
@@ -759,7 +757,7 @@ public class ElementMachine implements Runnable {
 	 * 
 	 * @return true表示过滤掉了一条信息，需要重新从消息队列里拿出消息；false表示没有过滤信息
 	 */
-	public boolean filterMessage(SGMMessage msg) {
+	private boolean filterMessage(SGMMessage msg) {
 		if (msg != null) {
 			if (msg.getBody().equals(MesBody_Mes2Machine.SUSPEND)
 					&& (this.getCurrentState() != State.Executing)) {
@@ -799,23 +797,23 @@ public class ElementMachine implements Runnable {
 
 	// *************checkCondition方法**************
 
-	public void checkContextCondition() {
+	private void checkContextCondition() {
 		this.getContextCondition().check();
 	}
 
-	public void checkPreCondition() {
+	private void checkPreCondition() {
 		this.getPreCondition().check();
 	}
 
-	public void checkPostCondition() {
+	private void checkPostCondition() {
 		this.getPostCondition().check();
 	}
 
-	public void checkCommitmentCondition() {
+	private void checkCommitmentCondition() {
 		this.getCommitmentCondition().check();
 	}
 
-	public void checkInvariantCondition() {
+	private void checkInvariantCondition() {
 		this.getInvariantCondition().check();
 	}
 
@@ -987,6 +985,14 @@ public class ElementMachine implements Runnable {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public int getRetryTimes() {
+		return retryTimes;
+	}
+
+	public void setRetryTimes(int retryTimes) {
+		this.retryTimes = retryTimes;
 	}
 
 }
