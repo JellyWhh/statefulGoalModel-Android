@@ -34,6 +34,7 @@ import edu.fudan.se.goalmodel.GoalModel;
 import edu.fudan.se.goalmodel.GoalModelManager;
 import edu.fudan.se.initial.SGMApplication;
 import edu.fudan.se.support.DownloadTask;
+import edu.fudan.se.support.GetAgent;
 
 /**
  * 从服务器上下载goal model xml文件的fragment
@@ -60,7 +61,7 @@ public class DownloadFragment extends ListFragment {
 		super.onActivityCreated(savedInstanceState);
 		adapter = new DownloadListAdapter(getActivity(),
 				R.layout.listview_download, application.getDownloadTaskList(),
-				application.getGoalModelManager());
+				application.getGoalModelManager(), application);
 		setListAdapter(adapter);
 
 		getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
@@ -88,21 +89,25 @@ class DownloadListAdapter extends ArrayAdapter<DownloadTask> {
 	private Context mContext;
 	private LayoutInflater mInflater;
 	private GoalModelManager goalModelManager;
+	private SGMApplication application;
 
 	public DownloadListAdapter(Context context, int resource,
-			List<DownloadTask> objects, GoalModelManager goalModelManager) {
+			List<DownloadTask> objects, GoalModelManager goalModelManager,
+			SGMApplication application) {
 		super(context, resource, objects);
-		init(context, resource, objects, goalModelManager);
+		init(context, resource, objects, goalModelManager, application);
 	}
 
 	private void init(Context context, int resource,
-			List<DownloadTask> objects, GoalModelManager goalModelManager) {
+			List<DownloadTask> objects, GoalModelManager goalModelManager,
+			SGMApplication application) {
 		mContext = context;
 		mInflater = (LayoutInflater) context
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		mResource = resource;
 		mObjects = objects;
 		this.goalModelManager = goalModelManager;
+		this.application = application;
 	}
 
 	@Override
@@ -229,6 +234,10 @@ class DownloadListAdapter extends ArrayAdapter<DownloadTask> {
 				GoalModel goalModel = gmXMLParser.newGoalModel(sdCardDir
 						+ downloadTask.getName());
 				goalModelManager.addGoalModel(goalModel);
+
+				// 把下载的服务注册到agent platform上
+				GetAgent.getAideAgentInterface(application)
+						.registerGoalModelService(goalModel);
 
 			} else {
 				System.err

@@ -65,7 +65,7 @@ public class IntentServiceUserInput extends IntentService {
 		String description = "You need to input a span of text:\n";
 
 		// 必须有要拍摄内容的描述
-		if (requestData.getContentType().equals("Text")) {
+		if (requestData != null && requestData.getContentType().equals("Text")) {
 			description += EncodeDecodeRequestData.decodeToText(requestData
 					.getContent());
 		}

@@ -54,6 +54,10 @@ public class Condition {
 		return satisfied;
 	}
 
+	public void setSatisfied(boolean satisfied) {
+		this.satisfied = satisfied;
+	}
+
 	public boolean isWaitable() {
 		return waitable;
 	}
@@ -64,6 +68,10 @@ public class Condition {
 
 	public void setContextHashtable(Hashtable<String, IContext> contextHashtable) {
 		this.contextHashtable = contextHashtable;
+	}
+	
+	public String getRightValue() {
+		return rightValue;
 	}
 
 	public void check() {
@@ -140,4 +148,6 @@ public class Condition {
 		System.out.println("---------check condition done!-------isSatisfied: "
 				+ this.isSatisfied());
 	}
+
+	
 }

@@ -1,6 +1,7 @@
 package edu.fudan.se.agent;
 
 import edu.fudan.se.goalmachine.message.SGMMessage;
+import edu.fudan.se.goalmodel.GoalModel;
 import edu.fudan.se.userMes.UserTask;
 
 public interface AideAgentInterface {
@@ -16,5 +17,7 @@ public interface AideAgentInterface {
 	public void handleMesFromService(SGMMessage msg);
 	
 	public void sendLocationToServerAgent(String userLocation);
+	
+	public void registerGoalModelService(GoalModel goalModel);
 
 }

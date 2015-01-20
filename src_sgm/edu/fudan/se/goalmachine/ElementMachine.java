@@ -42,7 +42,6 @@ public class ElementMachine implements Runnable {
 	private int priorityLevel; // 让父目标用来记录当前element的优先级
 
 	private Date startTime; // 当前element machine开始执行时的时间
-	private int timeLimit; // 完成这个任务的时间限制，单位为分钟minute
 
 	private Date startWaitingTime; // 开始等待的时间
 	private int waitingTimeLimit; // 等待时间限制
@@ -147,6 +146,7 @@ public class ElementMachine implements Runnable {
 					} else { // 刚进入激活状态，尝试把自己状态转换为激活
 						activatedEntry();
 						isActivatedEntryDone = true; // 设置为true表示这个entry动作做完了，以后不会再执行了
+						this.setStartTime(new Date());
 					}
 				}
 
@@ -810,7 +810,22 @@ public class ElementMachine implements Runnable {
 	}
 
 	private void checkCommitmentCondition() {
-		this.getCommitmentCondition().check();
+
+		// 单位是分钟
+		long timeLimit = Long.parseLong(this.getCommitmentCondition()
+				.getRightValue());
+
+		// 判断执行时间是否超时
+		Date nowTime = new Date();
+		long executingTime = nowTime.getTime() - this.getStartTime().getTime(); // 得到的差值单位是毫秒
+
+		if (executingTime > (timeLimit * 60 * 1000)) { // 超时
+			Log.logDebug(this.getName(), "checkCommitmentCondition()",
+					"Waiting Timeout!!!!!!");
+			this.getCommitmentCondition().setSatisfied(false);
+		} else { // 没有超时
+			this.getCommitmentCondition().setSatisfied(true);
+		}
 	}
 
 	private void checkInvariantCondition() {
@@ -873,14 +888,6 @@ public class ElementMachine implements Runnable {
 
 	public void setStartTime(Date startTime) {
 		this.startTime = startTime;
-	}
-
-	public int getTimeLimit() {
-		return timeLimit;
-	}
-
-	public void setTimeLimit(int timeLimit) {
-		this.timeLimit = timeLimit;
 	}
 
 	public Date getStartWaitingTime() {

@@ -130,6 +130,11 @@ public class AideAgent extends Agent implements AideAgentInterface {
 		this.addBehaviour(new SendLocationToServerAgent(this, userLocation));
 	}
 
+	@Override
+	public void registerGoalModelService(GoalModel goalModel) {
+		this.addBehaviour(new RegisterGoalModelService(this, goalModel));
+	}
+
 	/**
 	 * 发送消息给本地manager
 	 * 
@@ -408,10 +413,14 @@ public class AideAgent extends Agent implements AideAgentInterface {
 					try {
 						inner_msg = (SGMMessage) msg.getContentObject();
 					} catch (UnreadableException e) {
-						android.util.Log.i("MY_LOG",
-								"Handle mes from external agent...acl msg.getContentObject() error!");
+						android.util.Log
+								.i("MY_LOG",
+										"Handle mes from external agent...acl msg.getContentObject() error!");
 						e.printStackTrace();
 					}
+					System.out
+							.println("Handle mes from external agent:content is null?:"
+									+ (inner_msg.getContent() == null));
 
 					// String message[] = content.split("-");
 					// SGMMessage inner_msg = new SGMMessage(
@@ -421,8 +430,10 @@ public class AideAgent extends Agent implements AideAgentInterface {
 					// MesBody_Mes2Manager.getMesBody(message[7]));
 					// inner_msg.setDescription(message[8]);
 
-					if (inner_msg!=null && inner_msg.getHeader().equals(
-							MesHeader_Mes2Manger.EXTERNAL_AGENT_MESSAGE)) {
+					if (inner_msg != null
+							&& inner_msg
+									.getHeader()
+									.equals(MesHeader_Mes2Manger.EXTERNAL_AGENT_MESSAGE)) {
 
 						SimpleDateFormat df = new SimpleDateFormat(
 								"yyyy-MM-dd HH:mm:ss");
@@ -499,13 +510,13 @@ public class AideAgent extends Agent implements AideAgentInterface {
 			android.util.Log.i(
 					"MY_LOG",
 					"Obtain friends...goal model name is: "
-							+ userTask.getGoalModelName());
+							+ userTask.getElementName());
 
 			ArrayList<String> friendsArrayList = new ArrayList<>();
 			DFAgentDescription template = new DFAgentDescription();
 			ServiceDescription serviceDescription = new ServiceDescription();
 			serviceDescription.setType("GOALMODEL");
-			serviceDescription.setName(userTask.getGoalModelName());
+			serviceDescription.setName(userTask.getElementName());
 			template.addServices(serviceDescription);
 			try {
 				DFAgentDescription[] results = DFService
@@ -606,6 +617,46 @@ public class AideAgent extends Agent implements AideAgentInterface {
 			aclmsg.addReceiver(new AID("ServerAgent", AID.ISLOCALNAME));
 			aclmsg.setContent(content);
 			send(aclmsg);
+		}
+
+	}
+
+	/**
+	 * 发送位置信息给ServerAgent
+	 * 
+	 * @author whh
+	 * 
+	 */
+	private class RegisterGoalModelService extends OneShotBehaviour {
+
+		private static final long serialVersionUID = -8674488872785177053L;
+		private Agent a;
+		private GoalModel goalModel;
+
+		public RegisterGoalModelService(Agent a, GoalModel goalModel) {
+			super(a);
+			this.a = a;
+			this.goalModel = goalModel;
+		}
+
+		@Override
+		public void action() {
+
+			// 在黄页服务中注册所有的goal model服务
+			DFAgentDescription dfd = new DFAgentDescription();
+			dfd.setName(getAID());
+			ServiceDescription sd = new ServiceDescription();
+			sd.setType("GOALMODEL");
+			sd.setName(goalModel.getName());
+			dfd.addServices(sd);
+
+			try {
+				DFService.modify(a, dfd);
+				//DFService.register(a, dfd);
+			} catch (FIPAException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 	}

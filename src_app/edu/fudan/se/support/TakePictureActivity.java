@@ -116,7 +116,7 @@ public class TakePictureActivity extends Activity {
 		try {
 			// 保存图片到本地
 			FileOutputStream fos = new FileOutputStream(picture.getPath());
-			bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);// 把数据写入文件
+			bitmap.compress(Bitmap.CompressFormat.JPEG, 50, fos);// 把数据写入文件,0 meaning compress for small size
 			fos.flush();
 			fos.close();
 		} catch (Exception e) {
