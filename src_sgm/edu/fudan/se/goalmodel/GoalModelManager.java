@@ -92,27 +92,28 @@ public class GoalModelManager implements Runnable {
 				targetGoalModel, targetTaskName);
 
 		if (targetGoalModel != null) {
-			switch ((MesBody_Mes2Manager) msg.getBody()) {
-			case StartGM:
+			
+			switch (targetGoalModel.getDeviceEventMapToExternalEventTable().get((MesBody_Mes2Manager) msg.getBody())) {
+			case startGM:
 				start(targetGoalModel, msg);
 				break;
-			case StopGM:
+			case stopGM:
 				stop(targetGoalModel, msg);
 				break;
-			case SuspendGM:
+			case suspendGM:
 				suspend(targetGoalModel, msg);
 				break;
-			case ResumeGM:
+			case resumeGM:
 				resume(targetGoalModel, msg);
 				break;
-			case ResetGM:
+			case resetGM:
 				reset(targetGoalModel);
 				break;
-			case EndTE:
-			case QuitTE:
+			case endTE:
+			case quitTE:
 				endTaskMachine((TaskMachine) targetElementMachine, msg);
 				break;
-			case ServiceExecutingDone:
+			case serviceExecutingDone:
 				// 看返回的信息中是否需要给某些数据赋值
 				if (msg.getContent() != null) {
 					System.out
@@ -125,14 +126,58 @@ public class GoalModelManager implements Runnable {
 
 				endTaskMachine((TaskMachine) targetElementMachine, msg);
 				break;
-			case ServiceExecutingFailed:
+			case serviceExecutingFailed:
 				endTaskMachine((TaskMachine) targetElementMachine, msg);
 				break;
-			case QuitGM:
+			case quitGM:
 				endGoalMachine((GoalMachine) targetElementMachine, msg);
 				break;
 			default:
+				break;
 			}
+			
+			
+//			switch ((MesBody_Mes2Manager) msg.getBody()) {
+//			case StartGM:
+//				start(targetGoalModel, msg);
+//				break;
+//			case StopGM:
+//				stop(targetGoalModel, msg);
+//				break;
+//			case SuspendGM:
+//				suspend(targetGoalModel, msg);
+//				break;
+//			case ResumeGM:
+//				resume(targetGoalModel, msg);
+//				break;
+//			case ResetGM:
+//				reset(targetGoalModel);
+//				break;
+//			case EndTE:
+//			case QuitTE:
+//				endTaskMachine((TaskMachine) targetElementMachine, msg);
+//				break;
+//			case ServiceExecutingDone:
+//				// 看返回的信息中是否需要给某些数据赋值
+//				if (msg.getContent() != null) {
+//					System.out
+//							.println("handleLocalAgentMessage--ServiceExecutingDone--assignmentHashtable: "
+//									+ targetTaskName);
+//					targetGoalModel.getAssignmentHashtable()
+//							.get(targetTaskName)
+//							.setContent(msg.getContent().getContent());
+//				}
+//
+//				endTaskMachine((TaskMachine) targetElementMachine, msg);
+//				break;
+//			case ServiceExecutingFailed:
+//				endTaskMachine((TaskMachine) targetElementMachine, msg);
+//				break;
+//			case QuitGM:
+//				endGoalMachine((GoalMachine) targetElementMachine, msg);
+//				break;
+//			default:
+//			}
 		} else {
 			Log.logError("GoalModelManager:" + targetGoalModelName,
 					"treat EXTERNAL_EVENT", "goal model is null!");
@@ -159,8 +204,9 @@ public class GoalModelManager implements Runnable {
 			GoalModel targetGoalModel = goalModelList.get(targetGoalModelName);
 			GoalMachine targerGoalMachine = (GoalMachine) getEMFromGoalModelByName(
 					targetGoalModel, targetGoalName);
-			switch ((MesBody_Mes2Manager) msg.getBody()) {
-			case DelegatedAchieved:
+			
+			switch (targetGoalModel.getDeviceEventMapToExternalEventTable().get((MesBody_Mes2Manager) msg.getBody())) {
+			case delegatedAchieved:
 				// 如果有携带的数据，那么对本goal model的数据进行赋值，也就是对DELEGATERETURN条目的数据进行赋值
 				if (msg.getContent() != null) {
 					targetGoalModel.getAssignmentHashtable()
@@ -169,11 +215,11 @@ public class GoalModelManager implements Runnable {
 				}
 				endGoalMachine(targerGoalMachine, msg);
 				break;
-			case DelegatedFailed:
+			case delegatedFailed:
 				endGoalMachine(targerGoalMachine, msg);
 				break;
 
-			case StartGM:
+			case startGM:
 				targetGoalModel.getRootGoal().setDelegated(true);
 				targetGoalModel.getRootGoal().setAgentFrom(agentFrom);
 				targetGoalModel.getRootGoal().setDelegateGoalModelFrom(
@@ -191,6 +237,40 @@ public class GoalModelManager implements Runnable {
 			default:
 				break;
 			}
+			
+			
+//			switch ((MesBody_Mes2Manager) msg.getBody()) {
+//			case DelegatedAchieved:
+//				// 如果有携带的数据，那么对本goal model的数据进行赋值，也就是对DELEGATERETURN条目的数据进行赋值
+//				if (msg.getContent() != null) {
+//					targetGoalModel.getAssignmentHashtable()
+//							.get("DELEGATERETURN")
+//							.setContent(msg.getContent().getContent());
+//				}
+//				endGoalMachine(targerGoalMachine, msg);
+//				break;
+//			case DelegatedFailed:
+//				endGoalMachine(targerGoalMachine, msg);
+//				break;
+//
+//			case StartGM:
+//				targetGoalModel.getRootGoal().setDelegated(true);
+//				targetGoalModel.getRootGoal().setAgentFrom(agentFrom);
+//				targetGoalModel.getRootGoal().setDelegateGoalModelFrom(
+//						delegateGoalModelFrom);
+//
+//				// 如果有携带的数据，那么对本goal model的数据进行赋值，也就是对DELEGATEIN条目的数据进行赋值
+//				if (msg.getContent() != null) {
+//					targetGoalModel.getAssignmentHashtable().get("DELEGATEIN")
+//							.setContent(msg.getContent().getContent());
+//				}
+//
+//				start(targetGoalModel, msg);
+//				break;
+//
+//			default:
+//				break;
+//			}
 		}
 
 	}

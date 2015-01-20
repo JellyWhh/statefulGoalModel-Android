@@ -24,6 +24,7 @@ import edu.fudan.se.goalmachine.Condition;
 import edu.fudan.se.goalmachine.ElementMachine;
 import edu.fudan.se.goalmachine.GoalMachine;
 import edu.fudan.se.goalmachine.TaskMachine;
+import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
 
 /**
  * 解析表示一个goal model的xml文件，返回一个<code>GoalModel</code>
@@ -60,6 +61,8 @@ public class GmXMLParser {
 
 	public GoalModel newGoalModel(String filename) {
 		GoalModel goalModel = new GoalModel();
+		initialGoalModelMappingTable(goalModel
+				.getDeviceEventMapToExternalEventTable());
 		try {
 			// 得到DOM解析器的工厂实例
 			DocumentBuilderFactory domfac = DocumentBuilderFactory
@@ -474,6 +477,30 @@ public class GmXMLParser {
 			}
 		}
 		return ret;
+	}
+
+	/**
+	 * 
+	 * @param table
+	 */
+	private void initialGoalModelMappingTable(
+			Hashtable<MesBody_Mes2Manager, ExternalEvent> table) {
+		table.put(MesBody_Mes2Manager.StartGM, ExternalEvent.startGM);
+		table.put(MesBody_Mes2Manager.StopGM, ExternalEvent.stopGM);
+		table.put(MesBody_Mes2Manager.SuspendGM, ExternalEvent.suspendGM);
+		table.put(MesBody_Mes2Manager.ResumeGM, ExternalEvent.resumeGM);
+		table.put(MesBody_Mes2Manager.ResetGM, ExternalEvent.resetGM);
+		table.put(MesBody_Mes2Manager.EndTE, ExternalEvent.endTE);
+		table.put(MesBody_Mes2Manager.QuitTE, ExternalEvent.quitTE);
+		table.put(MesBody_Mes2Manager.QuitGM, ExternalEvent.quitGM);
+		table.put(MesBody_Mes2Manager.ServiceExecutingDone,
+				ExternalEvent.serviceExecutingDone);
+		table.put(MesBody_Mes2Manager.ServiceExecutingFailed,
+				ExternalEvent.serviceExecutingFailed);
+		table.put(MesBody_Mes2Manager.DelegatedAchieved,
+				ExternalEvent.delegatedAchieved);
+		table.put(MesBody_Mes2Manager.DelegatedFailed,
+				ExternalEvent.delegatedFailed);
 	}
 
 }
