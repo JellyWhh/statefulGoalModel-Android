@@ -3,6 +3,7 @@
  */
 package edu.fudan.agent.support;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -20,6 +21,7 @@ import edu.fudan.se.agent.data.UserInformation;
  * 
  */
 public class AideAgentSupport {
+
 	/**
 	 * 根据抽象服务名称，从所有服务列表中查找出可用的具体服务名称
 	 * 
@@ -41,28 +43,81 @@ public class AideAgentSupport {
 		return ret;
 	}
 
+	// /**
+	// * 获得一个goalModel-element对应的服务调用情况
+	// *
+	// * @param goalModelName
+	// * goal model name
+	// * @param elementName
+	// * element name
+	// * @return 服务调用情况
+	// */
+	// public static ServiceInvocationAUtil getServiceInvocationUtil(
+	// String goalModelName, String elementName,
+	// ArrayList<ServiceInvocationAUtil> serviceInvocationUtilList) {
+	// ServiceInvocationAUtil ret = null;
+	// for (ServiceInvocationAUtil serviceInvocationUtil :
+	// serviceInvocationUtilList) {
+	// if (serviceInvocationUtil.getGoalModelName().equals(goalModelName)
+	// && serviceInvocationUtil.getElementName().equals(
+	// elementName)) {
+	// ret = serviceInvocationUtil;
+	// break;
+	// }
+	// }
+	// return ret;
+	// }
+	//
+	// public static DelegateAUtil getDelegateAUtil(String goalModelName, String
+	// elementName,ArrayList<DelegateAUtil> delegateAUtilList){
+	// return (DelegateAUtil)getAdaptationUtil(goalModelName, elementName,
+	// delegateAUtilList);
+	// }
+	//
+
 	/**
-	 * 获得一个goalModel-element对应的服务调用情况
+	 * 获得一个goalModel-element对应的自适应情况
 	 * 
 	 * @param goalModelName
 	 *            goal model name
 	 * @param elementName
 	 *            element name
-	 * @return 服务调用情况
+	 * @param adaptationUtilList
+	 *            储存自适应情况的列表，可以是一个ArrayList<ServiceInvocationAUtil>，
+	 *            也可以是一个ArrayList<DelegateAUtil>
+	 * @return AdaptationUtil，可强制转换成<code>ServiceInvocationAUtil</code>或者
+	 *         <code>DelegateAUtil</code>
 	 */
-	public static ServiceInvocationUtil getServiceInvocationUtil(
-			String goalModelName, String elementName,
-			ArrayList<ServiceInvocationUtil> serviceInvocationUtilList) {
-		ServiceInvocationUtil ret = null;
-		for (ServiceInvocationUtil serviceInvocationUtil : serviceInvocationUtilList) {
-			if (serviceInvocationUtil.getGoalModelName().equals(goalModelName)
-					&& serviceInvocationUtil.getElementName().equals(
-							elementName)) {
-				ret = serviceInvocationUtil;
+	public static AdaptationUtil getAdaptationUtil(String goalModelName,
+			String elementName, ArrayList<AdaptationUtil> adaptationUtilList) {
+		AdaptationUtil ret = null;
+		for (AdaptationUtil adaptationUtil : adaptationUtilList) {
+			if (adaptationUtil.getGoalModelName().equals(goalModelName)
+					&& adaptationUtil.getElementName().equals(elementName)) {
+				ret = adaptationUtil;
 				break;
 			}
 		}
 		return ret;
+	}
+
+	/**
+	 * 当用户点击reset按钮后要把和那个goal model相关的两个adaptationUtilList中储存的数据清空
+	 * 
+	 * @param goalModelName
+	 *            reset的goal model
+	 * @param adaptationUtilList
+	 *            相关的adaptationUtilList
+	 */
+	public static void resetAdaptationUtilList(String goalModelName,
+			ArrayList<AdaptationUtil> adaptationUtilList) {
+		ArrayList<AdaptationUtil> toRemoveAdaptationUtils = new ArrayList<>();
+		for (AdaptationUtil adaptationUtil : adaptationUtilList) {
+			if (adaptationUtil.getGoalModelName().equals(goalModelName)) {
+				toRemoveAdaptationUtils.add(adaptationUtil);
+			}
+		}
+		adaptationUtilList.removeAll(toRemoveAdaptationUtils);
 	}
 
 	/**
@@ -94,7 +149,7 @@ public class AideAgentSupport {
 	}
 
 	/**
-	 * 获得最佳可委托对象的agent nick name
+	 * 获得可委托对象的agent nick name list
 	 * 
 	 * @param userInformations
 	 *            所有可委托对象的userInformation
@@ -102,11 +157,13 @@ public class AideAgentSupport {
 	 *            自己的位置
 	 * @param selfAgentNickName
 	 *            自己的agent nick name
-	 * @return 最佳可委托对象的agent nick name
+	 * @return 可委托对象的agent nick name list，第一个为最佳的
 	 */
-	public static String getDelegateToBasedRanking(
+	public static ArrayList<String> getDelegateToListBasedRanking(
 			ArrayList<UserInformation> userInformations, String selfLocation,
 			String selfAgentNickName) {
+
+		ArrayList<String> ret = new ArrayList<>();
 
 		// 获取与每个人的亲密度
 		for (UserInformation userInformation : userInformations) {
@@ -174,8 +231,12 @@ public class AideAgentSupport {
 
 		});
 
+		for (Map.Entry<String, Double> item : sortList) {
+			ret.add(item.getKey());
+		}
+
 		// 返回排在第一个的
-		return sortList.get(0).getKey();
+		return ret;
 	}
 
 	/**

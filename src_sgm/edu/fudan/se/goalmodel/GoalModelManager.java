@@ -304,6 +304,12 @@ public class GoalModelManager implements Runnable {
 							.getAssignmentHashtable().get(fromElementName);
 					msg.setContent(requestData);
 				}
+				
+				SGMMessage resetMsgToAgent= new SGMMessage(
+						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null,
+						null, null, msg.getSender().getGoalModelName(), null,
+						MesBody_Mes2Manager.ResetGM);
+				getAideAgentInterface().sendMesToManager(resetMsgToAgent);
 
 				getAideAgentInterface().sendMesToExternalAgent(msg);
 				break;
