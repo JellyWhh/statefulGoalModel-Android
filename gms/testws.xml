@@ -26,5 +26,6 @@
 	</ElementMachine>
 	
 	<RequestData name="cityname" from="setcityname" to="showweather" contentType="Text"></RequestData>
+	<EventBinding device="NewSMS" external="startGM"></EventBinding>
 
 </GoalModel>

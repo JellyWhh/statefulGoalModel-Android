@@ -39,7 +39,7 @@ public class MainActivity extends FragmentActivity {
 					.beginTransaction();
 			transaction.add(R.id.container, new MainFragment()).commit();
 		}
-
+		
 		// 处理agent弹窗相关
 		myReceiver = new MyReceiver();
 		IntentFilter refreshChatFilter = new IntentFilter();

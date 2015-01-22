@@ -24,7 +24,6 @@ import edu.fudan.se.goalmachine.Condition;
 import edu.fudan.se.goalmachine.ElementMachine;
 import edu.fudan.se.goalmachine.GoalMachine;
 import edu.fudan.se.goalmachine.TaskMachine;
-import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
 
 /**
  * 解析表示一个goal model的xml文件，返回一个<code>GoalModel</code>
@@ -410,6 +409,36 @@ public class GmXMLParser {
 						goalModel.getParameterHashtable().put(to, from);
 					}
 
+					// EventBinding节点
+					if (emNode.getNodeName().equals("EventBinding")) {
+						android.util.Log.i("MY_LOG",
+								"-------GmXMLParser--EventBingding!!");
+						// 获得子节点的属性的名和值，也就是name, from, to,contentType等属性
+						String device = "", external = "";
+						if (emNode.getAttributes().getLength() > 0) {
+							for (int j = 0; j < emNode.getAttributes()
+									.getLength(); j++) {
+								switch (emNode.getAttributes().item(j)
+										.getNodeName()) {
+								case "device":
+									device = emNode.getAttributes().item(j)
+											.getNodeValue();
+									break;
+								case "external":
+									external = emNode.getAttributes().item(j)
+											.getNodeValue();
+									break;
+
+								}
+							}
+						}
+						// 将对应的绑定注册添加到goal model相关的table中
+						goalModel.getDeviceEventMapToExternalEventTable().put(
+								device,
+								ExternalEvent.getExternalEvent(external));
+
+					}
+
 				}
 			}
 
@@ -458,23 +487,20 @@ public class GmXMLParser {
 	 * @param table
 	 */
 	private void initialGoalModelMappingTable(
-			Hashtable<MesBody_Mes2Manager, ExternalEvent> table) {
-		table.put(MesBody_Mes2Manager.StartGM, ExternalEvent.startGM);
-		table.put(MesBody_Mes2Manager.StopGM, ExternalEvent.stopGM);
-		table.put(MesBody_Mes2Manager.SuspendGM, ExternalEvent.suspendGM);
-		table.put(MesBody_Mes2Manager.ResumeGM, ExternalEvent.resumeGM);
-		table.put(MesBody_Mes2Manager.ResetGM, ExternalEvent.resetGM);
-		table.put(MesBody_Mes2Manager.EndTE, ExternalEvent.endTE);
-		table.put(MesBody_Mes2Manager.QuitTE, ExternalEvent.quitTE);
-		table.put(MesBody_Mes2Manager.QuitGM, ExternalEvent.quitGM);
-		table.put(MesBody_Mes2Manager.ServiceExecutingDone,
-				ExternalEvent.serviceExecutingDone);
-		table.put(MesBody_Mes2Manager.ServiceExecutingFailed,
+			Hashtable<String, ExternalEvent> table) {
+		table.put("StartGM", ExternalEvent.startGM);
+		table.put("StopGM", ExternalEvent.stopGM);
+		table.put("SuspendGM", ExternalEvent.suspendGM);
+		table.put("ResumeGM", ExternalEvent.resumeGM);
+		table.put("ResetGM", ExternalEvent.resetGM);
+		table.put("EndTE", ExternalEvent.endTE);
+		table.put("QuitTE", ExternalEvent.quitTE);
+		table.put("QuitGM", ExternalEvent.quitGM);
+		table.put("ServiceExecutingDone", ExternalEvent.serviceExecutingDone);
+		table.put("ServiceExecutingFailed",
 				ExternalEvent.serviceExecutingFailed);
-		table.put(MesBody_Mes2Manager.DelegatedAchieved,
-				ExternalEvent.delegatedAchieved);
-		table.put(MesBody_Mes2Manager.DelegatedFailed,
-				ExternalEvent.delegatedFailed);
+		table.put("DelegatedAchieved", ExternalEvent.delegatedAchieved);
+		table.put("DelegatedFailed", ExternalEvent.delegatedFailed);
 	}
 
 }

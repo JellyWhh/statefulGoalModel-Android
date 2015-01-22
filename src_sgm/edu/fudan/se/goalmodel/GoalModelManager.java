@@ -4,6 +4,7 @@ import jade.core.MicroRuntime;
 import jade.wrapper.ControllerException;
 import jade.wrapper.StaleProxyException;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -87,31 +88,55 @@ public class GoalModelManager implements Runnable {
 		String targetTaskName = receiver.getElementName();
 		String targetGoalModelName = receiver.getGoalModelName();
 
-		GoalModel targetGoalModel = goalModelList.get(targetGoalModelName);
-		ElementMachine targetElementMachine = getEMFromGoalModelByName(
-				targetGoalModel, targetTaskName);
+		/* 先找出注册了MesBody_Mes2Manager的goal model */
+		ArrayList<GoalModel> relateGoalModels = new ArrayList<>();
+		for (GoalModel goalModel : goalModelList.values()) {
+			if (goalModel.getDeviceEventMapToExternalEventTable().containsKey(
+					msg.getBody().toString())) {
+				relateGoalModels.add(goalModel);
+			}
+		}
 
-		if (targetGoalModel != null) {
-			
-			switch (targetGoalModel.getDeviceEventMapToExternalEventTable().get((MesBody_Mes2Manager) msg.getBody())) {
+		/*
+		 * 然后再找出target goal model list，如果targetGoalModelName不为空，那么这个列表里只有一个goal
+		 * model
+		 */
+		ArrayList<GoalModel> targetGoalModels = new ArrayList<>();
+		if (targetGoalModelName != null) {
+			targetGoalModels.add(goalModelList.get(targetGoalModelName));
+		} else {
+			targetGoalModels.addAll(relateGoalModels);
+		}
+
+		/* 对所有targetGoalModels执行他们自己对应的externalEvent的对应的操作 */
+		SGMMessage originalSgmMessage = copyMessage(msg);
+
+		for (GoalModel targetGoalModel : targetGoalModels) {
+
+			ElementMachine targetElementMachine = getEMFromGoalModelByName(
+					targetGoalModel, targetTaskName);
+
+			switch (targetGoalModel.getDeviceEventMapToExternalEventTable()
+					.get(originalSgmMessage.getBody().toString())) {
 			case startGM:
-				start(targetGoalModel, msg);
+				start(targetGoalModel, originalSgmMessage);
 				break;
 			case stopGM:
-				stop(targetGoalModel, msg);
+				stop(targetGoalModel, originalSgmMessage);
 				break;
 			case suspendGM:
-				suspend(targetGoalModel, msg);
+				suspend(targetGoalModel, originalSgmMessage);
 				break;
 			case resumeGM:
-				resume(targetGoalModel, msg);
+				resume(targetGoalModel, originalSgmMessage);
 				break;
 			case resetGM:
 				reset(targetGoalModel);
 				break;
 			case endTE:
 			case quitTE:
-				endTaskMachine((TaskMachine) targetElementMachine, msg);
+				endTaskMachine((TaskMachine) targetElementMachine,
+						originalSgmMessage);
 				break;
 			case serviceExecutingDone:
 				// 看返回的信息中是否需要给某些数据赋值
@@ -119,69 +144,86 @@ public class GoalModelManager implements Runnable {
 					System.out
 							.println("handleLocalAgentMessage--ServiceExecutingDone--assignmentHashtable: "
 									+ targetTaskName);
-					targetGoalModel.getAssignmentHashtable()
+					targetGoalModel
+							.getAssignmentHashtable()
 							.get(targetTaskName)
-							.setContent(msg.getContent().getContent());
+							.setContent(
+									originalSgmMessage.getContent()
+											.getContent());
 				}
 
-				endTaskMachine((TaskMachine) targetElementMachine, msg);
+				endTaskMachine((TaskMachine) targetElementMachine,
+						originalSgmMessage);
 				break;
 			case serviceExecutingFailed:
-				endTaskMachine((TaskMachine) targetElementMachine, msg);
+				endTaskMachine((TaskMachine) targetElementMachine,
+						originalSgmMessage);
 				break;
 			case quitGM:
-				endGoalMachine((GoalMachine) targetElementMachine, msg);
+				endGoalMachine((GoalMachine) targetElementMachine,
+						originalSgmMessage);
 				break;
 			default:
 				break;
 			}
-			
-			
-//			switch ((MesBody_Mes2Manager) msg.getBody()) {
-//			case StartGM:
-//				start(targetGoalModel, msg);
-//				break;
-//			case StopGM:
-//				stop(targetGoalModel, msg);
-//				break;
-//			case SuspendGM:
-//				suspend(targetGoalModel, msg);
-//				break;
-//			case ResumeGM:
-//				resume(targetGoalModel, msg);
-//				break;
-//			case ResetGM:
-//				reset(targetGoalModel);
-//				break;
-//			case EndTE:
-//			case QuitTE:
-//				endTaskMachine((TaskMachine) targetElementMachine, msg);
-//				break;
-//			case ServiceExecutingDone:
-//				// 看返回的信息中是否需要给某些数据赋值
-//				if (msg.getContent() != null) {
-//					System.out
-//							.println("handleLocalAgentMessage--ServiceExecutingDone--assignmentHashtable: "
-//									+ targetTaskName);
-//					targetGoalModel.getAssignmentHashtable()
-//							.get(targetTaskName)
-//							.setContent(msg.getContent().getContent());
-//				}
-//
-//				endTaskMachine((TaskMachine) targetElementMachine, msg);
-//				break;
-//			case ServiceExecutingFailed:
-//				endTaskMachine((TaskMachine) targetElementMachine, msg);
-//				break;
-//			case QuitGM:
-//				endGoalMachine((GoalMachine) targetElementMachine, msg);
-//				break;
-//			default:
-//			}
-		} else {
-			Log.logError("GoalModelManager:" + targetGoalModelName,
-					"treat EXTERNAL_EVENT", "goal model is null!");
 		}
+
+		// GoalModel targetGoalModel = goalModelList.get(targetGoalModelName);
+		// ElementMachine targetElementMachine = getEMFromGoalModelByName(
+		// targetGoalModel, targetTaskName);
+		//
+		// if (targetGoalModel != null) {
+		//
+		// switch
+		// (targetGoalModel.getDeviceEventMapToExternalEventTable().get((MesBody_Mes2Manager)
+		// msg.getBody())) {
+		// case startGM:
+		// start(targetGoalModel, msg);
+		// break;
+		// case stopGM:
+		// stop(targetGoalModel, msg);
+		// break;
+		// case suspendGM:
+		// suspend(targetGoalModel, msg);
+		// break;
+		// case resumeGM:
+		// resume(targetGoalModel, msg);
+		// break;
+		// case resetGM:
+		// reset(targetGoalModel);
+		// break;
+		// case endTE:
+		// case quitTE:
+		// endTaskMachine((TaskMachine) targetElementMachine, msg);
+		// break;
+		// case serviceExecutingDone:
+		// // 看返回的信息中是否需要给某些数据赋值
+		// if (msg.getContent() != null) {
+		// System.out
+		// .println("handleLocalAgentMessage--ServiceExecutingDone--assignmentHashtable: "
+		// + targetTaskName);
+		// targetGoalModel.getAssignmentHashtable()
+		// .get(targetTaskName)
+		// .setContent(msg.getContent().getContent());
+		// }
+		//
+		// endTaskMachine((TaskMachine) targetElementMachine, msg);
+		// break;
+		// case serviceExecutingFailed:
+		// endTaskMachine((TaskMachine) targetElementMachine, msg);
+		// break;
+		// case quitGM:
+		// endGoalMachine((GoalMachine) targetElementMachine, msg);
+		// break;
+		// default:
+		// break;
+		// }
+		//
+		//
+		// } else {
+		// Log.logError("GoalModelManager:" + targetGoalModelName,
+		// "treat EXTERNAL_EVENT", "goal model is null!");
+		// }
 	}
 
 	/**
@@ -204,8 +246,9 @@ public class GoalModelManager implements Runnable {
 			GoalModel targetGoalModel = goalModelList.get(targetGoalModelName);
 			GoalMachine targerGoalMachine = (GoalMachine) getEMFromGoalModelByName(
 					targetGoalModel, targetGoalName);
-			
-			switch (targetGoalModel.getDeviceEventMapToExternalEventTable().get((MesBody_Mes2Manager) msg.getBody())) {
+
+			switch (targetGoalModel.getDeviceEventMapToExternalEventTable()
+					.get((MesBody_Mes2Manager) msg.getBody())) {
 			case delegatedAchieved:
 				// 如果有携带的数据，那么对本goal model的数据进行赋值，也就是对DELEGATERETURN条目的数据进行赋值
 				if (msg.getContent() != null) {
@@ -237,40 +280,39 @@ public class GoalModelManager implements Runnable {
 			default:
 				break;
 			}
-			
-			
-//			switch ((MesBody_Mes2Manager) msg.getBody()) {
-//			case DelegatedAchieved:
-//				// 如果有携带的数据，那么对本goal model的数据进行赋值，也就是对DELEGATERETURN条目的数据进行赋值
-//				if (msg.getContent() != null) {
-//					targetGoalModel.getAssignmentHashtable()
-//							.get("DELEGATERETURN")
-//							.setContent(msg.getContent().getContent());
-//				}
-//				endGoalMachine(targerGoalMachine, msg);
-//				break;
-//			case DelegatedFailed:
-//				endGoalMachine(targerGoalMachine, msg);
-//				break;
-//
-//			case StartGM:
-//				targetGoalModel.getRootGoal().setDelegated(true);
-//				targetGoalModel.getRootGoal().setAgentFrom(agentFrom);
-//				targetGoalModel.getRootGoal().setDelegateGoalModelFrom(
-//						delegateGoalModelFrom);
-//
-//				// 如果有携带的数据，那么对本goal model的数据进行赋值，也就是对DELEGATEIN条目的数据进行赋值
-//				if (msg.getContent() != null) {
-//					targetGoalModel.getAssignmentHashtable().get("DELEGATEIN")
-//							.setContent(msg.getContent().getContent());
-//				}
-//
-//				start(targetGoalModel, msg);
-//				break;
-//
-//			default:
-//				break;
-//			}
+
+			// switch ((MesBody_Mes2Manager) msg.getBody()) {
+			// case DelegatedAchieved:
+			// // 如果有携带的数据，那么对本goal model的数据进行赋值，也就是对DELEGATERETURN条目的数据进行赋值
+			// if (msg.getContent() != null) {
+			// targetGoalModel.getAssignmentHashtable()
+			// .get("DELEGATERETURN")
+			// .setContent(msg.getContent().getContent());
+			// }
+			// endGoalMachine(targerGoalMachine, msg);
+			// break;
+			// case DelegatedFailed:
+			// endGoalMachine(targerGoalMachine, msg);
+			// break;
+			//
+			// case StartGM:
+			// targetGoalModel.getRootGoal().setDelegated(true);
+			// targetGoalModel.getRootGoal().setAgentFrom(agentFrom);
+			// targetGoalModel.getRootGoal().setDelegateGoalModelFrom(
+			// delegateGoalModelFrom);
+			//
+			// // 如果有携带的数据，那么对本goal model的数据进行赋值，也就是对DELEGATEIN条目的数据进行赋值
+			// if (msg.getContent() != null) {
+			// targetGoalModel.getAssignmentHashtable().get("DELEGATEIN")
+			// .setContent(msg.getContent().getContent());
+			// }
+			//
+			// start(targetGoalModel, msg);
+			// break;
+			//
+			// default:
+			// break;
+			// }
 		}
 
 	}
@@ -304,8 +346,8 @@ public class GoalModelManager implements Runnable {
 							.getAssignmentHashtable().get(fromElementName);
 					msg.setContent(requestData);
 				}
-				
-				SGMMessage resetMsgToAgent= new SGMMessage(
+
+				SGMMessage resetMsgToAgent = new SGMMessage(
 						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null,
 						null, null, msg.getSender().getGoalModelName(), null,
 						MesBody_Mes2Manager.ResetGM);
@@ -358,9 +400,10 @@ public class GoalModelManager implements Runnable {
 				Thread thread = new Thread(elementMachine);
 				thread.start();
 			}
+			SGMMessage newMessage = copyMessage(msg);
 			// 然后给root goal发送激活消息
-			msg.setBody(MesBody_Mes2Machine.ACTIVATE);
-			sendMesToRoot(goalModel, msg);
+			newMessage.setBody(MesBody_Mes2Machine.ACTIVATE);
+			sendMesToRoot(goalModel, newMessage);
 		} else {
 			Log.logError("GoalModelManager:" + goalModel.getName(), "start()",
 					"elementMachines is null or its size is 0!");
@@ -376,8 +419,9 @@ public class GoalModelManager implements Runnable {
 	private void stop(GoalModel goalModel, SGMMessage msg) {
 		Log.logDebug("GoalModelManager:" + goalModel.getName(), "stop()",
 				"init.");
-		msg.setBody(MesBody_Mes2Machine.STOP);
-		sendMesToRoot(goalModel, msg);
+		SGMMessage newMessage = copyMessage(msg);
+		newMessage.setBody(MesBody_Mes2Machine.STOP);
+		sendMesToRoot(goalModel, newMessage);
 	}
 
 	/**
@@ -389,8 +433,9 @@ public class GoalModelManager implements Runnable {
 	private void suspend(GoalModel goalModel, SGMMessage msg) {
 		Log.logDebug("GoalModelManager:" + goalModel.getName(), "suspend()",
 				"init.");
-		msg.setBody(MesBody_Mes2Machine.SUSPEND);
-		sendMesToRoot(goalModel, msg);
+		SGMMessage newMessage = copyMessage(msg);
+		newMessage.setBody(MesBody_Mes2Machine.SUSPEND);
+		sendMesToRoot(goalModel, newMessage);
 	}
 
 	/**
@@ -402,8 +447,9 @@ public class GoalModelManager implements Runnable {
 	private void resume(GoalModel goalModel, SGMMessage msg) {
 		Log.logDebug("GoalModelManager:" + goalModel.getName(), "resume()",
 				"init.");
-		msg.setBody(MesBody_Mes2Machine.RESUME);
-		sendMesToRoot(goalModel, msg);
+		SGMMessage newMessage = copyMessage(msg);
+		newMessage.setBody(MesBody_Mes2Machine.RESUME);
+		sendMesToRoot(goalModel, newMessage);
 	}
 
 	/**
@@ -442,25 +488,29 @@ public class GoalModelManager implements Runnable {
 		// taskMachine.getName(),
 		// mes);
 
-		if (msg.getBody().equals(MesBody_Mes2Manager.EndTE)
-				|| msg.getBody().equals(
+		SGMMessage newMessage = copyMessage(msg);
+
+		if (newMessage.getBody().equals(MesBody_Mes2Manager.EndTE)
+				|| newMessage.getBody().equals(
 						MesBody_Mes2Manager.ServiceExecutingDone)) {
-			msg.setBody(MesBody_Mes2Machine.TASK_DONE);
-		} else if (msg.getBody().equals(MesBody_Mes2Manager.QuitTE)
-				|| msg.getBody().equals(
+			newMessage.setBody(MesBody_Mes2Machine.TASK_DONE);
+		} else if (newMessage.getBody().equals(MesBody_Mes2Manager.QuitTE)
+				|| newMessage.getBody().equals(
 						MesBody_Mes2Manager.ServiceExecutingFailed)) {
-			msg.setBody(MesBody_Mes2Machine.TASK_FAILED);
+			newMessage.setBody(MesBody_Mes2Machine.TASK_FAILED);
 		}
-		if (taskMachine.getMsgPool().offer(msg)) {
-			Log.logMessage(msg, true);
+		if (taskMachine.getMsgPool().offer(newMessage)) {
+			Log.logMessage(newMessage, true);
 			Log.logDebug("GoalModelManager:" + taskMachine.getName(),
-					"endTaskMachine()", "UI thread send a " + msg.getBody()
-							+ " msg to " + taskMachine.getName() + " succeed!");
+					"endTaskMachine()",
+					"UI thread send a " + newMessage.getBody() + " msg to "
+							+ taskMachine.getName() + " succeed!");
 		} else {
-			Log.logMessage(msg, false);
+			Log.logMessage(newMessage, false);
 			Log.logError("GoalModelManager:" + taskMachine.getName(),
-					"endTaskMachine()", "UI thread send a " + msg.getBody()
-							+ " msg to " + taskMachine.getName() + " error!");
+					"endTaskMachine()",
+					"UI thread send a " + newMessage.getBody() + " msg to "
+							+ taskMachine.getName() + " error!");
 		}
 
 	}
@@ -477,25 +527,29 @@ public class GoalModelManager implements Runnable {
 	private void endGoalMachine(GoalMachine goalMachine, SGMMessage msg) {
 		Log.logDebug("GoalModelManager:" + goalMachine.getName(),
 				"endGoalMachine()", "init.");
-		if (msg.getBody().equals(MesBody_Mes2Manager.DelegatedAchieved)) {
-			msg.setBody(MesBody_Mes2Machine.ACHIEVEDDONE);
-		} else if (msg.getBody().equals(MesBody_Mes2Manager.DelegatedFailed)
-				|| msg.getBody().equals(MesBody_Mes2Manager.QuitGM)) {
-			msg.setBody(MesBody_Mes2Machine.FAILED);
+
+		SGMMessage newMessage = copyMessage(msg);
+
+		if (newMessage.getBody().equals(MesBody_Mes2Manager.DelegatedAchieved)) {
+			newMessage.setBody(MesBody_Mes2Machine.ACHIEVEDDONE);
+		} else if (newMessage.getBody().equals(
+				MesBody_Mes2Manager.DelegatedFailed)
+				|| newMessage.getBody().equals(MesBody_Mes2Manager.QuitGM)) {
+			newMessage.setBody(MesBody_Mes2Machine.FAILED);
 		}
 
-		if (goalMachine.getMsgPool().offer(msg)) {
-			Log.logMessage(msg, true);
+		if (goalMachine.getMsgPool().offer(newMessage)) {
+			Log.logMessage(newMessage, true);
 			Log.logDebug("GoalModelManager:" + goalMachine.getName(),
 					"endGoalMachine()",
-					"External agent or UI send a " + msg.getBody() + " msg to "
-							+ goalMachine.getName() + " succeed!");
+					"External agent or UI send a " + newMessage.getBody()
+							+ " msg to " + goalMachine.getName() + " succeed!");
 		} else {
-			Log.logMessage(msg, false);
+			Log.logMessage(newMessage, false);
 			Log.logError("GoalModelManager:" + goalMachine.getName(),
 					"endGoalMachine()",
-					"External agent send a " + msg.getBody() + " msg to "
-							+ goalMachine.getName() + " error!");
+					"External agent send a " + newMessage.getBody()
+							+ " msg to " + goalMachine.getName() + " error!");
 		}
 	}
 
@@ -511,20 +565,22 @@ public class GoalModelManager implements Runnable {
 		Log.logDebug("GoalModelManager:" + goalModel.getName(),
 				"sendMesToRoot()", "init.");
 		if (goalModel.getRootGoal() != null) {
+
+			SGMMessage newMessage = copyMessage(msg);
 			// SGMMessage msg = new SGMMessage("TOROOT", "UI", goalModel
 			// .getRootGoal().getName(), mes);
-			if (goalModel.getRootGoal().getMsgPool().offer(msg)) {
-				Log.logMessage(msg, true);
+			if (goalModel.getRootGoal().getMsgPool().offer(newMessage)) {
+				Log.logMessage(newMessage, true);
 				Log.logDebug("GoalModelManager:" + goalModel.getName(),
-						"sendMesToRoot()", "UI thread send a " + msg.getBody()
-								+ " msg to "
+						"sendMesToRoot()",
+						"UI thread send a " + newMessage.getBody() + " msg to "
 								+ goalModel.getRootGoal().getName()
 								+ " succeed!");
 			} else {
-				Log.logMessage(msg, false);
+				Log.logMessage(newMessage, false);
 				Log.logError("GoalModelManager:" + goalModel.getName(),
-						"sendMesToRoot()", "UI thread send a " + msg.getBody()
-								+ " msg to "
+						"sendMesToRoot()",
+						"UI thread send a " + newMessage.getBody() + " msg to "
 								+ goalModel.getRootGoal().getName() + " error!");
 			}
 
@@ -570,6 +626,18 @@ public class GoalModelManager implements Runnable {
 			}
 		}
 		return ret;
+	}
+
+	private SGMMessage copyMessage(SGMMessage msg) {
+		SGMMessage newMessage = new SGMMessage(msg.getHeader(), msg.getSender()
+				.getAgentName(), msg.getSender().getGoalModelName(), msg
+				.getSender().getElementName(),
+				msg.getReceiver().getAgentName(), msg.getReceiver()
+						.getGoalModelName(), msg.getSender().getElementName(),
+				msg.getBody());
+		newMessage.setDescription(msg.getDescription());
+		newMessage.setContent(msg.getContent());
+		return newMessage;
 	}
 
 	public void addGoalModel(GoalModel gm) {

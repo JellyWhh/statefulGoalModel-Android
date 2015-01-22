@@ -882,7 +882,7 @@ public class AideAgent extends Agent implements AideAgentInterface {
 		public void action() {
 			String content = a.getLocalName() + "---" + userLocation;
 
-			android.util.Log.i("MY_LOG",
+			android.util.Log.i("SendLocationToServerAgent",
 					"Send user location to server agent...content is: "
 							+ content);
 

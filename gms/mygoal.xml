@@ -84,5 +84,6 @@
 	</ElementMachine>
 	
 	<RequestData name="cityName" from="aliceChild_1" to="bobChild_3" contentType="Text"></RequestData>
+	<EventBinding device="NewSMS" external="startGM"></EventBinding>
 
 </GoalModel>

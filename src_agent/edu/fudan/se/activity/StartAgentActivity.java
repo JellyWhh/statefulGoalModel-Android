@@ -109,6 +109,11 @@ public class StartAgentActivity extends Activity {
 					Intent locationServiceIntent = new Intent("service.appservice.locator");
 					startService(locationServiceIntent);
 					
+					//开启监听系统广播的服务
+					android.util.Log.i("MY_LOG", "startSystemBroadcastListenerService......");
+					Intent sblistenerIntent = new Intent("service.appservice.sblistener");
+					startService(sblistenerIntent);
+					
 
 				} catch (Exception ex) {
 					System.out.println(ex.toString()

@@ -88,6 +88,11 @@
                 <action android:name="service.appservice.locator" />
             </intent-filter>
         </service>
+        <service android:name="edu.fudan.se.support.SystemBroadcastListenerService" >
+            <intent-filter>
+                <action android:name="service.appservice.sblistener" />
+            </intent-filter>
+        </service>
         <service
             android:name="com.baidu.location.f"
             android:enabled="true"
