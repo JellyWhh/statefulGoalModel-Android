@@ -101,8 +101,8 @@ public class MobileLocatorService extends Service {
 		locationOption.setIsNeedAddress(true); // 返回的定位结果包含地址信息
 		locationOption.setAddrType("all"); // 返回的定位结果包含地址信息
 		locationOption.setCoorType("bd09ll");// 返回的定位结果是百度经纬度,默认值gcj02
-		locationOption.disableCache(true);// 禁止启用缓存定位
-		locationOption.setPriority(LocationClientOption.GpsFirst);
+//		locationOption.disableCache(true);// 禁止启用缓存定位
+//		locationOption.setPriority(LocationClientOption.GpsFirst);
 		locationOption.setScanSpan(DELAY_TIME);// 设置发起定位请求的间隔时间
 
 		mLocationClient.setLocOption(locationOption);
@@ -256,7 +256,6 @@ public class MobileLocatorService extends Service {
 				sb.append("\nAddr:");
 				sb.append(location.getAddrStr());
 			}
-
 //			Log.logDebug("MobileLocatorService", "onReceiveLocation()", "sb: "
 //					+ sb.toString());
 			android.util.Log.i("MY_LOG",
@@ -277,11 +276,7 @@ public class MobileLocatorService extends Service {
 						Constant.Notification_Network_State);
 			}
 		}
-
-		@Override
-		public void onReceivePoi(BDLocation arg0) {
-		}
-
+		
 	}
 
 }

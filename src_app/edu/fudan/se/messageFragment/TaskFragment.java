@@ -9,15 +9,10 @@ import jade.wrapper.StaleProxyException;
 
 import java.util.List;
 
-
 import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
@@ -41,7 +36,7 @@ import edu.fudan.se.goalmodel.EncodeDecodeRequestData;
 import edu.fudan.se.goalmodel.RequestData;
 import edu.fudan.se.initial.SGMApplication;
 import edu.fudan.se.support.TakePictureActivity;
-import edu.fudan.se.userMes.UserDelegateOutTask;
+import edu.fudan.se.userMes.UserDelegateInTask;
 import edu.fudan.se.userMes.UserInputTextTask;
 import edu.fudan.se.userMes.UserShowContentTask;
 import edu.fudan.se.userMes.UserTakePictureTask;
@@ -57,7 +52,8 @@ public class TaskFragment extends ListFragment {
 	private UserTaskAdapter adapter;
 
 	private AideAgentInterface aideAgentInterface; // agent interface
-	private ProgressDialog progressDialog;
+
+	// private ProgressDialog progressDialog;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -80,13 +76,13 @@ public class TaskFragment extends ListFragment {
 			e.printStackTrace();
 		}
 
-		progressDialog = onCreateProgressDialog();
-
-		// 设置接受agent发来的friends列表的receiver
-		MyFriendsReceiver receiver = new MyFriendsReceiver();
-		IntentFilter refreshChatFilter = new IntentFilter();
-		refreshChatFilter.addAction("jade.delegate.FRIENDS");
-		getActivity().registerReceiver(receiver, refreshChatFilter);
+		// progressDialog = onCreateProgressDialog();
+		//
+		// // 设置接受agent发来的friends列表的receiver
+		// MyFriendsReceiver receiver = new MyFriendsReceiver();
+		// IntentFilter refreshChatFilter = new IntentFilter();
+		// refreshChatFilter.addAction("jade.delegate.FRIENDS");
+		// getActivity().registerReceiver(receiver, refreshChatFilter);
 	}
 
 	@Override
@@ -94,7 +90,7 @@ public class TaskFragment extends ListFragment {
 		super.onActivityCreated(savedInstanceState);
 		adapter = new UserTaskAdapter(getActivity(),
 				R.layout.listview_usertask, application.getUserTaskList(),
-				aideAgentInterface, progressDialog);
+				aideAgentInterface);
 
 		setListAdapter(adapter);
 
@@ -106,148 +102,148 @@ public class TaskFragment extends ListFragment {
 		super.onListItemClick(l, v, position, id);
 	}
 
-	/**
-	 * 创建一个进度条对话框
-	 * 
-	 * @return ProgressDialog
-	 */
-	private ProgressDialog onCreateProgressDialog() {
-		ProgressDialog dialog = new ProgressDialog(getActivity());
-		dialog.setMessage("Loading friends. Please wait...");
-		return dialog;
-	}
-
-	/**
-	 * 创建一个显示可委托对象的单选对话框
-	 * 
-	 * @return Dialog
-	 */
-	private Dialog onCreateFriendsDialog(final String[] friends,
-			final String goalModelName, final String elementName) {
-
-		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-		final ChoiceOnClickListener choiceListener = new ChoiceOnClickListener();
-		builder.setTitle("Select a friend:");
-		builder.setSingleChoiceItems(friends, 0, choiceListener);
-
-		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-
-				// 要把这个task设置成已做过状态
-				UserDelegateOutTask userDelegateOutTask = null;
-				for (UserTask ut : application.getUserTaskList()) {
-					if (ut.getGoalModelName().equals(goalModelName)
-							&& ut.getElementName().equals(elementName)) {
-						userDelegateOutTask = (UserDelegateOutTask) ut;
-						ut.setDone(true);
-						adapter.notifyDataSetChanged();
-						break;
-					}
-				}
-
-				// 获得选取的friend名字
-				String friendSelected = friends[choiceListener.getWhich()]
-						.split(":")[0];
-
-				// 发送消息给agent
-				SGMMessage msgToExternalAgent = new SGMMessage(
-						MesHeader_Mes2Manger.EXTERNAL_AGENT_MESSAGE, null,
-						goalModelName, elementName, friendSelected,
-						elementName, elementName,
-						MesBody_Mes2Manager.DelegateOut);
-
-				// 看是否有需要在委托出去的时候顺便传递出去的数据
-				if (userDelegateOutTask != null
-						&& userDelegateOutTask.getRequestData() != null) {
-					msgToExternalAgent.setContent(userDelegateOutTask
-							.getRequestData());
-				}
-
-				aideAgentInterface.sendMesToExternalAgent(msgToExternalAgent);
-
-			}
-		});
-		builder.setNegativeButton("Cancel",
-				new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						dialog.cancel();
-					}
-				});
-
-		Dialog dialog = builder.create();
-		return dialog;
-	}
-
-	private class ChoiceOnClickListener implements
-			DialogInterface.OnClickListener {
-
-		private int which = 0;
-
-		@Override
-		public void onClick(DialogInterface dialogInterface, int which) {
-			this.which = which;
-		}
-
-		public int getWhich() {
-			return which;
-		}
-	}
-
-	/**
-	 * 如果没有可委托对象，弹出这个警告对话框
-	 * 
-	 * @return
-	 */
-	private AlertDialog onCreateNullFriendsDialog() {
-
-		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-		builder.setMessage("No Friends!").setNeutralButton("OK",
-				new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						dialog.cancel();
-					}
-				});
-
-		AlertDialog dialog = builder.create();
-
-		return dialog;
-	}
-
-	private class MyFriendsReceiver extends BroadcastReceiver {
-
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			String action = intent.getAction();
-			if (action.equalsIgnoreCase("jade.delegate.FRIENDS")) {
-				progressDialog.dismiss();
-				String[] friends = intent.getExtras().getStringArray("Friends");
-				String goalModelName = intent.getExtras().getString(
-						"GoalModelName");
-				String elementName = intent.getExtras()
-						.getString("ElementName");
-
-				if (friends == null || friends.length == 0) {
-					android.util.Log
-							.e("MY_LOG",
-									"MyFriendsReceiver,friends is null or its length is 0.");
-					onCreateNullFriendsDialog().show();
-				} else {
-					android.util.Log.i("MY_LOG",
-							"MyFriendsReceiver,friends num is: "
-									+ friends.length);
-					onCreateFriendsDialog(friends, goalModelName, elementName)
-							.show();
-				}
-			}
-		}
-
-	}
+	// /**
+	// * 创建一个进度条对话框
+	// *
+	// * @return ProgressDialog
+	// */
+	// private ProgressDialog onCreateProgressDialog() {
+	// ProgressDialog dialog = new ProgressDialog(getActivity());
+	// dialog.setMessage("Loading friends. Please wait...");
+	// return dialog;
+	// }
+	//
+	// /**
+	// * 创建一个显示可委托对象的单选对话框
+	// *
+	// * @return Dialog
+	// */
+	// private Dialog onCreateFriendsDialog(final String[] friends,
+	// final String goalModelName, final String elementName) {
+	//
+	// AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+	// final ChoiceOnClickListener choiceListener = new ChoiceOnClickListener();
+	// builder.setTitle("Select a friend:");
+	// builder.setSingleChoiceItems(friends, 0, choiceListener);
+	//
+	// builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+	//
+	// @Override
+	// public void onClick(DialogInterface dialog, int which) {
+	//
+	// // 要把这个task设置成已做过状态
+	// UserDelegateOutTask userDelegateOutTask = null;
+	// for (UserTask ut : application.getUserTaskList()) {
+	// if (ut.getGoalModelName().equals(goalModelName)
+	// && ut.getElementName().equals(elementName)) {
+	// userDelegateOutTask = (UserDelegateOutTask) ut;
+	// ut.setDone(true);
+	// adapter.notifyDataSetChanged();
+	// break;
+	// }
+	// }
+	//
+	// // 获得选取的friend名字
+	// String friendSelected = friends[choiceListener.getWhich()]
+	// .split(":")[0];
+	//
+	// // 发送消息给agent
+	// SGMMessage msgToExternalAgent = new SGMMessage(
+	// MesHeader_Mes2Manger.EXTERNAL_AGENT_MESSAGE, null,
+	// goalModelName, elementName, friendSelected,
+	// elementName, elementName,
+	// MesBody_Mes2Manager.DelegateOut);
+	//
+	// // 看是否有需要在委托出去的时候顺便传递出去的数据
+	// if (userDelegateOutTask != null
+	// && userDelegateOutTask.getRequestData() != null) {
+	// msgToExternalAgent.setContent(userDelegateOutTask
+	// .getRequestData());
+	// }
+	//
+	// aideAgentInterface.sendMesToExternalAgent(msgToExternalAgent);
+	//
+	// }
+	// });
+	// builder.setNegativeButton("Cancel",
+	// new DialogInterface.OnClickListener() {
+	//
+	// @Override
+	// public void onClick(DialogInterface dialog, int which) {
+	// dialog.cancel();
+	// }
+	// });
+	//
+	// Dialog dialog = builder.create();
+	// return dialog;
+	// }
+	//
+	// private class ChoiceOnClickListener implements
+	// DialogInterface.OnClickListener {
+	//
+	// private int which = 0;
+	//
+	// @Override
+	// public void onClick(DialogInterface dialogInterface, int which) {
+	// this.which = which;
+	// }
+	//
+	// public int getWhich() {
+	// return which;
+	// }
+	// }
+	//
+	// /**
+	// * 如果没有可委托对象，弹出这个警告对话框
+	// *
+	// * @return
+	// */
+	// private AlertDialog onCreateNullFriendsDialog() {
+	//
+	// AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+	// builder.setMessage("No Friends!").setNeutralButton("OK",
+	// new DialogInterface.OnClickListener() {
+	//
+	// @Override
+	// public void onClick(DialogInterface dialog, int which) {
+	// dialog.cancel();
+	// }
+	// });
+	//
+	// AlertDialog dialog = builder.create();
+	//
+	// return dialog;
+	// }
+	//
+	// private class MyFriendsReceiver extends BroadcastReceiver {
+	//
+	// @Override
+	// public void onReceive(Context context, Intent intent) {
+	// String action = intent.getAction();
+	// if (action.equalsIgnoreCase("jade.delegate.FRIENDS")) {
+	// progressDialog.dismiss();
+	// String[] friends = intent.getExtras().getStringArray("Friends");
+	// String goalModelName = intent.getExtras().getString(
+	// "GoalModelName");
+	// String elementName = intent.getExtras()
+	// .getString("ElementName");
+	//
+	// if (friends == null || friends.length == 0) {
+	// android.util.Log
+	// .e("MY_LOG",
+	// "MyFriendsReceiver,friends is null or its length is 0.");
+	// onCreateNullFriendsDialog().show();
+	// } else {
+	// android.util.Log.i("MY_LOG",
+	// "MyFriendsReceiver,friends num is: "
+	// + friends.length);
+	// onCreateFriendsDialog(friends, goalModelName, elementName)
+	// .show();
+	// }
+	// }
+	// }
+	//
+	// }
 
 }
 
@@ -257,24 +253,24 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 	private Context mContext;
 	private LayoutInflater mInflater;
 	private AideAgentInterface aideAgentInterface; // agent interface
-	private ProgressDialog progressDialog;
+
+	// private ProgressDialog progressDialog;
 
 	public UserTaskAdapter(Context context, int resource,
-			List<UserTask> objects, AideAgentInterface aideAgentInterface,
-			ProgressDialog progressDialog) {
+			List<UserTask> objects, AideAgentInterface aideAgentInterface) {
 		super(context, resource, objects);
-		init(context, resource, objects, aideAgentInterface, progressDialog);
+		init(context, resource, objects, aideAgentInterface);
 	}
 
 	private void init(Context context, int resource, List<UserTask> objects,
-			AideAgentInterface aideAgentInterface, ProgressDialog progressDialog) {
+			AideAgentInterface aideAgentInterface) {
 		this.mContext = context;
 		this.mInflater = (LayoutInflater) context
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		this.mResource = resource;
 		this.mObjects = objects;
 		this.aideAgentInterface = aideAgentInterface;
-		this.progressDialog = progressDialog;
+		// this.progressDialog = progressDialog;
 	}
 
 	@Override
@@ -327,15 +323,14 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 		holder.done.setOnClickListener(new UserTaskDoneListener(usertask));
 		holder.quit.setOnClickListener(new UserTaskQuitListener(usertask));
 
-		if (usertask instanceof UserDelegateOutTask) { // 如果是需要用户选择委托去向的任务
-			holder.done.setText("Friends");
-			description += "You need to choose a friend to help you complete the goal:\n";
+		if (usertask instanceof UserDelegateInTask) { // 如果是需要用户选择委托去向的任务
+			holder.done.setText("Accept");
 		} else if (usertask instanceof UserShowContentTask) {// 展示内容的user task
-			holder.done.setText("show");
+			holder.done.setText("Show");
 		} else if (usertask instanceof UserTakePictureTask) {// 让用户拍照的task
-			holder.done.setText("camera");
+			holder.done.setText("Camera");
 		} else if (usertask instanceof UserInputTextTask) {// 让用户输入一段文本的task
-			holder.done.setText("input");
+			holder.done.setText("Input");
 		} else {// 普通的user task
 			description += "You need to do:\n";
 		}
@@ -351,7 +346,7 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 			holder.quit.setTextColor(mContext.getResources().getColor(
 					R.color.unclickable_grey));
 		} else {
-			if (usertask instanceof UserDelegateOutTask) {
+			if (usertask instanceof UserDelegateInTask) {
 				holder.taskLayout.setBackgroundColor(mContext.getResources()
 						.getColor(R.color.nodone_green));
 			} else if (usertask instanceof UserShowContentTask) {
@@ -406,12 +401,20 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 			if (userTask instanceof UserInputTextTask) {
 				showInputTextDialog(userTask);
 			}
-			// 是需要用户选择委托去向的任务
-			else if (userTask instanceof UserDelegateOutTask) {
-				// 调用agent从platform上搜索可委托对象
-				aideAgentInterface.obtainFriends(userTask);
-				// 把进度条对话框显示出来
-				progressDialog.show();
+			// // 是需要用户选择委托去向的任务
+			// else if (userTask instanceof UserDelegateOutTask) {
+			// // 调用agent从platform上搜索可委托对象
+			// aideAgentInterface.obtainFriends(userTask);
+			// // 把进度条对话框显示出来
+			// progressDialog.show();
+			// }
+			// 是否接受别人委托的任务
+			else if (userTask instanceof UserDelegateInTask) {
+				aideAgentInterface
+						.sendMesToManager(((UserDelegateInTask) userTask)
+								.getRelateSgmMessage());
+				userTask.setDone(true);
+				notifyDataSetChanged();
 			}
 			// 展示内容的user task
 			else if (userTask instanceof UserShowContentTask) {
@@ -456,12 +459,27 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 
 		@Override
 		public void onClick(View v) {
-			if (userTask instanceof UserDelegateOutTask) { // 如果是需要用户选择委托去向的任务
-				aideAgentInterface.sendMesToManager(new SGMMessage(
-						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null,
-						null, null, userTask.getGoalModelName(), userTask
-								.getElementName(), MesBody_Mes2Manager.QuitGM));
-
+			// if (userTask instanceof UserDelegateOutTask) { //
+			// 如果是需要用户选择委托去向的任务
+			// aideAgentInterface.sendMesToManager(new SGMMessage(
+			// MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null,
+			// null, null, userTask.getGoalModelName(), userTask
+			// .getElementName(), MesBody_Mes2Manager.QuitGM));
+			//
+			// }
+			if (userTask instanceof UserDelegateInTask) {
+				SGMMessage relateMessage = ((UserDelegateInTask) userTask)
+						.getRelateSgmMessage();
+				SGMMessage msgToExternalAgent = new SGMMessage(
+						MesHeader_Mes2Manger.ELEMENT_MESSAGE, null, null, null,
+						relateMessage.getSender().getAgentName(), relateMessage
+								.getSender().getGoalModelName(), relateMessage
+								.getSender().getElementName(),
+						MesBody_Mes2Manager.DelegatedFailed);
+				msgToExternalAgent.setDescription("GoalModel-"
+						+ relateMessage.getSender().getElementName()
+						+ " is failed!");
+				aideAgentInterface.sendMesToExternalAgent(msgToExternalAgent);
 			} else {
 				aideAgentInterface.sendMesToManager(new SGMMessage(
 						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null,

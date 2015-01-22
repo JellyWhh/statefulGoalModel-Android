@@ -45,7 +45,7 @@ public class ElementMachine implements Runnable {
 
 	private Date startWaitingTime; // 开始等待的时间
 	private int waitingTimeLimit; // 等待时间限制
-	private int retryTimes;// 可重试次数，也就是一共可以执行的次数
+	private int retryTimes = 1;// 可重试次数，也就是一共可以执行的次数
 
 	private boolean finish; // 标识当前machine是否运行结束，结束后run()里面的while循环将停止
 
@@ -595,6 +595,7 @@ public class ElementMachine implements Runnable {
 			// 检查已经执行的次数是否小于设定的可重试次数，如果小于，可重新进入执行，否则表示已经重试完毕，进入failed。
 			if (currentExecutingIndex < this.getRetryTimes()) {
 				retState = State.Executing;
+				resetExecuting();
 			} else {
 				retState = State.Failed;
 			}
@@ -810,6 +811,11 @@ public class ElementMachine implements Runnable {
 	}
 
 	private void checkCommitmentCondition() {
+		// 第一次检查承诺条件的时候还没有设置startTime
+		if (this.getStartTime() == null) {
+			this.getCommitmentCondition().setSatisfied(true);
+			return;
+		}
 
 		// 单位是分钟
 		long timeLimit = Long.parseLong(this.getCommitmentCondition()

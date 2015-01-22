@@ -7,17 +7,24 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Hashtable;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import edu.fudan.agent.support.AideAgentSupport;
+import edu.fudan.agent.support.ServiceInvocationUtil;
+import edu.fudan.se.agent.data.RequestUserInformation;
+import edu.fudan.se.agent.data.UserInformation;
 import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
 import edu.fudan.se.goalmachine.message.MesHeader_Mes2Manger;
 import edu.fudan.se.goalmachine.message.SGMMessage;
 import edu.fudan.se.goalmodel.GoalModel;
 import edu.fudan.se.goalmodel.GoalModelManager;
+import edu.fudan.se.goalmodel.RequestData;
+import edu.fudan.se.initial.SGMApplication;
 import edu.fudan.se.log.Log;
-import edu.fudan.se.userMes.UserDelegateOutTask;
+import edu.fudan.se.userMes.UserDelegateInTask;
 import edu.fudan.se.userMes.UserMessage;
 import edu.fudan.se.userMes.UserTask;
 import jade.core.AID;
@@ -32,12 +39,13 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
 
 /**
- * @author qwy
+ * @author qwy, whh
  * 
  */
 public class AideAgent extends Agent implements AideAgentInterface {
 	private static final long serialVersionUID = -540261740171554489L;
 
+	private SGMApplication sgmApplication;
 	private GoalModelManager goalModelManager;
 
 	private ArrayList<UserTask> userTaskList;
@@ -45,31 +53,45 @@ public class AideAgent extends Agent implements AideAgentInterface {
 
 	private Context context;
 
+	int canInvokeTimes = 2;// agent收到调用服务失败消息后重新查找替换服务的次数
+	ArrayList<String> allIntentServiceNameArrayList = new ArrayList<>();
+	ArrayList<ServiceInvocationUtil> serviceInvocationUtilList = new ArrayList<>();
+
+	// 用来临时储存委托出去的时候goalModelName-ElementName对应的requestData
+	Hashtable<String, RequestData> delegateOutRequestData = new Hashtable<>();
+
 	@Override
 	protected void setup() {
-		// TODO Auto-generated method stub
 		super.setup();
 		Object[] args = getArguments();
 		if (args != null && args.length > 0) {
 			if (args[0] instanceof Context) {
 				context = (Context) args[0];
 			}
-			if (args[1] instanceof GoalModelManager) {
-				goalModelManager = (GoalModelManager) args[1];
+			if (args[1] instanceof SGMApplication) {
+				sgmApplication = (SGMApplication) args[1];
 			}
-			if (args[2] instanceof ArrayList<?>) {
-				userTaskList = (ArrayList<UserTask>) args[2];
-			}
-			if (args[3] instanceof ArrayList<?>) {
-				userMessageList = (ArrayList<UserMessage>) args[3];
-			}
+			// if (args[1] instanceof GoalModelManager) {
+			// goalModelManager = (GoalModelManager) args[1];
+			// }
+			// if (args[2] instanceof ArrayList<?>) {
+			// userTaskList = (ArrayList<UserTask>) args[2];
+			// }
+			// if (args[3] instanceof ArrayList<?>) {
+			// userMessageList = (ArrayList<UserMessage>) args[3];
+			// }
+			goalModelManager = sgmApplication.getGoalModelManager();
+			userTaskList = sgmApplication.getUserTaskList();
+			userMessageList = sgmApplication.getUserMessageList();
 		}
-
-		// goalModelController = new GoalModelController();
 
 		registerO2AInterface(AideAgentInterface.class, this);
 
-		// 在黄页服务中注册所有的goal model服务
+		/* 初始化所有可能用到的intent service */
+		AideAgentSupport
+				.initAllIntentService(this.allIntentServiceNameArrayList);
+
+		/* 在黄页服务中注册所有的goal model服务 */
 		DFAgentDescription dfd = new DFAgentDescription();
 		dfd.setName(getAID());
 		for (GoalModel gm : goalModelManager.getGoalModelList().values()) {
@@ -82,7 +104,6 @@ public class AideAgent extends Agent implements AideAgentInterface {
 		try {
 			DFService.register(this, dfd);
 		} catch (FIPAException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -113,11 +134,6 @@ public class AideAgent extends Agent implements AideAgentInterface {
 	@Override
 	public void sendMesToExternalAgent(SGMMessage msg) {
 		this.addBehaviour(new SendMesToExternalAgent(this, msg));
-	}
-
-	@Override
-	public void obtainFriends(UserTask userTask) {
-		this.addBehaviour(new ObtainFriends(this, userTask));
 	}
 
 	@Override
@@ -175,9 +191,11 @@ public class AideAgent extends Agent implements AideAgentInterface {
 
 		private static final long serialVersionUID = -628259960649979121L;
 		private SGMMessage msg;
+		private Agent agent;
 
 		public HandleMesFromManager(Agent a, SGMMessage msg) {
 			super(a);
+			this.agent = a;
 			this.msg = msg;
 		}
 
@@ -216,8 +234,23 @@ public class AideAgent extends Agent implements AideAgentInterface {
 				break;
 
 			case RequestService:
-				String serviceName = msg.getDescription();
-				Intent serviceIntent = new Intent(serviceName);
+				String abstractServiceName = msg.getDescription();
+				ArrayList<String> serviceInvocationChoice = AideAgentSupport
+						.getServiceNameListBasedAbstractServiceName(
+								abstractServiceName,
+								allIntentServiceNameArrayList);
+				// 第一次调用，直接调用可选服务中的第一个，并且记录服务调用信息
+				ServiceInvocationUtil serviceInvocationUtil = new ServiceInvocationUtil(
+						msg.getSender().getGoalModelName(), msg.getSender()
+								.getElementName(), msg);
+				serviceInvocationUtil.setInvocationTimes(1);// 第一次调用
+				serviceInvocationUtil.getAlreadyTriedServiceNameList().add(
+						serviceInvocationChoice.get(0));
+				serviceInvocationUtilList.add(serviceInvocationUtil);
+
+				// 开始服务调用
+				Intent serviceIntent = new Intent(
+						serviceInvocationChoice.get(0));
 				Bundle bundle = new Bundle();
 				bundle.putString("GOAL_MODEL_NAME", msg.getSender()
 						.getGoalModelName());
@@ -227,8 +260,6 @@ public class AideAgent extends Agent implements AideAgentInterface {
 				if (msg.getContent() != null) {
 					bundle.putSerializable("REQUEST_DATA_CONTENT",
 							msg.getContent());
-					// bundle.putByteArray("REQUEST_DATA_CONTENT",
-					// msg.getContent());
 				}
 
 				serviceIntent.putExtras(bundle);
@@ -250,30 +281,82 @@ public class AideAgent extends Agent implements AideAgentInterface {
 				break;
 
 			case DelegateOut:
-				String delegateOutTaskTime = df.format(new Date());
-				UserDelegateOutTask userDelegateOutTask = new UserDelegateOutTask(
-						delegateOutTaskTime,
-						msg.getSender().getGoalModelName(), msg.getSender()
-								.getElementName(), false);
-				// 有需要在委托出去时顺便传输的数据
+
+				String goalModelName = msg.getSender().getGoalModelName();
+				String elementName = msg.getSender().getElementName();
+
 				if (msg.getContent() != null) {
-					userDelegateOutTask.setRequestData(msg.getContent());
-				}
-				userTaskList.add(userDelegateOutTask);
-
-				String description2 = "You need to choose a friend to help you complete the goal:\n";
-				if (userDelegateOutTask.getDescription() == null
-						|| userDelegateOutTask.getDescription().equals("")) {
-					description2 += userDelegateOutTask.getElementName();
-				} else {
-					description2 += userDelegateOutTask.getDescription();
+					delegateOutRequestData.put(goalModelName + "#"
+							+ elementName, msg.getContent());
 				}
 
-				// 发送 弹窗广播，在MainActivity会监听这个广播然后弹出通知窗口
-				Intent broadcast_ndt = new Intent();
-				broadcast_ndt.setAction("jade.task.NOTIFICATION");
-				broadcast_ndt.putExtra("Content", description2);
-				context.sendBroadcast(broadcast_ndt);
+				ArrayList<String> friendsArrayList = new ArrayList<>();
+				DFAgentDescription template = new DFAgentDescription();
+				ServiceDescription serviceDescription = new ServiceDescription();
+				serviceDescription.setType("GOALMODEL");
+				serviceDescription.setName(elementName);
+				template.addServices(serviceDescription);
+				try {
+					DFAgentDescription[] results = DFService.search(agent,
+							template);
+					for (int i = 0; i < results.length; i++) {
+						String agentNickName = results[i].getName()
+								.getLocalName();
+						// 跳过自己
+						if ((!agentNickName.equals(this.getAgent()
+								.getLocalName()))
+								&& agentNickName != null
+								&& agentNickName != "") {
+							friendsArrayList.add(agentNickName);
+						}
+					}
+
+				} catch (FIPAException e) {
+					e.printStackTrace();
+				}
+
+				// 向server agent发送获取位置信息的ACLMessage
+				String content = goalModelName + "#" + elementName + "###";
+				for (String frientName : friendsArrayList) {
+					content += frientName + "---";
+				}
+
+				android.util.Log.i("MY_LOG",
+						"Send OBTAINLOCATION aclMessage to server agent...content is: "
+								+ content);
+
+				ACLMessage aclmsg = new ACLMessage(ACLMessage.CFP);
+				aclmsg.addReceiver(new AID("ServerAgent", AID.ISLOCALNAME));
+				aclmsg.setContent(content);
+				send(aclmsg);
+				// 然后会一直等待server agent回复信息，在handleMesFromExternalAgent会对信息进行处理
+
+				// String delegateOutTaskTime = df.format(new Date());
+				// UserDelegateOutTask userDelegateOutTask = new
+				// UserDelegateOutTask(
+				// delegateOutTaskTime,
+				// msg.getSender().getGoalModelName(), msg.getSender()
+				// .getElementName(), false);
+				// // 有需要在委托出去时顺便传输的数据
+				// if (msg.getContent() != null) {
+				// userDelegateOutTask.setRequestData(msg.getContent());
+				// }
+				// userTaskList.add(userDelegateOutTask);
+				//
+				// String description2 =
+				// "You need to choose a friend to help you complete the goal:\n";
+				// if (userDelegateOutTask.getDescription() == null
+				// || userDelegateOutTask.getDescription().equals("")) {
+				// description2 += userDelegateOutTask.getElementName();
+				// } else {
+				// description2 += userDelegateOutTask.getDescription();
+				// }
+				//
+				// // 发送 弹窗广播，在MainActivity会监听这个广播然后弹出通知窗口
+				// Intent broadcast_ndt = new Intent();
+				// broadcast_ndt.setAction("jade.task.NOTIFICATION");
+				// broadcast_ndt.putExtra("Content", description2);
+				// context.sendBroadcast(broadcast_ndt);
 				break;
 
 			default:
@@ -365,44 +448,104 @@ public class AideAgent extends Agent implements AideAgentInterface {
 
 				// 来自server agent的消息
 				if (msg.getPerformative() == ACLMessage.PROPOSE) {
-					String content = msg.getContent();
 
-					android.util.Log.i("MY_LOG", "server agent reply: "
-							+ content);
+					try {
+						RequestUserInformation requestUserInformation = (RequestUserInformation) msg
+								.getContentObject();
 
-					String[] item = content.split("###");
-					String goalModelElementName = item[0];
-					ArrayList<String> friendsLocationArrayList = new ArrayList<>();
+						String goalModelName = requestUserInformation
+								.getGoalModelName();
+						String elementName = requestUserInformation
+								.getElementName();
 
-					if (item.length > 1) { // 有friend location信息传过来
-						String[] userLocations = item[1].split("---");
-						for (int i = 0; i < userLocations.length; i++) {
-							// #号前面是昵称，后面是地址
-							String[] friendLocation = userLocations[i]
-									.split("#");
-							String item2 = friendLocation[0] + ":";
-							if (friendLocation[1].split("\n").length == 5) { // 有网络定位结果，也就是具体物理地址
-								item2 += friendLocation[1].split("\n")[4]
-										.split(":")[1];
+						ArrayList<UserInformation> userInformationList = requestUserInformation
+								.getUserInformations();
+						if (userInformationList == null
+								|| userInformationList.isEmpty()) {// 没有可委托对象
+
+							android.util.Log.i("MY_LOG", "no delegateDo user!");
+
+							SGMMessage sgmMessage = new SGMMessage(
+									MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE,
+									null, null, null, null, goalModelName,
+									elementName, MesBody_Mes2Manager.QuitGM);
+
+							android.util.Log.i("MY_LOG",
+									"Send mes to manager...");
+							if (goalModelManager.getMsgPool().offer(sgmMessage)) {
+								Log.logMessage(sgmMessage, true);
 							} else {
-								item2 += "UnKnown";
+								Log.logMessage(sgmMessage, false);
 							}
+						} else {
+							String delegateTo = AideAgentSupport
+									.getDelegateToBasedRanking(
+											userInformationList, sgmApplication
+													.getLocation(), this
+													.getAgent().getLocalName());
 
-							friendsLocationArrayList.add(item2);
+							android.util.Log.i("MY_LOG", " delegateDo user is "
+									+ delegateTo);
+
+							// 发送消息给agent
+							SGMMessage msgToExternalAgent = new SGMMessage(
+									MesHeader_Mes2Manger.EXTERNAL_AGENT_MESSAGE,
+									null, goalModelName, elementName,
+									delegateTo, elementName, elementName,
+									MesBody_Mes2Manager.DelegateOut);
+
+							RequestData requestData = delegateOutRequestData
+									.get(goalModelName + "#" + elementName);
+							if (requestData != null) {
+								msgToExternalAgent.setContent(requestData);
+							}
+							sendMesToExternalAgent(msgToExternalAgent);
 						}
+
+					} catch (UnreadableException e) {
+						e.printStackTrace();
 					}
-					// 发送 UI更新广播，在TaskFragment会监听这个广播然后弹出通知窗口
-					String[] friends = new String[friendsLocationArrayList
-							.size()];
-					friends = friendsLocationArrayList.toArray(friends);
-					Intent broadcast_fs = new Intent();
-					broadcast_fs.setAction("jade.delegate.FRIENDS");
-					broadcast_fs.putExtra("Friends", friends);
-					broadcast_fs.putExtra("GoalModelName",
-							goalModelElementName.split("#")[0]);
-					broadcast_fs.putExtra("ElementName",
-							goalModelElementName.split("#")[1]);
-					context.sendBroadcast(broadcast_fs);
+
+					// String content = msg.getContent();
+					//
+					// android.util.Log.i("MY_LOG", "server agent reply: "
+					// + content);
+					//
+					// String[] item = content.split("###");
+					// String goalModelElementName = item[0];
+					// ArrayList<String> friendsLocationArrayList = new
+					// ArrayList<>();
+					//
+					// if (item.length > 1) { // 有friend location信息传过来
+					// String[] userLocations = item[1].split("---");
+					// for (int i = 0; i < userLocations.length; i++) {
+					// // #号前面是昵称，后面是地址
+					// String[] friendLocation = userLocations[i]
+					// .split("#");
+					// String item2 = friendLocation[0] + ":";
+					// if (friendLocation[1].split("\n").length == 5) { //
+					// 有网络定位结果，也就是具体物理地址
+					// item2 += friendLocation[1].split("\n")[4]
+					// .split(":")[1];
+					// } else {
+					// item2 += "UnKnown";
+					// }
+					//
+					// friendsLocationArrayList.add(item2);
+					// }
+					// }
+					// // 发送 UI更新广播，在TaskFragment会监听这个广播然后弹出通知窗口
+					// String[] friends = new String[friendsLocationArrayList
+					// .size()];
+					// friends = friendsLocationArrayList.toArray(friends);
+					// Intent broadcast_fs = new Intent();
+					// broadcast_fs.setAction("jade.delegate.FRIENDS");
+					// broadcast_fs.putExtra("Friends", friends);
+					// broadcast_fs.putExtra("GoalModelName",
+					// goalModelElementName.split("#")[0]);
+					// broadcast_fs.putExtra("ElementName",
+					// goalModelElementName.split("#")[1]);
+					// context.sendBroadcast(broadcast_fs);
 				}
 
 				// 来自其他aide agent的ACLMessage.INFORM消息
@@ -447,13 +590,16 @@ public class AideAgent extends Agent implements AideAgentInterface {
 									+ " has completed the goal: "
 									+ inner_msg.getReceiver().getElementName()
 									+ "!";
+							goalModelManager.getMsgPool().offer(inner_msg);
 							break;
+
 						case DelegatedFailed:
 							userMesContent = inner_msg.getSender()
 									.getAgentName()
 									+ " didn't complete the goal: "
 									+ inner_msg.getReceiver().getElementName()
 									+ "!";
+							goalModelManager.getMsgPool().offer(inner_msg);
 							break;
 
 						case StartGM:
@@ -461,7 +607,22 @@ public class AideAgent extends Agent implements AideAgentInterface {
 									.getAgentName()
 									+ " want you to help him/her complete the goal: "
 									+ inner_msg.getReceiver().getElementName()
-									+ "! GoalModel has started!";
+									+ "! Please make a choice.";
+							// TODO 添加一个userDelegateInTask
+							UserDelegateInTask userDelegateInTask = new UserDelegateInTask(
+									mesTime, inner_msg.getReceiver()
+											.getElementName(), inner_msg
+											.getReceiver().getElementName(),
+									false);
+							userDelegateInTask
+									.setDescription(inner_msg.getSender()
+											.getAgentName()
+											+ "want you to help him/her complete the goal: "
+											+ inner_msg.getReceiver()
+													.getElementName());
+
+							userDelegateInTask.setRelateSgmMessage(inner_msg);
+							userTaskList.add(userDelegateInTask);
 							break;
 
 						default:
@@ -478,7 +639,6 @@ public class AideAgent extends Agent implements AideAgentInterface {
 								userMessage.getContent());
 						context.sendBroadcast(broadcast_nda);
 
-						goalModelManager.getMsgPool().offer(inner_msg);
 					}
 				}
 
@@ -487,72 +647,72 @@ public class AideAgent extends Agent implements AideAgentInterface {
 
 	}
 
-	/**
-	 * 从agent platform上获取可委托对象
-	 * 
-	 * @author whh
-	 * 
-	 */
-	private class ObtainFriends extends OneShotBehaviour {
-
-		private static final long serialVersionUID = 5110063359758030270L;
-		private Agent agent;
-		private UserTask userTask;
-
-		public ObtainFriends(Agent a, UserTask userTask) {
-			super(a);
-			this.agent = a;
-			this.userTask = userTask;
-		}
-
-		@Override
-		public void action() {
-			android.util.Log.i(
-					"MY_LOG",
-					"Obtain friends...goal model name is: "
-							+ userTask.getElementName());
-
-			ArrayList<String> friendsArrayList = new ArrayList<>();
-			DFAgentDescription template = new DFAgentDescription();
-			ServiceDescription serviceDescription = new ServiceDescription();
-			serviceDescription.setType("GOALMODEL");
-			serviceDescription.setName(userTask.getElementName());
-			template.addServices(serviceDescription);
-			try {
-				DFAgentDescription[] results = DFService
-						.search(agent, template);
-				for (int i = 0; i < results.length; i++) {
-					String agentNickName = results[i].getName().getLocalName();
-					// 跳过自己
-					if ((!agentNickName.equals(this.getAgent().getLocalName()))
-							&& agentNickName != null && agentNickName != "") {
-						friendsArrayList.add(agentNickName);
-					}
-				}
-
-			} catch (FIPAException e) {
-				e.printStackTrace();
-			}
-
-			// 向server agent发送获取位置信息的ACLMessage
-			String content = userTask.getGoalModelName() + "#"
-					+ userTask.getElementName() + "###";
-			for (String frientName : friendsArrayList) {
-				content += frientName + "---";
-			}
-
-			android.util.Log.i("MY_LOG",
-					"Send OBTAINLOCATION aclMessage to server agent...content is: "
-							+ content);
-
-			ACLMessage aclmsg = new ACLMessage(ACLMessage.CFP);
-			aclmsg.addReceiver(new AID("ServerAgent", AID.ISLOCALNAME));
-			aclmsg.setContent(content);
-			send(aclmsg);
-			// 然后会一直等待server agent回复信息，在handleMesFromExternalAgent会对信息进行处理
-		}
-
-	}
+	// /**
+	// * 从agent platform上获取可委托对象
+	// *
+	// * @author whh
+	// *
+	// */
+	// private class ObtainFriends extends OneShotBehaviour {
+	//
+	// private static final long serialVersionUID = 5110063359758030270L;
+	// private Agent agent;
+	// private UserTask userTask;
+	//
+	// public ObtainFriends(Agent a, UserTask userTask) {
+	// super(a);
+	// this.agent = a;
+	// this.userTask = userTask;
+	// }
+	//
+	// @Override
+	// public void action() {
+	// android.util.Log.i(
+	// "MY_LOG",
+	// "Obtain friends...goal model name is: "
+	// + userTask.getElementName());
+	//
+	// ArrayList<String> friendsArrayList = new ArrayList<>();
+	// DFAgentDescription template = new DFAgentDescription();
+	// ServiceDescription serviceDescription = new ServiceDescription();
+	// serviceDescription.setType("GOALMODEL");
+	// serviceDescription.setName(userTask.getElementName());
+	// template.addServices(serviceDescription);
+	// try {
+	// DFAgentDescription[] results = DFService
+	// .search(agent, template);
+	// for (int i = 0; i < results.length; i++) {
+	// String agentNickName = results[i].getName().getLocalName();
+	// // 跳过自己
+	// if ((!agentNickName.equals(this.getAgent().getLocalName()))
+	// && agentNickName != null && agentNickName != "") {
+	// friendsArrayList.add(agentNickName);
+	// }
+	// }
+	//
+	// } catch (FIPAException e) {
+	// e.printStackTrace();
+	// }
+	//
+	// // 向server agent发送获取位置信息的ACLMessage
+	// String content = userTask.getGoalModelName() + "#"
+	// + userTask.getElementName() + "###";
+	// for (String frientName : friendsArrayList) {
+	// content += frientName + "---";
+	// }
+	//
+	// android.util.Log.i("MY_LOG",
+	// "Send OBTAINLOCATION aclMessage to server agent...content is: "
+	// + content);
+	//
+	// ACLMessage aclmsg = new ACLMessage(ACLMessage.CFP);
+	// aclmsg.addReceiver(new AID("ServerAgent", AID.ISLOCALNAME));
+	// aclmsg.setContent(content);
+	// send(aclmsg);
+	// // 然后会一直等待server agent回复信息，在handleMesFromExternalAgent会对信息进行处理
+	// }
+	//
+	// }
 
 	private class HandleMesFromService extends OneShotBehaviour {
 
@@ -569,20 +729,84 @@ public class AideAgent extends Agent implements AideAgentInterface {
 		@Override
 		public void action() {
 			Log.logDebug("AideAgent", "HandleMesFromService()", "init.");
-			// if (msg.getBody().equals(MesBody_Mes2Manager.ServiceResult)) {
-			//
-			// SimpleDateFormat df = new SimpleDateFormat(
-			// "yyyy-MM-dd HH:mm:ss");
-			// String mesTime = df.format(new Date());
-			// UserMessage userMessage = new UserMessage(mesTime,
-			// msg.getDescription());
-			// userMessageList.add(userMessage);
-			//
-			// Intent broadcast_nda = new Intent();
-			// broadcast_nda.setAction("jade.mes.NOTIFICATION");
-			// broadcast_nda.putExtra("Content", userMessage.getContent());
-			// context.sendBroadcast(broadcast_nda);
-			// }
+			// 服务调用成功，直接把msg发送给manager
+			if (msg.getBody().equals(MesBody_Mes2Manager.ServiceExecutingDone)) {
+				android.util.Log.i("MY_LOG", "Send mes to manager...");
+				if (goalModelManager.getMsgPool().offer(msg)) {
+					Log.logMessage(msg, true);
+				} else {
+					Log.logMessage(msg, false);
+				}
+			}
+			// 服务调用失败
+			else if (msg.getBody().equals(
+					MesBody_Mes2Manager.ServiceExecutingFailed)) {
+				String goalModelName = msg.getReceiver().getGoalModelName();
+				String elementName = msg.getReceiver().getElementName();
+				ServiceInvocationUtil serviceInvocationUtil = AideAgentSupport
+						.getServiceInvocationUtil(goalModelName, elementName,
+								serviceInvocationUtilList);
+				int invocationTimes = serviceInvocationUtil
+						.getInvocationTimes();
+
+				if (invocationTimes < canInvokeTimes) { // 还可以再重新尝试调用
+					SGMMessage originalSgmMessage = serviceInvocationUtil
+							.getSgmMessage();
+					ArrayList<String> serviceInvocationChoice = AideAgentSupport
+							.getServiceNameListBasedAbstractServiceName(
+									originalSgmMessage.getDescription(),
+									allIntentServiceNameArrayList);
+					// 把已经尝试过的服务名称移除
+					serviceInvocationChoice.removeAll(serviceInvocationUtil
+							.getAlreadyTriedServiceNameList());
+					if (serviceInvocationChoice.isEmpty()) {// 移除之后没有可选的了
+						android.util.Log.i("MY_LOG", "Send mes to manager...");
+						if (goalModelManager.getMsgPool().offer(msg)) {
+							Log.logMessage(msg, true);
+						} else {
+							Log.logMessage(msg, false);
+						}
+					} else {// 选择仍然可选的服务中的第一个
+
+						serviceInvocationUtil
+								.setInvocationTimes(invocationTimes++);
+						serviceInvocationUtil.getAlreadyTriedServiceNameList()
+								.add(serviceInvocationChoice.get(0));
+
+						// 开始服务调用
+						Intent serviceIntent = new Intent(
+								serviceInvocationChoice.get(0));
+						Bundle bundle = new Bundle();
+						bundle.putString("GOAL_MODEL_NAME", originalSgmMessage
+								.getSender().getGoalModelName());
+						bundle.putString("ELEMENT_NAME", originalSgmMessage
+								.getSender().getElementName());
+
+						if (originalSgmMessage.getContent() != null) {
+							bundle.putSerializable("REQUEST_DATA_CONTENT",
+									originalSgmMessage.getContent());
+						}
+
+						serviceIntent.putExtras(bundle);
+						context.startService(serviceIntent);
+						android.util.Log.i("MY_LOG",
+								"ServiceInvocation, goalModelName: "
+										+ goalModelName + ", elementName: "
+										+ elementName + ", serviceName: "
+										+ serviceInvocationChoice.get(0)
+										+ ", invocationTimes: "
+										+ invocationTimes);
+					}
+				} else {// 已经超过重试次数，直接把msg发送给manager
+					android.util.Log.i("MY_LOG", "Send mes to manager...");
+					if (goalModelManager.getMsgPool().offer(msg)) {
+						Log.logMessage(msg, true);
+					} else {
+						Log.logMessage(msg, false);
+					}
+				}
+			}
+
 		}
 
 	}
@@ -651,10 +875,9 @@ public class AideAgent extends Agent implements AideAgentInterface {
 			dfd.addServices(sd);
 
 			try {
+				// 这里是更新服务，而不是重新注册服务
 				DFService.modify(a, dfd);
-				//DFService.register(a, dfd);
 			} catch (FIPAException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

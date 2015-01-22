@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GoalModel name="testws" description="This is a goal model. Its name is testws 这个goal model用来测试web service">
+
+	<ElementMachine id="0" type="GoalMachine" name="testws"
+		level="0" description="testws">
+		<decomposition>0</decomposition>
+		<schedulerMethod>1</schedulerMethod>
+		<needDelegate>false</needDelegate>
+	</ElementMachine>
+
+	
+	<ElementMachine id="1" type="TaskMachine" name="setcityname"
+		level="1" description="set city name">
+		<parentGoal>testws</parentGoal>
+		<priorityLevel>1</priorityLevel>
+		<needPeopleInteraction>false</needPeopleInteraction>
+		<executingRequestedServiceName>setcityname</executingRequestedServiceName>
+	</ElementMachine>
+	
+	<ElementMachine id="2" type="TaskMachine" name="showweather"
+		level="1" description="show weather">
+		<parentGoal>testws</parentGoal>
+		<priorityLevel>1</priorityLevel>
+		<needPeopleInteraction>false</needPeopleInteraction>
+		<executingRequestedServiceName>weather</executingRequestedServiceName>
+	</ElementMachine>
+	
+	<RequestData name="cityname" from="setcityname" to="showweather" contentType="Text"></RequestData>
+
+</GoalModel>

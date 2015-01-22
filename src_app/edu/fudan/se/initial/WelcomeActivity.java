@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
+
 /**
  * 欢迎界面，也就是那个设置agent的界面
  * @author whh
@@ -27,6 +28,7 @@ public class WelcomeActivity extends Activity{
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
 		setContentView(R.layout.activity_welcome);
 		if (savedInstanceState == null) {
 			bt_setAgent = (Button) findViewById(R.id.bt_setAgent);

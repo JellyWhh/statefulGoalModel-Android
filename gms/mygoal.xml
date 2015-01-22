@@ -6,6 +6,9 @@
 		<decomposition>0</decomposition>
 		<schedulerMethod>1</schedulerMethod>
 		<needDelegate>false</needDelegate>
+		<!-- 承诺60分钟内做完 -->
+		<Condition type="COMMITMENT" valueType="Long" leftValueDes="TIME" operator="SMALLERTHAN" rightValue = "60">
+		</Condition>
 	</ElementMachine>
 
 	<ElementMachine id="1" type="GoalMachine" name="alice"
@@ -25,8 +28,9 @@
 		<priorityLevel>1</priorityLevel>
 		<needPeopleInteraction>false</needPeopleInteraction>
 		<!-- executingRequestedServiceName的格式必须是 AndroidManifest.xml中service标签中action name-->
+		<retryTimes>2</retryTimes>
 		<executingRequestedServiceName>setcityname</executingRequestedServiceName>
-		<Condition type="POST" valueType="Int" leftValueDes="Temperature" operator="BIGGERTHAN" rightValue = "0">
+		<Condition type="POST" valueType="Int" leftValueDes="Temperature" operator="SMALLERTHAN" rightValue = "0">
 		</Condition>
 	</ElementMachine>
 
@@ -35,6 +39,7 @@
 		<parentGoal>alice</parentGoal>
 		<priorityLevel>1</priorityLevel>
 		<needPeopleInteraction>true</needPeopleInteraction>
+		<retryTimes>2</retryTimes>
 	</ElementMachine>
 
 	<ElementMachine id="4" type="GoalMachine" name="bob"
@@ -73,6 +78,7 @@
 		<priorityLevel>3</priorityLevel>
 		<needPeopleInteraction>false</needPeopleInteraction>
 		<executingRequestedServiceName>weather</executingRequestedServiceName>
+		<retryTimes>2</retryTimes>
 		<Condition type="POST" valueType="Int" leftValueDes="Temperature" operator="SMALLERTHAN" rightValue = "0">
 		</Condition>
 	</ElementMachine>

@@ -53,6 +53,11 @@
                 <action android:name="service.intentservice.weather" />
             </intent-filter>
         </service>
+        <service android:name="service.async.webservice.IntentServiceWeatherCandidate" >
+            <intent-filter>
+                <action android:name="service.intentservice.weatherCandidate" />
+            </intent-filter>
+        </service>
         <service android:name="service.async.webservice.TestIntentServiceSetCityName" >
             <intent-filter>
                 <action android:name="service.intentservice.setcityname" />
@@ -88,6 +93,11 @@
             android:enabled="true"
             android:process=":remote" >
         </service>
+        <!--
+        <meta-data
+                android:name="com.amap.api.v2.apikey"
+                android:value="918a29c9b410022958bb4c013403467e"/>
+        -->
 
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
