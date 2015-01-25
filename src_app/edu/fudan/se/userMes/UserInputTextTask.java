@@ -10,8 +10,9 @@ package edu.fudan.se.userMes;
  */
 public class UserInputTextTask extends UserTask {
 
-	public UserInputTextTask(String time, String goalModelName,
-			String elementName, boolean isDone) {
-		super(time, goalModelName, elementName, isDone);
+	public UserInputTextTask(String time, String fromAgentName,
+			String goalModelName, String elementName) {
+		super(time, fromAgentName, goalModelName, elementName);
 	}
+
 }

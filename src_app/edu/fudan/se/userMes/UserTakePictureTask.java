@@ -11,9 +11,8 @@ package edu.fudan.se.userMes;
  */
 public class UserTakePictureTask extends UserTask {
 
-	public UserTakePictureTask(String time, String goalModelName,
-			String elementName, boolean isDone) {
-		super(time, goalModelName, elementName, isDone);
+	public UserTakePictureTask(String time, String fromAgentName,
+			String goalModelName, String elementName) {
+		super(time, fromAgentName, goalModelName, elementName);
 	}
-
 }

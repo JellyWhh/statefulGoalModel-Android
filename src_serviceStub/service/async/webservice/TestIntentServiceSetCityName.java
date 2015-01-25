@@ -13,7 +13,7 @@ import android.app.IntentService;
 import android.content.Intent;
 
 /**
- * 用来测试数据传递，这个服务给intentServiceWeather里用到的cityname赋值
+ * 这个服务返回一条文本信息，可用来作为天气服务的输入，也就是城市名字
  * 
  * @author whh
  * 
@@ -46,17 +46,17 @@ public class TestIntentServiceSetCityName extends IntentService {
 		System.out.println("TestIntentServiceSetCityName onDestroy");
 
 		// 在destory前把天气信息通过agent发送给manager
+		// 服务执行成功
 		SGMMessage msg = new SGMMessage(
-				MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null, null,
-				null, goalModelName, elementName,
-				MesBody_Mes2Manager.ServiceExecutingDone);
-		RequestData requestData = new RequestData("Text");
-		requestData.setContent(retCityName.getBytes());
-		msg.setContent(requestData);
+				MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, goalModelName, null,
+				elementName, MesBody_Mes2Manager.ServiceExecutingDone);
+		RequestData retRequestData = new RequestData("cityName", "Text");
+		retRequestData.setContent(retCityName.getBytes());
+		msg.setRetContent(retRequestData);
 
 		GetAgent.getAideAgentInterface((SGMApplication) getApplication())
 				.sendMesToManager(msg);
-		
+
 		super.onDestroy();
 	}
 

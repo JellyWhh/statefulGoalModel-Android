@@ -9,6 +9,7 @@ import java.util.Date;
 import edu.fudan.se.goalmodel.RequestData;
 import edu.fudan.se.initial.SGMApplication;
 import edu.fudan.se.userMes.UserShowContentTask;
+import edu.fudan.se.userMes.UserTask;
 import android.app.IntentService;
 import android.content.Intent;
 
@@ -57,8 +58,9 @@ public class IntentServiceShowContent extends IntentService {
 
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String delegateOutTaskTime = df.format(new Date());
-		UserShowContentTask userShowContentTask = new UserShowContentTask(
-				delegateOutTaskTime, goalModelName, elementName, false);
+		UserShowContentTask userShowContentTask = new UserShowContentTask(delegateOutTaskTime, goalModelName, elementName);
+		// UserShowContentTask userShowContentTask = new UserShowContentTask(
+		// delegateOutTaskTime, goalModelName, elementName, false);
 		// 有需要展示的数据
 		if (requestData != null) {
 			userShowContentTask.setRequestData(requestData);

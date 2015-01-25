@@ -56,9 +56,9 @@ public class GoalModelFragment extends Fragment {
 		super.onCreate(savedInstanceState);
 
 		application = (SGMApplication) getActivity().getApplication();
-		
+
 		aideAgentInterface = GetAgent.getAideAgentInterface(application);
-		
+
 	}
 
 	@Override
@@ -219,33 +219,49 @@ public class GoalModelFragment extends Fragment {
 
 			case R.id.bt_dialog_start:
 				aideAgentInterface.sendMesToManager(new SGMMessage(
-						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null,
-						null, null, goalModel.getName(), null,
+						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, goalModel
+								.getName(), null, null,
 						MesBody_Mes2Manager.StartGM));
+//				aideAgentInterface.sendMesToManager(new SGMMessage(
+//						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null,
+//						null, null, goalModel.getName(), null,
+//						MesBody_Mes2Manager.StartGM));
 				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				break;
 
 			case R.id.bt_dialog_suspend:
 				aideAgentInterface.sendMesToManager(new SGMMessage(
-						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null,
-						null, null, goalModel.getName(), null,
+						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, goalModel
+								.getName(), null, null,
 						MesBody_Mes2Manager.SuspendGM));
+//				aideAgentInterface.sendMesToManager(new SGMMessage(
+//						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null,
+//						null, null, goalModel.getName(), null,
+//						MesBody_Mes2Manager.SuspendGM));
 				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				break;
 
 			case R.id.bt_dialog_resume:
 				aideAgentInterface.sendMesToManager(new SGMMessage(
-						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null,
-						null, null, goalModel.getName(), null,
+						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, goalModel
+								.getName(), null, null,
 						MesBody_Mes2Manager.ResumeGM));
+//				aideAgentInterface.sendMesToManager(new SGMMessage(
+//						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null,
+//						null, null, goalModel.getName(), null,
+//						MesBody_Mes2Manager.ResumeGM));
 				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				break;
 
 			case R.id.bt_dialog_stop:
 				aideAgentInterface.sendMesToManager(new SGMMessage(
-						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null,
-						null, null, goalModel.getName(), null,
+						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, goalModel
+								.getName(), null, null,
 						MesBody_Mes2Manager.StopGM));
+//				aideAgentInterface.sendMesToManager(new SGMMessage(
+//						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null,
+//						null, null, goalModel.getName(), null,
+//						MesBody_Mes2Manager.StopGM));
 				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				break;
 
@@ -253,9 +269,13 @@ public class GoalModelFragment extends Fragment {
 				// reset的时候要把让用户做的任务列表中的相关任务清除
 				application.clearTasksOfGoalModel(goalModel);
 				aideAgentInterface.sendMesToManager(new SGMMessage(
-						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null,
-						null, null, goalModel.getName(), null,
+						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, goalModel
+								.getName(), null, null,
 						MesBody_Mes2Manager.ResetGM));
+//				aideAgentInterface.sendMesToManager(new SGMMessage(
+//						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null,
+//						null, null, goalModel.getName(), null,
+//						MesBody_Mes2Manager.ResetGM));
 				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				break;
 

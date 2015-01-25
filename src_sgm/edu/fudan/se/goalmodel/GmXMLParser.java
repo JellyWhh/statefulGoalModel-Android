@@ -3,18 +3,26 @@
  */
 package edu.fudan.se.goalmodel;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import android.util.Log;
 
 import edu.fudan.se.contextmanager.CTemperature;
 import edu.fudan.se.contextmanager.CTime;
@@ -126,7 +134,6 @@ public class GmXMLParser {
 						// System.err.println(propertyNodeList.getLength());
 						String parentGoal = "";
 						int decomposition = 0, schedulerMethod = 0, priorityLevel = 0, waitingTimeLimit = 0, retryTimes = 0;
-						boolean needDelegate = false, needPeopleInteraction = false;
 
 						String executingRequestedServiceName = "";
 						Condition preCondition = null, postCondition = null, invariantCondition = null, commitmentCondition = null, contextCondition = null;
@@ -163,16 +170,16 @@ public class GmXMLParser {
 									retryTimes = Integer.parseInt(propertyNode
 											.getTextContent());
 									break;
-								case "needDelegate":
-									needDelegate = Boolean
-											.parseBoolean(propertyNode
-													.getTextContent());
-									break;
-								case "needPeopleInteraction":
-									needPeopleInteraction = Boolean
-											.parseBoolean(propertyNode
-													.getTextContent());
-									break;
+								// case "needDelegate":
+								// needDelegate = Boolean
+								// .parseBoolean(propertyNode
+								// .getTextContent());
+								// break;
+								// case "needPeopleInteraction":
+								// needPeopleInteraction = Boolean
+								// .parseBoolean(propertyNode
+								// .getTextContent());
+								// break;
 								case "executingRequestedServiceName":
 									// 要把xml中的短的service name映射成完成的服务地址
 									// executingRequestedServiceName =
@@ -322,18 +329,18 @@ public class GmXMLParser {
 						if (type.equals("GoalMachine")) {
 							elementMachine = new GoalMachine(name,
 									decomposition, schedulerMethod,
-									parentElementMachine, level, needDelegate);
+									parentElementMachine, level);
 
 						} else if (type.equals("TaskMachine")) {
 							elementMachine = new TaskMachine(name,
 									parentElementMachine, level,
-									needPeopleInteraction);
-							// 不需要人的参与，而是需要调用服务的
-							if (!needPeopleInteraction
-									&& executingRequestedServiceName != "") {
-								((TaskMachine) elementMachine)
-										.setExecutingRequestedServiceName(executingRequestedServiceName);
-							}
+									executingRequestedServiceName);
+							// // 不需要人的参与，而是需要调用服务的
+							// if (!needPeopleInteraction
+							// && executingRequestedServiceName != "") {
+							// ((TaskMachine) elementMachine)
+							// .setExecutingRequestedServiceName(executingRequestedServiceName);
+							// }
 						}
 
 						elementMachine.setDescription(description);
@@ -341,9 +348,9 @@ public class GmXMLParser {
 							elementMachine
 									.setWaitingTimeLimit(waitingTimeLimit);
 						}
-						if (retryTimes != 0) {
-							elementMachine.setRetryTimes(retryTimes);
-						}
+						// if (retryTimes != 0) {
+						// elementMachine.setRetryTimes(retryTimes);
+						// }
 
 						// 设置各种condition
 						if (preCondition != null) {
@@ -406,7 +413,7 @@ public class GmXMLParser {
 								contentType);
 						goalModel.getAssignmentHashtable().put(from,
 								requestData);
-						goalModel.getParameterHashtable().put(to, from);
+						goalModel.getParameterMapHashtable().put(to, from);
 					}
 
 					// EventBinding节点
@@ -495,12 +502,78 @@ public class GmXMLParser {
 		table.put("ResetGM", ExternalEvent.resetGM);
 		table.put("EndTE", ExternalEvent.endTE);
 		table.put("QuitTE", ExternalEvent.quitTE);
-		table.put("QuitGM", ExternalEvent.quitGM);
 		table.put("ServiceExecutingDone", ExternalEvent.serviceExecutingDone);
 		table.put("ServiceExecutingFailed",
 				ExternalEvent.serviceExecutingFailed);
-		table.put("DelegatedAchieved", ExternalEvent.delegatedAchieved);
-		table.put("DelegatedFailed", ExternalEvent.delegatedFailed);
+	}
+
+	public static void editGoalModel(String filePath,
+			HashMap<String, Integer> toCustom) {
+		try {
+			// 得到DOM解析器的工厂实例
+			DocumentBuilderFactory domfac = DocumentBuilderFactory
+					.newInstance();
+			// 从DOM工厂获得DOM解析器
+			DocumentBuilder dombuilder = domfac.newDocumentBuilder();
+			// 把要解析的XML文档转化为输入流，以便DOM解析器解析它
+			InputStream is = new FileInputStream(filePath);
+			// 解析XML文档的输入流，得到一个Document
+			Document doc = dombuilder.parse(is);
+			// 得到XML文档的根节点(books)
+			Element root = doc.getDocumentElement();
+			// 获得根节点的所有属性名和值
+
+			// 得到根节点的所有子节点，也就是ElementMachine节点和RequestData节点
+			NodeList emNodeList = root.getChildNodes();
+			for (int i = 0; i < emNodeList.getLength(); i++) {
+
+				Node emNode = emNodeList.item(i);// 这个node是element machine节点
+				// 判断是不是子节点
+				if (emNode.getNodeType() == Node.ELEMENT_NODE) {
+
+					// ElementMachine elementMachine;
+					if (emNode.getNodeName().equals("ElementMachine")) {
+						String name = emNode.getAttributes()
+								.getNamedItem("name").getNodeValue();
+
+						if (toCustom.get(name) != null) {
+							// 获得子节点的所有子节点，也就是decomposition, schedulerMethod,
+							// condition等节点
+							NodeList propertyNodeList = emNode.getChildNodes();
+							for (int j = 0; j < propertyNodeList.getLength(); j++) {
+								Node propertyNode = propertyNodeList.item(j);
+								if (propertyNode.getNodeType() == Node.ELEMENT_NODE) {
+									if (propertyNode.getNodeName().equals(
+											"priorityLevel")) {
+										propertyNode.setTextContent(String
+												.valueOf(toCustom.get(name)));
+										propertyNode.setNodeValue(String
+												.valueOf(toCustom.get(name)));
+										// Log.i("MY_LOG", "EditXML: name: " +
+										// name + ", priority: " +
+										// propertyNode.getTextContent());
+									}
+								}
+							}
+						}
+
+					}
+				}
+
+			}
+
+			// 保存修改后的文件
+			TransformerFactory tFactory = TransformerFactory.newInstance();
+			Transformer transformer = tFactory.newTransformer();
+
+			DOMSource source = new DOMSource(doc);
+			StreamResult result = new StreamResult(new File(filePath));
+			transformer.transform(source, result);
+
+		} catch (Exception e) {
+			System.err.println("GmXMLParser edit goal model error!!!!");
+			e.printStackTrace();
+		}
 	}
 
 }

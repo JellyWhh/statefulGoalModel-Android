@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GoalModel name="testNew" description="这是个测试goal model，有11个目标，其中有7个task machine, ">
+
+	<ElementMachine id="0" type="GoalMachine" name="testNew"
+		level="0" description="test new">
+		<decomposition>0</decomposition>
+		<schedulerMethod>1</schedulerMethod>
+	</ElementMachine>
+
+	<ElementMachine id="1" type="GoalMachine" name="weather"
+		level="1" description="weather">
+		<parentGoal>testNew</parentGoal>
+		<decomposition>0</decomposition>
+		<schedulerMethod>1</schedulerMethod>
+		<priorityLevel>1</priorityLevel>
+	</ElementMachine>
+
+	<ElementMachine id="2" type="GoalMachine" name="setCityName"
+		level="2" description="set city name">
+		<parentGoal>weather</parentGoal>
+		<decomposition>1</decomposition>
+		<schedulerMethod>-1</schedulerMethod>
+		<priorityLevel>1</priorityLevel>
+	</ElementMachine>
+	
+	<ElementMachine id="3" type="TaskMachine" name="manual"
+		level="3" description="input a city name.">
+		<parentGoal>setCityName</parentGoal>
+		<priorityLevel>1</priorityLevel>
+		<executingRequestedServiceName>manualSetCName</executingRequestedServiceName>
+	</ElementMachine>
+	
+	<ElementMachine id="4" type="TaskMachine" name="automatic"
+		level="3" description="automatically set a city name.">
+		<parentGoal>setCityName</parentGoal>
+		<priorityLevel>2</priorityLevel>
+		<executingRequestedServiceName>setcityname</executingRequestedServiceName>
+		<Condition type="CONTEXT" valueType="Int" leftValueDes="Temperature" operator="SMALLERTHAN" rightValue = "0">
+		</Condition>
+	</ElementMachine>
+
+	<ElementMachine id="5" type="TaskMachine" name="queryWeather"
+		level="2" description="input the weather info.">
+		<parentGoal>weather</parentGoal>
+		<priorityLevel>1</priorityLevel>
+		<executingRequestedServiceName>weather</executingRequestedServiceName>
+	</ElementMachine>
+
+	<ElementMachine id="6" type="GoalMachine" name="picture"
+		level="1" description="picture">
+		<parentGoal>testNew</parentGoal>
+		<decomposition>0</decomposition>
+		<schedulerMethod>1</schedulerMethod>
+		<priorityLevel>1</priorityLevel>
+	</ElementMachine>
+
+	<ElementMachine id="7" type="TaskMachine" name="inputPicContent"
+		level="2" description="input pic content">
+		<parentGoal>picture</parentGoal>
+		<priorityLevel>1</priorityLevel>
+		<executingRequestedServiceName>setcityname</executingRequestedServiceName>
+	</ElementMachine>
+
+	<ElementMachine id="8" type="TaskMachine" name="takePic"
+		level="2" description="take a picture">
+		<parentGoal>picture</parentGoal>
+		<priorityLevel>1</priorityLevel>
+		<waitingTimeLimit>5</waitingTimeLimit>
+		<executingRequestedServiceName>takePicture</executingRequestedServiceName>
+	</ElementMachine>
+	
+	<ElementMachine id="9" type="TaskMachine" name="showPic"
+		level="2" description="show the picture">
+		<parentGoal>picture</parentGoal>
+		<priorityLevel>1</priorityLevel>
+		<executingRequestedServiceName>showcontent</executingRequestedServiceName>
+	</ElementMachine>
+
+	<ElementMachine id="10" type="TaskMachine" name="eatLunch"
+		level="1" description="eat lunch.">
+		<parentGoal>testNew</parentGoal>
+		<priorityLevel>1</priorityLevel>
+		<executingRequestedServiceName>eatLunch</executingRequestedServiceName>
+	</ElementMachine>
+	
+	<RequestData name="cityName" from="manual-automatic" to="queryWeather" contentType="Text"></RequestData>
+	
+	
+	<RequestData name="picContent" from="inputPicContent" to="takePic" contentType="Text"></RequestData>
+	<RequestData name="pic" from="takePic" to="showPic" contentType="Image"></RequestData>
+
+</GoalModel>

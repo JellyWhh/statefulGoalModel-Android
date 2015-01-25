@@ -19,18 +19,6 @@ public class RequestData implements Serializable {
 	private String contentType; // 数据的类型，比如Image,Text,Voice等，在真正用数据时解码用
 	private byte[] content; // 储存具体内容的字节流
 	
-	/**
-	 * 构造方法
-	 * 
-	 * @param name
-	 *            这个数据的名字，只是用来标识，没什么具体用处
-	 * @param contentTye
-	 *            数据的类型，比如Image,Text,Voice等，在真正用数据时解码用
-	 */
-	public RequestData(String contentType) {
-		this.contentType = contentType;
-		this.content = new byte[512];
-	}
 
 	/**
 	 * 构造方法
@@ -50,16 +38,8 @@ public class RequestData implements Serializable {
 		return name;
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
 	public String getContentType() {
 		return contentType;
-	}
-
-	public void setContentType(String contentType) {
-		this.contentType = contentType;
 	}
 
 	public byte[] getContent() {

@@ -3,8 +3,6 @@
  */
 package edu.fudan.se.userMes;
 
-import edu.fudan.se.goalmodel.RequestData;
-
 /**
  * 用户要做的任务
  * 
@@ -14,29 +12,31 @@ import edu.fudan.se.goalmodel.RequestData;
 public class UserTask {
 
 	private String time;
+
+	private String fromAgentName;
 	private String goalModelName;
 	private String elementName;
+
 	private String description;
 	private boolean isDone; // 用户是否做过了
-	
-	/**
-	 * 有些user task可能需要request data
-	 */
-	private RequestData requestData;
-	
-	public UserTask(String time,String goalModelName, String elementName, boolean isDone) {
+
+	private String requestDataName;
+
+	public UserTask(String time, String fromAgentName, String goalModelName,
+			String elementName) {
 		this.time = time;
+		this.fromAgentName = fromAgentName;
 		this.goalModelName = goalModelName;
 		this.elementName = elementName;
-		this.isDone = isDone;
+		this.isDone = false;
 	}
 
 	public String getTime() {
 		return time;
 	}
 
-	public void setTime(String time) {
-		this.time = time;
+	public String getFromAgentName() {
+		return fromAgentName;
 	}
 
 	public boolean isDone() {
@@ -51,16 +51,8 @@ public class UserTask {
 		return goalModelName;
 	}
 
-	public void setGoalModelName(String goalModelName) {
-		this.goalModelName = goalModelName;
-	}
-
 	public String getElementName() {
 		return elementName;
-	}
-
-	public void setElementName(String elementName) {
-		this.elementName = elementName;
 	}
 
 	public String getDescription() {
@@ -71,12 +63,12 @@ public class UserTask {
 		this.description = description;
 	}
 
-	public RequestData getRequestData() {
-		return requestData;
+	public String getRequestDataName() {
+		return requestDataName;
 	}
 
-	public void setRequestData(RequestData requestData) {
-		this.requestData = requestData;
+	public void setRequestDataName(String requestDataName) {
+		this.requestDataName = requestDataName;
 	}
-	
+
 }

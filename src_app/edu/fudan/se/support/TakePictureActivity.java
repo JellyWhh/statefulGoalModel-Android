@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import edu.fudan.agent.support.ACLMC_DelegateTask;
 import edu.fudan.se.R;
 import edu.fudan.se.agent.AideAgentInterface;
 import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
@@ -43,6 +44,7 @@ public class TakePictureActivity extends Activity {
 
 	private AideAgentInterface aideAgentInterface; // agent interface
 	private String goalModelName, elementName;
+	private String fromAgentName, requestDataName;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -53,8 +55,10 @@ public class TakePictureActivity extends Activity {
 				.getAideAgentInterface((SGMApplication) this.getApplication());
 
 		Intent intent = getIntent();
+		fromAgentName = intent.getStringExtra("fromAgentName");
 		goalModelName = intent.getStringExtra("goalmodelname");
 		elementName = intent.getStringExtra("elementname");
+		requestDataName = intent.getStringExtra("requestDataName");
 
 		iv_show_pic = (ImageView) findViewById(R.id.iv_show_pic);
 		bt_take_pic = (Button) findViewById(R.id.bt_take_pic);
@@ -75,7 +79,7 @@ public class TakePictureActivity extends Activity {
 			public void onClick(View v) {
 				savePicToLocal(bitmap);
 				sendPicToAgent(bitmap);
-				
+
 				Intent intent = new Intent();
 				intent.setClass(TakePictureActivity.this, MainActivity.class);
 				startActivity(intent);
@@ -107,8 +111,8 @@ public class TakePictureActivity extends Activity {
 	private void savePicToLocal(Bitmap bitmap) {
 		System.out.println("MY_LOG-TakePictureActivity--savePicToLocal()");
 
-		SimpleDateFormat df = new SimpleDateFormat("yyyyMMddhhmmss");
-		String picName = df.format(new Date()) + ".jpg";
+		String picName = new SimpleDateFormat("yyyyMMddhhmmss")
+				.format(new Date()) + ".jpg";
 
 		File picture = new File(Environment.getExternalStorageDirectory()
 				+ "/sgm/pic/" + picName);
@@ -116,7 +120,8 @@ public class TakePictureActivity extends Activity {
 		try {
 			// 保存图片到本地
 			FileOutputStream fos = new FileOutputStream(picture.getPath());
-			bitmap.compress(Bitmap.CompressFormat.JPEG, 50, fos);// 把数据写入文件,0 meaning compress for small size
+			// 把数据写入文件, 0表示压缩后质量最差，100为最好
+			bitmap.compress(Bitmap.CompressFormat.JPEG, 50, fos);
 			fos.flush();
 			fos.close();
 		} catch (Exception e) {
@@ -133,15 +138,14 @@ public class TakePictureActivity extends Activity {
 	private void sendPicToAgent(Bitmap bitmap) {
 		System.out.println("MY_LOG-TakePictureActivity--sendPicToAgent()");
 
-		SGMMessage msg = new SGMMessage(
-				MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null, null,
-				null, goalModelName, elementName,
-				MesBody_Mes2Manager.ServiceExecutingDone);
-		RequestData requestData = new RequestData("Image");
+		ACLMC_DelegateTask aclmc_DelegateTask = new ACLMC_DelegateTask(
+				ACLMC_DelegateTask.DTHeader.DTBACK, null, fromAgentName,
+				goalModelName, elementName);
+		aclmc_DelegateTask.setDone(true);
+		RequestData requestData = new RequestData(requestDataName, "Image");
 		requestData.setContent(EncodeDecodeRequestData.encodeBitmap(bitmap));
-		msg.setContent(requestData);
-
-		aideAgentInterface.sendMesToManager(msg);
+		aclmc_DelegateTask.setRequestData(requestData);
+		aideAgentInterface.sendMesToExternalAgent(aclmc_DelegateTask);
 	}
 
 }

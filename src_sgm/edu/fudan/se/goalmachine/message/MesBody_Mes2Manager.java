@@ -11,9 +11,9 @@ import edu.fudan.se.goalmachine.message.SGMMessage.MesBody;
  * 
  */
 public enum MesBody_Mes2Manager implements MesBody, Serializable {
-	StartGM, StopGM, SuspendGM, ResumeGM, ResetGM,EndTE, QuitTE, QuitGM,
-	RequestPersonIA, RequestService, DelegatedAchieved, DelegatedFailed, NoDelegatedAchieved,
-	NoDelegatedFailed, DelegateOut, ServiceExecutingDone,ServiceExecutingFailed,
+	StartGM, StopGM, SuspendGM, ResumeGM, ResetGM,EndTE, QuitTE, 
+	RequestService, DelegateToPeople,NoDelegatedAchieved,
+	NoDelegatedFailed, ServiceExecutingDone,ServiceExecutingFailed,
 	NewSMS;
 
 //	public static MesBody getMesBody(String body) {

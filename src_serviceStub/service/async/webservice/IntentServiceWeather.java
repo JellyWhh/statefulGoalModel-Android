@@ -19,7 +19,6 @@ import edu.fudan.se.goalmodel.EncodeDecodeRequestData;
 import edu.fudan.se.goalmodel.RequestData;
 import edu.fudan.se.initial.SGMApplication;
 import edu.fudan.se.support.GetAgent;
-import edu.fudan.se.utils.NotificationUtil;
 
 import android.app.IntentService;
 import android.content.Intent;
@@ -62,6 +61,9 @@ public class IntentServiceWeather extends IntentService {
 
 		cityName = EncodeDecodeRequestData.decodeToText(requestData
 				.getContent());
+		
+		System.out
+		.println("IntentServiceWeather, cityName: " + cityName);
 
 		goalModelName = intent.getExtras().getString("GOAL_MODEL_NAME");
 		elementName = intent.getExtras().getString("ELEMENT_NAME");
@@ -76,10 +78,10 @@ public class IntentServiceWeather extends IntentService {
 			try {
 				weatherInfo = getWeather(cityName);
 			} catch (IOException | XmlPullParserException e1) {
-				// 在destory前把天气信息通过agent发送给manager
+				// 服务执行失败
 				SGMMessage msg = new SGMMessage(
-						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null,
-						null, null, goalModelName, elementName,
+						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE,
+						goalModelName, null, elementName,
 						MesBody_Mes2Manager.ServiceExecutingFailed);
 
 				GetAgent.getAideAgentInterface(
@@ -89,17 +91,20 @@ public class IntentServiceWeather extends IntentService {
 			}
 		}
 
-		// 测试时用，弹出一个通知，显示这个web service调用完毕要返回了
-		NotificationUtil notificationUtil = new NotificationUtil(this);
-		notificationUtil.showNotification("Web service Done",
-				"intent service weather done!\nweatherInfo: " + weatherInfo,
-				"Web Service Done", 100);
+//		// 测试时用，弹出一个通知，显示这个web service调用完毕要返回了
+//		NotificationUtil notificationUtil = new NotificationUtil(this);
+//		notificationUtil.showNotification("Web service Done",
+//				"intent service weather done!\nweatherInfo: " + weatherInfo,
+//				"Web Service Done", 100);
 
-		// 在destory前把天气信息通过agent发送给manager
+		// 服务执行成功
 		SGMMessage msg = new SGMMessage(
-				MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null, null,
-				null, goalModelName, elementName,
+				MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE,
+				goalModelName, null, elementName,
 				MesBody_Mes2Manager.ServiceExecutingDone);
+		RequestData retRequestData = new RequestData("weatherInfo", "Text");
+		retRequestData.setContent(weatherInfo.getBytes());
+		msg.setRetContent(retRequestData);
 
 		GetAgent.getAideAgentInterface((SGMApplication) getApplication())
 				.handleMesFromService(msg);

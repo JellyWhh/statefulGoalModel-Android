@@ -5,7 +5,6 @@
 		level="0" description="my goal">
 		<decomposition>0</decomposition>
 		<schedulerMethod>1</schedulerMethod>
-		<needDelegate>false</needDelegate>
 		<!-- 承诺60分钟内做完 -->
 		<Condition type="COMMITMENT" valueType="Long" leftValueDes="TIME" operator="SMALLERTHAN" rightValue = "60">
 		</Condition>
@@ -17,7 +16,6 @@
 		<decomposition>0</decomposition>
 		<schedulerMethod>0</schedulerMethod>
 		<priorityLevel>1</priorityLevel>
-		<needDelegate>false</needDelegate>
 		<Condition type="CONTEXT" valueType="Int" leftValueDes="Temperature" operator="BIGGERTHAN" rightValue = "0">
 		</Condition>
 	</ElementMachine>
@@ -26,9 +24,7 @@
 		level="2" description="alice child 1">
 		<parentGoal>alice</parentGoal>
 		<priorityLevel>1</priorityLevel>
-		<needPeopleInteraction>false</needPeopleInteraction>
 		<!-- executingRequestedServiceName的格式必须是 AndroidManifest.xml中service标签中action name-->
-		<retryTimes>2</retryTimes>
 		<executingRequestedServiceName>setcityname</executingRequestedServiceName>
 		<Condition type="POST" valueType="Int" leftValueDes="Temperature" operator="SMALLERTHAN" rightValue = "0">
 		</Condition>
@@ -38,8 +34,7 @@
 		level="2" description="alice child 2">
 		<parentGoal>alice</parentGoal>
 		<priorityLevel>1</priorityLevel>
-		<needPeopleInteraction>true</needPeopleInteraction>
-		<retryTimes>2</retryTimes>
+		<executingRequestedServiceName>setcityname</executingRequestedServiceName>
 	</ElementMachine>
 
 	<ElementMachine id="4" type="GoalMachine" name="bob"
@@ -48,14 +43,13 @@
 		<decomposition>1</decomposition>
 		<schedulerMethod>-1</schedulerMethod>
 		<priorityLevel>1</priorityLevel>
-		<needDelegate>false</needDelegate>
 	</ElementMachine>
 
 	<ElementMachine id="5" type="TaskMachine" name="bobChild_1"
 		level="2" description="bob child 1">
 		<parentGoal>bob</parentGoal>
 		<priorityLevel>1</priorityLevel>
-		<needPeopleInteraction>true</needPeopleInteraction>
+		<executingRequestedServiceName>setcityname</executingRequestedServiceName>
 		<Condition type="CONTEXT" valueType="Int" leftValueDes="Temperature" operator="SMALLERTHAN" rightValue = "0">
 		</Condition>
 	</ElementMachine>
@@ -64,8 +58,8 @@
 		level="2" description="bob child 2">
 		<parentGoal>bob</parentGoal>
 		<priorityLevel>2</priorityLevel>
-		<needPeopleInteraction>true</needPeopleInteraction>
 		<waitingTimeLimit>5</waitingTimeLimit>
+		<executingRequestedServiceName>setcityname</executingRequestedServiceName>
 		<Condition type="PRE" valueType="Int" leftValueDes="Temperature" operator="SMALLERTHAN" rightValue = "0">
 		    <!-- 只有pre condition需要设置是否能修复 -->
 		    <canRepairing>false</canRepairing>
@@ -76,9 +70,7 @@
 		level="2" description="bob child 3">
 		<parentGoal>bob</parentGoal>
 		<priorityLevel>3</priorityLevel>
-		<needPeopleInteraction>false</needPeopleInteraction>
 		<executingRequestedServiceName>weather</executingRequestedServiceName>
-		<retryTimes>2</retryTimes>
 		<Condition type="POST" valueType="Int" leftValueDes="Temperature" operator="SMALLERTHAN" rightValue = "0">
 		</Condition>
 	</ElementMachine>

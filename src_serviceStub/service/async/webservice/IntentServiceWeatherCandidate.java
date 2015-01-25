@@ -12,9 +12,9 @@ import edu.fudan.se.goalmodel.EncodeDecodeRequestData;
 import edu.fudan.se.goalmodel.RequestData;
 import edu.fudan.se.initial.SGMApplication;
 import edu.fudan.se.support.GetAgent;
-import edu.fudan.se.utils.NotificationUtil;
 
 /**
+ * 天气服务的候选服务，一定会返回执行失败的信息
  * @author whh
  * 
  */
@@ -57,19 +57,21 @@ public class IntentServiceWeatherCandidate extends IntentService {
 		
 		weatherInfo = "cityName: " + cityName + ", no more info!";
 		
+		// 服务执行失败
 		SGMMessage msg = new SGMMessage(
-				MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null, null,
-				null, goalModelName, elementName,
+				MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE,
+				goalModelName, null, elementName,
 				MesBody_Mes2Manager.ServiceExecutingFailed);
+
 
 		GetAgent.getAideAgentInterface((SGMApplication) getApplication())
 				.handleMesFromService(msg);
 
-		// 测试时用，弹出一个通知，显示这个web service调用完毕要返回了
-		NotificationUtil notificationUtil = new NotificationUtil(this);
-		notificationUtil.showNotification("Web service Done",
-				"intent service weather candidate done!\nweatherInfo: " + weatherInfo,
-				"Web Service Done", 100);
+//		// 测试时用，弹出一个通知，显示这个web service调用完毕要返回了
+//		NotificationUtil notificationUtil = new NotificationUtil(this);
+//		notificationUtil.showNotification("Web service Done",
+//				"intent service weather candidate done!\nweatherInfo: " + weatherInfo,
+//				"Web Service Done", 100);
 
 	}
 

@@ -1,8 +1,8 @@
 package edu.fudan.se.agent;
 
+import edu.fudan.agent.support.ACLMC_DelegateTask;
 import edu.fudan.se.goalmachine.message.SGMMessage;
 import edu.fudan.se.goalmodel.GoalModel;
-import edu.fudan.se.userMes.UserTask;
 
 public interface AideAgentInterface {
 
@@ -10,7 +10,7 @@ public interface AideAgentInterface {
 
 	public void handleMesFromManager(SGMMessage msg);
 
-	public void sendMesToExternalAgent(SGMMessage msg);
+	public void sendMesToExternalAgent(ACLMC_DelegateTask aclmc_DelegateTask);
 	
 //	public void obtainFriends(UserTask userTask);
 	

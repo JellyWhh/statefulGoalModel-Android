@@ -3,11 +3,11 @@
  */
 package edu.fudan.agent.support;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -43,81 +43,29 @@ public class AideAgentSupport {
 		return ret;
 	}
 
-	// /**
-	// * 获得一个goalModel-element对应的服务调用情况
-	// *
-	// * @param goalModelName
-	// * goal model name
-	// * @param elementName
-	// * element name
-	// * @return 服务调用情况
-	// */
-	// public static ServiceInvocationAUtil getServiceInvocationUtil(
-	// String goalModelName, String elementName,
-	// ArrayList<ServiceInvocationAUtil> serviceInvocationUtilList) {
-	// ServiceInvocationAUtil ret = null;
-	// for (ServiceInvocationAUtil serviceInvocationUtil :
-	// serviceInvocationUtilList) {
-	// if (serviceInvocationUtil.getGoalModelName().equals(goalModelName)
-	// && serviceInvocationUtil.getElementName().equals(
-	// elementName)) {
-	// ret = serviceInvocationUtil;
-	// break;
-	// }
-	// }
-	// return ret;
-	// }
-	//
-	// public static DelegateAUtil getDelegateAUtil(String goalModelName, String
-	// elementName,ArrayList<DelegateAUtil> delegateAUtilList){
-	// return (DelegateAUtil)getAdaptationUtil(goalModelName, elementName,
-	// delegateAUtilList);
-	// }
-	//
 
 	/**
-	 * 获得一个goalModel-element对应的自适应情况
-	 * 
-	 * @param goalModelName
-	 *            goal model name
-	 * @param elementName
-	 *            element name
-	 * @param adaptationUtilList
-	 *            储存自适应情况的列表，可以是一个ArrayList<ServiceInvocationAUtil>，
-	 *            也可以是一个ArrayList<DelegateAUtil>
-	 * @return AdaptationUtil，可强制转换成<code>ServiceInvocationAUtil</code>或者
-	 *         <code>DelegateAUtil</code>
-	 */
-	public static AdaptationUtil getAdaptationUtil(String goalModelName,
-			String elementName, ArrayList<AdaptationUtil> adaptationUtilList) {
-		AdaptationUtil ret = null;
-		for (AdaptationUtil adaptationUtil : adaptationUtilList) {
-			if (adaptationUtil.getGoalModelName().equals(goalModelName)
-					&& adaptationUtil.getElementName().equals(elementName)) {
-				ret = adaptationUtil;
-				break;
-			}
-		}
-		return ret;
-	}
-
-	/**
-	 * 当用户点击reset按钮后要把和那个goal model相关的两个adaptationUtilList中储存的数据清空
+	 * 当用户点击reset按钮后要把和那个goal model相关的taskExecutingAdaptionUtilList中储存的数据清空
 	 * 
 	 * @param goalModelName
 	 *            reset的goal model
-	 * @param adaptationUtilList
-	 *            相关的adaptationUtilList
+	 * @param taskExecutingAdaptionUtilList
+	 *            相关的taskExecutingAdaptionUtilList
 	 */
 	public static void resetAdaptationUtilList(String goalModelName,
-			ArrayList<AdaptationUtil> adaptationUtilList) {
-		ArrayList<AdaptationUtil> toRemoveAdaptationUtils = new ArrayList<>();
-		for (AdaptationUtil adaptationUtil : adaptationUtilList) {
-			if (adaptationUtil.getGoalModelName().equals(goalModelName)) {
-				toRemoveAdaptationUtils.add(adaptationUtil);
+			Hashtable<String, AdaptationUtil> taskExecutingAdaptionUtilList) {
+		
+		ArrayList<String> toRemoveKeys = new ArrayList<>();
+		for (String key: taskExecutingAdaptionUtilList.keySet()) {
+			if (key.contains(goalModelName)) {
+				toRemoveKeys.add(key);
 			}
 		}
-		adaptationUtilList.removeAll(toRemoveAdaptationUtils);
+		
+		for(String key: toRemoveKeys){
+			taskExecutingAdaptionUtilList.remove(key);
+		}
+		
 	}
 
 	/**
@@ -129,10 +77,7 @@ public class AideAgentSupport {
 				.add("service.intentservice.weatherCandidate");
 		allIntentServiceNameArrayList.add("service.intentservice.weather");
 		allIntentServiceNameArrayList.add("service.intentservice.setcityname");
-		allIntentServiceNameArrayList.add("service.intentservice.readimage");
 		allIntentServiceNameArrayList.add("service.intentservice.showcontent");
-		allIntentServiceNameArrayList.add("service.intentservice.takepicture");
-		allIntentServiceNameArrayList.add("service.intentservice.userinput");
 	}
 
 	/**

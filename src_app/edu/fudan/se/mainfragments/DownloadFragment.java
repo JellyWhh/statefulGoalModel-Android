@@ -229,7 +229,7 @@ class DownloadListAdapter extends ArrayAdapter<DownloadTask> {
 				fileOutputStream.close();
 				inputStream.close();
 
-				// 文件已经保存到sbCard里了，解析它
+				// 文件已经保存到sbCard里了，解析它	//TODO
 				GmXMLParser gmXMLParser = new GmXMLParser();
 				GoalModel goalModel = gmXMLParser.newGoalModel(sdCardDir
 						+ downloadTask.getName());
@@ -250,6 +250,7 @@ class DownloadListAdapter extends ArrayAdapter<DownloadTask> {
 			e.printStackTrace();
 		}
 	}
+	
 
 	class ViewHolder {
 		TextView text;

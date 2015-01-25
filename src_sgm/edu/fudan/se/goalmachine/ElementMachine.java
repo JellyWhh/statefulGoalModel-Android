@@ -45,7 +45,7 @@ public class ElementMachine implements Runnable {
 
 	private Date startWaitingTime; // 开始等待的时间
 	private int waitingTimeLimit; // 等待时间限制
-	private int retryTimes = 1;// 可重试次数，也就是一共可以执行的次数
+	// private int retryTimes = 1;// 可重试次数，也就是一共可以执行的次数
 
 	private boolean finish; // 标识当前machine是否运行结束，结束后run()里面的while循环将停止
 
@@ -68,7 +68,7 @@ public class ElementMachine implements Runnable {
 	boolean isWaitingEntryDone = false;
 	boolean isSuspendedEntryDone = false;
 
-	int currentExecutingIndex = 0; // 当前进入执行的次数，
+	// int currentExecutingIndex = 0; // 当前进入执行的次数，
 
 	/**
 	 * 构造方法
@@ -91,7 +91,7 @@ public class ElementMachine implements Runnable {
 		this.setCurrentState(State.Initial); // 刚开始是目标状态是initial状态
 		// this.setStartTime(new Date()); // 设置目标状态机开始运行时间为当前时间
 
-		Log.logDebug(this.name, "run()", "ElementMachine start!");
+		Log.logEMDebug(this.name, "run()", "ElementMachine start!");
 
 		this.setFinish(false);
 		while (!this.isFinish()) {
@@ -103,7 +103,7 @@ public class ElementMachine implements Runnable {
 				e.printStackTrace();
 			}
 		}
-		Log.logDebug(this.getName(), "run()",
+		Log.logEMDebug(this.getName(), "run()",
 				"ElementMachine stop while cycling!");
 
 	}
@@ -179,7 +179,8 @@ public class ElementMachine implements Runnable {
 
 					} else {
 						executingEntry();
-						currentExecutingIndex++; // 每次进入executing，代表了执行了一次，执行次数加一
+						// currentExecutingIndex++; //
+						// 每次进入executing，代表了执行了一次，执行次数加一
 						isExecutingEntryDone = true;
 					}
 				}
@@ -238,7 +239,7 @@ public class ElementMachine implements Runnable {
 	 * 只会执行一次
 	 */
 	public void initialEntry() {
-		Log.logDebug(this.getName(), "initialEntry()", "init.");
+		Log.logEMDebug(this.getName(), "initialEntry()", "init.");
 		// this.setStartTime(new Date()); // setTimer
 	}
 
@@ -246,12 +247,15 @@ public class ElementMachine implements Runnable {
 	 * initial状态的do所做的action：监听消息池，看是否有ACTIVATE消息到达
 	 */
 	public void initialDo(SGMMessage msg) {
-		Log.logDebug(this.getName(), "initialDo()", "init.");
+//		Log.logDebug(this.getName(), "initialDo()", "init.");
 		// SGMMessage msg = this.getMsgPool().poll(); // 每次拿出一条消息
 		if (msg != null) {
-			Log.logDebug(this.name, "initialDo()",
-					"get a msg from " + msg.getSender().toString()
-							+ ", body is: " + msg.getBody());
+			Log.logEMDebug(
+					this.name,
+					"initialDo()",
+					"get a msg from " + msg.getGoalModelName() + "#"
+							+ msg.getFromElementName() + ", body is: "
+							+ msg.getBody());
 
 			// 收到消息后的行为处理
 			if (msg.getBody().equals(MesBody_Mes2Machine.ACTIVATE)) {
@@ -282,7 +286,7 @@ public class ElementMachine implements Runnable {
 	 * waiting状态中entry所做的action：告诉父目标自己进入了Waiting状态
 	 */
 	public void waitingEntry() {
-		Log.logDebug(this.getName(), "waitingEntry()", "init.");
+		Log.logEMDebug(this.getName(), "waitingEntry()", "init.");
 		// 设置waiting开始的时间
 		this.setStartWaitingTime(new Date());
 	}
@@ -291,7 +295,7 @@ public class ElementMachine implements Runnable {
 	 * waiting状态中do所做的action：等待父目标的EXITWAITING消息，并且一直做checkPreCondition
 	 */
 	public void waitingDo() {
-		Log.logDebug(this.getName(), "waitingDo()", "init.");
+//		Log.logDebug(this.getName(), "waitingDo()", "init.");
 
 		// 先判断等待时间是否超时
 		Date nowTime = new Date();
@@ -305,7 +309,7 @@ public class ElementMachine implements Runnable {
 				this.setCurrentState(State.Executing);
 			}
 		} else { // 超时了
-			Log.logDebug(this.getName(), "waitingDo()", "Waiting Timeout!!!!!!");
+			Log.logEMDebug(this.getName(), "waitingDo()", "Waiting Timeout!!!!!!");
 			this.setCurrentState(State.Failed);
 		}
 
@@ -316,7 +320,7 @@ public class ElementMachine implements Runnable {
 	 * <code>TaskMachine</code>需要重写
 	 */
 	public void executingEntry() {
-		Log.logDebug(this.getName(), "executingEntry()", "init.");
+		Log.logEMDebug(this.getName(), "executingEntry()", "init.");
 
 	}
 
@@ -333,7 +337,7 @@ public class ElementMachine implements Runnable {
 	 * @return true 表示需要挂起，直接进入挂起状态，不能再执行下面的代码；false 不需要挂起
 	 */
 	private boolean checkIfSuspend(SGMMessage msg) {
-		Log.logDebug(this.getName(), "checkIfSuspend()", "init.");
+//		Log.logDebug(this.getName(), "checkIfSuspend()", "init.");
 
 		// 这里用peek()方法取消息，Retrieves, but does not
 		// remove，这样就不会影响接下来的executingDo()方法中取消息了
@@ -343,9 +347,10 @@ public class ElementMachine implements Runnable {
 			// 消息内容是SUSPEND，表示父目标让当前目标进入挂起
 			if (msg.getBody().equals(MesBody_Mes2Machine.SUSPEND)) {
 				this.getMsgPool().poll(); // 如果消息真的是SUSPEND，那么就把它拿出来
-				Log.logDebug(this.getName(), "checkIfSuspend()",
-						"get a message from " + msg.getSender().toString()
-								+ "; body is: " + msg.getBody());
+				Log.logEMDebug(this.getName(), "checkIfSuspend()",
+						"get a message from " + msg.getGoalModelName() + "#"
+								+ msg.getFromElementName() + "; body is: "
+								+ msg.getBody());
 				this.setCurrentState(State.Suspended);
 				return true;
 			}
@@ -373,7 +378,7 @@ public class ElementMachine implements Runnable {
 	 * 修复后的状态在transiton中会通过调用doRepairing(condition)得到
 	 */
 	public void repairingDo() {
-		Log.logDebug(this.getName(), "repairingDo()", "init.");
+		Log.logEMDebug(this.getName(), "repairingDo()", "init.");
 		this.setCurrentState(this.transition(State.Repairing, null));
 	}
 
@@ -389,12 +394,12 @@ public class ElementMachine implements Runnable {
 	 * failed状态中entry所做的action：告诉父目标自己FAILED
 	 */
 	public void failedEntry() {
-		Log.logDebug(this.getName(), "failedEntry()", "init.");
+		Log.logEMDebug(this.getName(), "failedEntry()", "init.");
 		// 告诉父目标自己failed
 		if (this.getParentGoal() != null) {
 			if (this.getCauseToFailed() == null) {
 				if (sendMessageToParent(MesBody_Mes2Machine.FAILED)) {
-					Log.logDebug(this.getName(), "failedEntry()",
+					Log.logEMDebug(this.getName(), "failedEntry()",
 							"send FAILED msg to parent succeed!");
 				} else {
 					Log.logError(this.getName(), "failedEntry()",
@@ -404,7 +409,7 @@ public class ElementMachine implements Runnable {
 				switch (this.getCauseToFailed()) {
 				case ActivatedFail:
 					if (sendMessageToParent(MesBody_Mes2Machine.ACTIVATEDFAILED)) {
-						Log.logDebug(this.getName(), "failedEntry()",
+						Log.logEMDebug(this.getName(), "failedEntry()",
 								"send ACTIVATEDFAILED msg to parent succeed!");
 					} else {
 						Log.logError(this.getName(), "failedEntry()",
@@ -414,7 +419,7 @@ public class ElementMachine implements Runnable {
 
 				default:
 					if (sendMessageToParent(MesBody_Mes2Machine.FAILED)) {
-						Log.logDebug(this.getName(), "failedEntry()",
+						Log.logEMDebug(this.getName(), "failedEntry()",
 								"send FAILED msg to parent succeed!");
 					} else {
 						Log.logError(this.getName(), "failedEntry()",
@@ -430,9 +435,9 @@ public class ElementMachine implements Runnable {
 	 * failed状态中do所做的action：停止自己的状态机，<code>GoalMachine</code>需要重写
 	 */
 	public void failedDo() {
-		Log.logDebug(this.getName(), "failedDo()", "init.");
+//		Log.logDebug(this.getName(), "failedDo()", "init.");
 		this.stopMachine();
-		Log.logDebug(this.getName(), "failedDo()",
+		Log.logEMDebug(this.getName(), "failedDo()",
 				"It failed to achieved its goal and stopped its machine!");
 	}
 
@@ -441,11 +446,11 @@ public class ElementMachine implements Runnable {
 	 * goal，就不用发送了，直接标记整个goal model完成
 	 */
 	public void achievedEntry() {
-		Log.logDebug(this.getName(), "achievedEntry()", "init.");
+		Log.logEMDebug(this.getName(), "achievedEntry()", "init.");
 
 		if (this.getParentGoal() != null) { // 不是root goal
 			if (this.sendMessageToParent(MesBody_Mes2Machine.ACHIEVEDDONE)) {
-				Log.logDebug(this.getName(), "achievedEntry()",
+				Log.logEMDebug(this.getName(), "achievedEntry()",
 						"send ACHIEVEDDONE msg to parent succeed!");
 			} else {
 				Log.logError(this.getName(), "achievedEntry()",
@@ -458,9 +463,9 @@ public class ElementMachine implements Runnable {
 	 * achieved状态中do所做的action：在<code>GoalMachine</code>中需要重写
 	 */
 	public void achievedDo() {
-		Log.logDebug(this.getName(), "achievedDo()", "init.");
+//		Log.logDebug(this.getName(), "achievedDo()", "init.");
 		this.stopMachine(); // 本身已完成
-		Log.logDebug(this.getName(), "achievedDo()",
+		Log.logEMDebug(this.getName(), "achievedDo()",
 				"It has achieved its goal and stopped its machine!");
 
 	}
@@ -482,9 +487,10 @@ public class ElementMachine implements Runnable {
 			// 消息内容是STOP，表示父目标让当前目标stop
 			if (msg.getBody().equals(MesBody_Mes2Machine.STOP)) {
 				this.getMsgPool().poll(); // 如果消息真的是STOP，那么就把它拿出来
-				Log.logDebug(this.getName(), "checkIfStop()",
-						"get a message from " + msg.getSender().toString()
-								+ "; body is: " + msg.getBody());
+				Log.logEMDebug(this.getName(), "checkIfStop()",
+						"get a message from " + msg.getGoalModelName() + "#"
+								+ msg.getFromElementName() + "; body is: "
+								+ msg.getBody());
 				// 收到STOP消息后把自己状态设置为stop
 				this.setCurrentState(State.Stop);
 				return true;
@@ -593,12 +599,12 @@ public class ElementMachine implements Runnable {
 
 		case PostCondition:
 			// 检查已经执行的次数是否小于设定的可重试次数，如果小于，可重新进入执行，否则表示已经重试完毕，进入failed。
-			if (currentExecutingIndex < this.getRetryTimes()) {
-				retState = State.Executing;
-				resetExecuting();
-			} else {
-				retState = State.Failed;
-			}
+			// if (currentExecutingIndex < this.getRetryTimes()) {
+			// retState = State.Executing;
+			// resetExecuting();
+			// } else {
+			retState = State.Failed;
+			// }
 			break;
 		case SubActivatedFail:
 			retState = subFailRepairing(CauseToRepairing.SubActivatedFail);
@@ -634,7 +640,7 @@ public class ElementMachine implements Runnable {
 		if (this.getCommitmentCondition() != null) {
 			checkCommitmentCondition();
 			if (!this.getCommitmentCondition().isSatisfied()) { // 检测到违反
-				Log.logDebug(this.getName(), "doCCandInvCChecking()",
+				Log.logEMDebug(this.getName(), "doCCandInvCChecking()",
 						"commitment condition violation is detected!!!");
 				this.setCurrentState(State.Failed);
 				return true;
@@ -645,7 +651,7 @@ public class ElementMachine implements Runnable {
 		if (this.getInvariantCondition() != null) {
 			checkInvariantCondition();
 			if (!this.getInvariantCondition().isSatisfied()) { // 检测到违反
-				Log.logDebug(this.getName(), "doCCandInvCChecking()",
+				Log.logEMDebug(this.getName(), "doCCandInvCChecking()",
 						"invariant condition violation is detected!!!");
 				this.setCurrentState(State.Failed);
 				return true;
@@ -662,9 +668,12 @@ public class ElementMachine implements Runnable {
 	 * @return true 发送成功, false 发送失败
 	 */
 	public boolean sendMessageToParent(MesBody body) {
-		SGMMessage msg = new SGMMessage(MesHeader_Mes2Machine.ToParent, null,
-				null, this.getName(), null, null, this.getParentGoal()
-						.getName(), body);
+		SGMMessage msg = new SGMMessage(MesHeader_Mes2Machine.ToParent, this
+				.getGoalModel().getName(), this.getName(), this.getParentGoal()
+				.getName(), body);
+		// SGMMessage msg = new SGMMessage(MesHeader_Mes2Machine.ToParent, null,
+		// null, this.getName(), null, null, this.getParentGoal()
+		// .getName(), body);
 		if (this.getParentGoal().getMsgPool().offer(msg)) {
 			// 发送成功
 			Log.logMessage(msg, true);
@@ -683,11 +692,11 @@ public class ElementMachine implements Runnable {
 	 *            要发送的消息
 	 */
 	public void sendMesToManager(SGMMessage msg) {
-		Log.logDebug(this.getName(), "sendMesToManager()", "init.");
+		Log.logEMDebug(this.getName(), "sendMesToManager()", "init.");
 
 		if (this.getGoalModel().getGoalModelManager().getMsgPool().offer(msg)) {
 			Log.logMessage(msg, true);
-			Log.logDebug(this.getName(), "sendMesToManager()",
+			Log.logEMDebug(this.getName(), "sendMesToManager()",
 					"send a " + msg.getBody() + " message to Manager succeed!");
 		} else {
 			Log.logMessage(msg, false);
@@ -702,7 +711,7 @@ public class ElementMachine implements Runnable {
 	public void stopMachine() {
 		this.setFinish(true);
 
-		Log.logDebug(this.getName(), "stopMachine()",
+		Log.logEMDebug(this.getName(), "stopMachine()",
 				"It begins to stop its machine");
 	}
 
@@ -734,17 +743,17 @@ public class ElementMachine implements Runnable {
 
 	}
 
-	public void resetExecuting() {
-		isExecutingEntryDone = false;
-		resetElementMachineExecuting();
-	}
-
-	/**
-	 * 让GoalMachine和TaskMachine重写，用来初始化里面的两个变量
-	 */
-	public void resetElementMachineExecuting() {
-
-	}
+	// public void resetExecuting() {
+	// isExecutingEntryDone = false;
+	// resetElementMachineExecuting();
+	// }
+	//
+	// /**
+	// * 让GoalMachine和TaskMachine重写，用来初始化里面的两个变量
+	// */
+	// public void resetElementMachineExecuting() {
+	//
+	// }
 
 	/**
 	 * 在suspended状态收到RESUME消息后要重新把isSuspendedEntryDone设置为false，以防再次进入suspended状态
@@ -763,21 +772,21 @@ public class ElementMachine implements Runnable {
 			if (msg.getBody().equals(MesBody_Mes2Machine.SUSPEND)
 					&& (this.getCurrentState() != State.Executing)) {
 				this.getMsgPool().poll(); // 把它拿出来
-				Log.logDebug(this.getName(), "filterMessage()",
+				Log.logEMDebug(this.getName(), "filterMessage()",
 						"filter a SUSPEND msg!");
 				return true;
 			}
 			if (msg.getBody().equals(MesBody_Mes2Machine.RESUME)
 					&& (this.getCurrentState() != State.Suspended)) {
 				this.getMsgPool().poll(); // 把它拿出来
-				Log.logDebug(this.getName(), "filterMessage()",
+				Log.logEMDebug(this.getName(), "filterMessage()",
 						"filter a RESUME msg!");
 				return true;
 			}
 			if (msg.getBody().equals(MesBody_Mes2Machine.ACTIVATEDDONE)
 					&& (this.getCurrentState() != State.Activated)) {
 				this.getMsgPool().poll(); // 把它拿出来
-				Log.logDebug(this.getName(), "filterMessage()",
+				Log.logEMDebug(this.getName(), "filterMessage()",
 						"filter a ACTIVATEDDONE msg!");
 				return true;
 			}
@@ -826,7 +835,7 @@ public class ElementMachine implements Runnable {
 		long executingTime = nowTime.getTime() - this.getStartTime().getTime(); // 得到的差值单位是毫秒
 
 		if (executingTime > (timeLimit * 60 * 1000)) { // 超时
-			Log.logDebug(this.getName(), "checkCommitmentCondition()",
+			Log.logEMDebug(this.getName(), "checkCommitmentCondition()",
 					"Waiting Timeout!!!!!!");
 			this.getCommitmentCondition().setSatisfied(false);
 		} else { // 没有超时
@@ -1000,12 +1009,12 @@ public class ElementMachine implements Runnable {
 		this.description = description;
 	}
 
-	public int getRetryTimes() {
-		return retryTimes;
-	}
-
-	public void setRetryTimes(int retryTimes) {
-		this.retryTimes = retryTimes;
-	}
+	// public int getRetryTimes() {
+	// return retryTimes;
+	// }
+	//
+	// public void setRetryTimes(int retryTimes) {
+	// this.retryTimes = retryTimes;
+	// }
 
 }

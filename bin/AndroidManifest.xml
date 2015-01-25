@@ -63,11 +63,6 @@
                 <action android:name="service.intentservice.setcityname" />
             </intent-filter>
         </service>
-        <service android:name="service.async.webservice.TestIntentServiceSetImage" >
-            <intent-filter>
-                <action android:name="service.intentservice.readimage" />
-            </intent-filter>
-        </service>
         <service android:name="service.async.webservice.IntentServiceShowContent" >
             <intent-filter>
                 <action android:name="service.intentservice.showcontent" />

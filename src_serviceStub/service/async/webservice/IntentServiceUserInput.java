@@ -60,7 +60,7 @@ public class IntentServiceUserInput extends IntentService {
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String delegateOutTaskTime = df.format(new Date());
 		UserInputTextTask userInputTextTask = new UserInputTextTask(
-				delegateOutTaskTime, goalModelName, elementName, false);
+				delegateOutTaskTime, null,goalModelName, elementName);
 
 		String description = "You need to input a span of text:\n";
 

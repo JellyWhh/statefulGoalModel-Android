@@ -65,7 +65,7 @@ public class SystemBroadcastListenerService extends Service {
 
 				msgToMessage = new SGMMessage(
 						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null,
-						null, null, null, null, MesBody_Mes2Manager.NewSMS);
+						null, MesBody_Mes2Manager.NewSMS);
 				break;
 
 			case Intent.ACTION_HEADSET_PLUG: // 耳机的插入和拔出
@@ -82,8 +82,7 @@ public class SystemBroadcastListenerService extends Service {
 										"-------SystemBroadcastListenerService headset  connected!!!-------");
 						msgToMessage = new SGMMessage(
 								MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
-								null, null, null, null, null,
-								MesBody_Mes2Manager.NewSMS);
+								null, null, MesBody_Mes2Manager.NewSMS);
 
 					}
 				}

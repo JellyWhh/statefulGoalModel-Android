@@ -68,7 +68,7 @@ public class MobileLocatorService extends Service {
 
 	@Override
 	public void onCreate() {
-		Log.logDebug("MobileLocatorService", "onCreate()",
+		Log.logEMDebug("MobileLocatorService", "onCreate()",
 				"-------MobileLocatorService onCreate()-------");
 		android.util.Log.i("MY_LOG",
 				"-------MobileLocatorService onCreate()-------");
@@ -123,7 +123,7 @@ public class MobileLocatorService extends Service {
 						Constant.Notification_GPS_State);
 			}
 
-			Log.logDebug("MobileLocatorService", "checkNetwork()",
+			Log.logEMDebug("MobileLocatorService", "checkNetwork()",
 					"MobileLocatorService start Location Service!");
 			android.util.Log.i("MY_LOG",
 					"MobileLocatorService start Location Service!");

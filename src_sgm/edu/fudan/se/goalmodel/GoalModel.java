@@ -8,7 +8,6 @@ import java.util.Hashtable;
 
 import edu.fudan.se.goalmachine.ElementMachine;
 import edu.fudan.se.goalmachine.GoalMachine;
-import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
 
 /**
  * 表示一个完整的goal model，用来把里面的<code>ElementMachine</code>组织起来
@@ -42,7 +41,7 @@ public class GoalModel {
 	 * 参数表，manager在收到element请求服务时查询的表，如果有，说明element调用的服务需要传入参数，那么就把byte[]
 	 * 字节流附加在信息中传递过去。key是element name,value是assignmentHashtable中的key
 	 */
-	private Hashtable<String, String> parameterHashtable;
+	private Hashtable<String, String> parameterMapHashtable;
 	
 	/**
 	 * 将设备事件（定时器、点击按钮等）映射到goal machine的“外部事件”, key是MesBody_Mes2Manager.toString
@@ -52,7 +51,7 @@ public class GoalModel {
 	public GoalModel() {
 		this.elementMachines = new ArrayList<>();
 		this.assignmentHashtable = new Hashtable<>();
-		this.parameterHashtable = new Hashtable<>();
+		this.parameterMapHashtable = new Hashtable<>();
 		this.deviceEventMapToExternalEventTable = new Hashtable<>();
 	}
 
@@ -66,7 +65,7 @@ public class GoalModel {
 		this.name = name;
 		this.elementMachines = new ArrayList<>();
 		this.assignmentHashtable = new Hashtable<>();
-		this.parameterHashtable = new Hashtable<>();
+		this.parameterMapHashtable = new Hashtable<>();
 		this.deviceEventMapToExternalEventTable = new Hashtable<>();
 	}
 
@@ -121,8 +120,8 @@ public class GoalModel {
 		return assignmentHashtable;
 	}
 
-	public Hashtable<String, String> getParameterHashtable() {
-		return parameterHashtable;
+	public Hashtable<String, String> getParameterMapHashtable() {
+		return parameterMapHashtable;
 	}
 
 	public Hashtable<String, ExternalEvent> getDeviceEventMapToExternalEventTable() {

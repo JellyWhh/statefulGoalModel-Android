@@ -59,8 +59,9 @@ public class IntentServiceTakePicture extends IntentService {
 
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String delegateOutTaskTime = df.format(new Date());
-		UserTakePictureTask userTakePictureTask = new UserTakePictureTask(
-				delegateOutTaskTime, goalModelName, elementName, false);
+		UserTakePictureTask userTakePictureTask = new UserTakePictureTask(delegateOutTaskTime, null, goalModelName, elementName);
+//				new UserTakePictureTask(
+//				delegateOutTaskTime, goalModelName, elementName, false);
 
 		String description = "You need to take a picture of ";
 

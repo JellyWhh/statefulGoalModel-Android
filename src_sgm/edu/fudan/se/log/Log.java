@@ -23,7 +23,51 @@ import edu.fudan.se.goalmachine.message.SGMMessage;
 public class Log {
 
 	/**
-	 * 记录正常运行的debug日志
+	 * 记录自适应过程
+	 * 
+	 * @param goalModelName
+	 *            发生自适应的goal model
+	 * @param elementName
+	 *            发生自适应的element
+	 * @param content
+	 *            记录的内容
+	 */
+	public static void logAdaption(String goalModelName, String elementName,
+			String content) {
+		String adaptionFile = "adaption.txt";
+		try {
+
+			String con = "[" + goalModelName + "-" + elementName + "], "
+					+ content;
+			writeAndroidLog(adaptionFile, con);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * 记录正常运行时的GoalModelManager的debug日志
+	 * 
+	 * @param methodName
+	 *            GoalModelManager中的方法名字
+	 * @param content
+	 *            记录的内容
+	 */
+	public static void logGMMDebug(String methodName, String content) {
+		String debugFile = "gmmdebug.txt";
+
+		try {
+			String con = "[GoalModelManager] " + methodName + ", " + content;
+			writeAndroidLog(debugFile, con);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * 记录正常运行的AideAgent的debug日志
 	 * 
 	 * @param goalName
 	 *            goal name
@@ -32,10 +76,34 @@ public class Log {
 	 * @param content
 	 *            日志内容
 	 */
-	public static void logDebug(String goalName, String methodName,
+	public static void logAADebug(String agentName, String methodName,
 			String content) {
 
-		String debugFile = "debug.txt";
+		String debugFile = "aadebug.txt";
+		try {
+			String con = "[" + agentName + "] " + methodName + ", LogContent: "
+					+ content;
+			writeAndroidLog(debugFile, con);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * 记录正常运行的element machine的debug日志
+	 * 
+	 * @param goalName
+	 *            goal name
+	 * @param methodName
+	 *            记录日志时调用的方法名字
+	 * @param content
+	 *            日志内容
+	 */
+	public static void logEMDebug(String goalName, String methodName,
+			String content) {
+
+		String debugFile = "emdebug.txt";
 		try {
 			String con = "[" + goalName + "] " + methodName + ", LogContent: "
 					+ content;
@@ -88,8 +156,8 @@ public class Log {
 			result = "failed!";
 		}
 
-		String content = msg.getHeader() + ", [" + msg.getSender()
-				+ "] send to [" + msg.getReceiver() + "], body is: ["
+		String content = msg.getHeader() + ", [" + msg.getFromElementName()
+				+ "] send to [" + msg.getToElementName() + "], body is: ["
 				+ msg.getBody() + "]. " + result;
 		try {
 			writeAndroidLog(messageFile, content);
@@ -168,7 +236,7 @@ public class Log {
 					"yyyy-MM-dd HH:mm:ss");
 			String time = dateFormat.format(nowDate);
 
-			String writeString = time + " " + content + ".\n";
+			String writeString = time + " " + content + "\n";
 
 			fileOutputStream.write(writeString.getBytes());
 			fileOutputStream.close();

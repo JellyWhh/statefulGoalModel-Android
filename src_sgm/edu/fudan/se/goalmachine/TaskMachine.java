@@ -17,8 +17,11 @@ import edu.fudan.se.log.Log;
  */
 public class TaskMachine extends ElementMachine {
 
-	private boolean needPeopleInteraction; // 是否需要人的交互
+	// private boolean needPeopleInteraction; // 是否需要人的交互
 	private String executingRequestedServiceName; // 执行这个task时具体需要调用的服务名称，如果需要人的交互，这个就为空了
+
+	// private boolean needDelegate; //
+	// 任务是否要委托出去，也就是委托给别人做，如果是，则它应该是没有subElements的
 
 	/**
 	 * 构造方法
@@ -27,11 +30,15 @@ public class TaskMachine extends ElementMachine {
 	 *            task machine名字
 	 * @param parentGoal
 	 *            父目标
+	 * @param level
+	 *            显示层级
+	 * @param executingRequestedServiceName
+	 *            执行时需要查找的服务
 	 */
 	public TaskMachine(String name, ElementMachine parentGoal, int level,
-			boolean needPeopleInteraction) {
+			String executingRequestedServiceName) {
 		super(name, parentGoal, level);
-		this.needPeopleInteraction = needPeopleInteraction;
+		this.executingRequestedServiceName = executingRequestedServiceName;
 	}
 
 	/**
@@ -40,10 +47,10 @@ public class TaskMachine extends ElementMachine {
 	 */
 	@Override
 	public void activatedEntry() {
-		Log.logDebug(this.getName(), "activatedEntry()", "init.");
+		Log.logEMDebug(this.getName(), "activatedEntry()", "init.");
 
 		if (this.sendMessageToParent(MesBody_Mes2Machine.ACTIVATEDDONE)) {
-			Log.logDebug(this.getName(), "activatedEntry()",
+			Log.logEMDebug(this.getName(), "activatedEntry()",
 					"send ACTIVATEDDONE msg to "
 							+ this.getParentGoal().getName() + " succeed!");
 		} else {
@@ -60,13 +67,13 @@ public class TaskMachine extends ElementMachine {
 	 */
 	@Override
 	public void activateDo(SGMMessage msg) {
-		Log.logDebug(this.getName(), "activateDo()", "init.");
+//		Log.logDebug(this.getName(), "activateDo()", "init.");
 
 		// SGMMessage msg = this.getMsgPool().poll(); // 每次拿出一条消息
 		if (msg != null) {
-			Log.logDebug(this.getName(), "activateDo()",
-					"get a message from " + msg.getSender().toString()
-							+ "; body is: " + msg.getBody());
+			Log.logEMDebug(this.getName(), "activateDo()", "get a message from "
+					+ msg.getGoalModelName() + "#" + msg.getFromElementName()
+					+ "; body is: " + msg.getBody());
 
 			// 消息内容是START，表示父目标让当前目标开始状态转换
 			if (msg.getBody().equals(MesBody_Mes2Machine.START)) {
@@ -82,23 +89,30 @@ public class TaskMachine extends ElementMachine {
 	 * executing状态中entry所做的action：给manager发送消息，消息内容是需要人的参与或者是调用服务
 	 */
 	public void executingEntry() {
-		Log.logDebug(this.getName(), "executingEntry()", "init.");
+		Log.logEMDebug(this.getName(), "executingEntry()", "init.");
 
-		SGMMessage msgToManager = null;
-		if (this.isNeedPeopleInteraction()) { // 需要人的参与
-			// 发送消息给agent,让agent提醒用户需要他的参与
-			msgToManager = new SGMMessage(MesHeader_Mes2Manger.ELEMENT_MESSAGE,
-					null, this.getGoalModel().getName(), this.getName(), null,
-					null, null, MesBody_Mes2Manager.RequestPersonIA);
-			msgToManager.setDescription(this.getDescription());
-		} else {// 不需要人的参与，而是需要调服务
-			msgToManager = new SGMMessage(MesHeader_Mes2Manger.ELEMENT_MESSAGE,
-					null, this.getGoalModel().getName(), this.getName(), null,
-					null, null, MesBody_Mes2Manager.RequestService);
-			// 将需要调用的服务名称附加在description里
-			msgToManager
-					.setDescription(this.getExecutingRequestedServiceName());
-		}
+		// SGMMessage msgToManager = null;
+		// if (this.isNeedPeopleInteraction()) { // 需要人的参与
+		// // 发送消息给agent,让agent提醒用户需要他的参与
+		// msgToManager = new SGMMessage(MesHeader_Mes2Manger.ELEMENT_MESSAGE,
+		// null, this.getGoalModel().getName(), this.getName(), null,
+		// null, null, MesBody_Mes2Manager.RequestPersonIA);
+		// msgToManager.setDescription(this.getDescription());
+		// } else {// 不需要人的参与，而是需要调服务
+		SGMMessage msgToManager = new SGMMessage(
+				MesHeader_Mes2Manger.ELEMENT_MESSAGE, this.getGoalModel()
+						.getName(), this.getName(), null,
+				MesBody_Mes2Manager.RequestService);
+
+		// SGMMessage msgToManager = new SGMMessage(
+		// MesHeader_Mes2Manger.ELEMENT_MESSAGE, null, this.getGoalModel()
+		// .getName(), this.getName(), null, null, null,
+		// MesBody_Mes2Manager.RequestService);
+		// 将需要调用的服务名称附加在description里
+		msgToManager.setAbstractServiceName(this.getExecutingRequestedServiceName());
+		msgToManager.setTaskDescription(this.getDescription());
+//		msgToManager.setDescription(this.getExecutingRequestedServiceName());
+		// }
 
 		sendMesToManager(msgToManager);
 
@@ -109,12 +123,15 @@ public class TaskMachine extends ElementMachine {
 	 */
 	@Override
 	public void executingDo(SGMMessage msg) {
-		Log.logDebug(this.getName(), "executingDo()", "init.");
+//		Log.logDebug(this.getName(), "executingDo()", "init.");
 
 		if (msg != null) {
-			Log.logDebug(this.getName(), "executingDo_waitingEnd()",
-					"get a message from " + msg.getSender().toString()
-							+ "; body is: " + msg.getBody());
+			Log.logEMDebug(
+					this.getName(),
+					"executingDo_waitingEnd()",
+					"get a message from " + msg.getGoalModelName() + "#"
+							+ msg.getFromElementName() + "; body is: "
+							+ msg.getBody());
 
 			if (msg.getBody().equals(MesBody_Mes2Machine.TASK_DONE)) { // 收到外部UI的END消息
 				this.getMsgPool().poll();
@@ -137,12 +154,12 @@ public class TaskMachine extends ElementMachine {
 	 */
 	@Override
 	public void suspendedDo(SGMMessage msg) {
-		Log.logDebug(this.getName(), "suspendedDo()", "init.");
+		Log.logEMDebug(this.getName(), "suspendedDo()", "init.");
 		// SGMMessage msg = this.getMsgPool().poll(); // 每次拿出一条消息
 		if (msg != null) {
-			Log.logDebug(this.getName(), "suspendedDo()",
-					"get a message from " + msg.getSender().toString()
-							+ "; body is: " + msg.getBody());
+			Log.logEMDebug(this.getName(), "suspendedDo()", "get a message from "
+					+ msg.getGoalModelName() + "#" + msg.getFromElementName()
+					+ "; body is: " + msg.getBody());
 			if (msg.getBody().equals(MesBody_Mes2Machine.RESUME)) {
 				this.getMsgPool().poll();
 				// 把自己状态设置为executing,同时resetSuspendEntry
@@ -158,13 +175,13 @@ public class TaskMachine extends ElementMachine {
 	public void resetElementMachine() {
 	}
 
-	public boolean isNeedPeopleInteraction() {
-		return needPeopleInteraction;
-	}
-
-	public void setNeedPeopleInteraction(boolean needPeopleInteraction) {
-		this.needPeopleInteraction = needPeopleInteraction;
-	}
+	// public boolean isNeedPeopleInteraction() {
+	// return needPeopleInteraction;
+	// }
+	//
+	// public void setNeedPeopleInteraction(boolean needPeopleInteraction) {
+	// this.needPeopleInteraction = needPeopleInteraction;
+	// }
 
 	public String getExecutingRequestedServiceName() {
 		return executingRequestedServiceName;
