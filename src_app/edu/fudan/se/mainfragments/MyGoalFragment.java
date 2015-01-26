@@ -13,7 +13,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.support.v4.app.ListFragment;
 import android.text.Editable;
@@ -28,7 +27,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import edu.fudan.se.goalmachine.ElementMachine;
 import edu.fudan.se.goalmachine.GoalMachine;
 import edu.fudan.se.goalmachine.State;
@@ -52,6 +50,10 @@ public class MyGoalFragment extends ListFragment {
 	private MyGoalListAdapter adapter;
 
 	private ArrayList<GoalModel> goalmodels;
+
+	public MyGoalFragment() {
+
+	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -88,6 +90,21 @@ public class MyGoalFragment extends ListFragment {
 		startActivity(intent);
 	}
 
+	private boolean mHasLoadedOnce = false;
+
+	@Override
+	public void setUserVisibleHint(boolean isVisibleToUser) {
+		if (this.isVisible()) {
+			// we check that the fragment is becoming visible
+			if (isVisibleToUser && !mHasLoadedOnce) {
+				System.out.println("DEBUG!!!!!!!!!!-MyGoalFragment---mHasLoadedOnce: " + mHasLoadedOnce);
+				adapter.notifyDataSetChanged();
+				// async http request here
+				mHasLoadedOnce = true;
+			}
+		}
+		super.setUserVisibleHint(isVisibleToUser);
+	}
 }
 
 /**
@@ -225,7 +242,7 @@ class MyGoalListAdapter extends ArrayAdapter<GoalModel> {
 				listView.setAdapter(cvAdapter);
 
 				// 弹出对goal model做定制化的对话框
-				builder.setTitle("Customization");
+				builder.setTitle("Set Priority");
 				builder.setIcon(android.R.drawable.btn_star);
 				builder.setView(listView);
 				builder.setPositiveButton("Save",
@@ -256,7 +273,8 @@ class MyGoalListAdapter extends ArrayAdapter<GoalModel> {
 
 								// 然后再重新解析文件，替换goal model manager中的goal model
 								GmXMLParser parser = new GmXMLParser();
-								GoalModel newGoalModel = parser.newGoalModel(filePath);
+								GoalModel newGoalModel = parser
+										.newGoalModel(filePath);
 								goalModelManager.getGoalModelList().remove(
 										goalModel.getName());
 								goalModelManager.addGoalModel(newGoalModel);

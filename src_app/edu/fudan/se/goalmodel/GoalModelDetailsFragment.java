@@ -163,9 +163,17 @@ class TreeViewAdapter extends ArrayAdapter<ElementMachine> {
 			holder.layout.setBackgroundColor(mContext.getResources().getColor(
 					R.color.gl_3));
 			break;
+		case 4:
+			holder.layout.setBackgroundColor(mContext.getResources().getColor(
+					R.color.gl_4));
+			break;
+		case 5:
+			holder.layout.setBackgroundColor(mContext.getResources().getColor(
+					R.color.gl_5));
+			break;
 		default:
 			holder.layout.setBackgroundColor(mContext.getResources().getColor(
-					R.color.gl_3));
+					R.color.gl_5));
 			break;
 		}
 

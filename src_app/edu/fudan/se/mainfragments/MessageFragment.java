@@ -6,7 +6,7 @@ package edu.fudan.se.mainfragments;
 import java.util.ArrayList;
 
 import edu.fudan.se.R;
-import edu.fudan.se.messageFragment.MesFragment;
+import edu.fudan.se.messageFragment.LogFragment;
 import edu.fudan.se.messageFragment.TaskFragment;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -80,7 +80,7 @@ public class MessageFragment extends Fragment {
 		fragmentsList = new ArrayList<Fragment>();
 
 		Fragment taskFragment = new TaskFragment();
-		Fragment mesFragment = new MesFragment();
+		Fragment mesFragment = new LogFragment();
 
 		fragmentsList.add(taskFragment);
 		fragmentsList.add(mesFragment);
@@ -88,6 +88,7 @@ public class MessageFragment extends Fragment {
 		mPager.setAdapter(new MyMessageFragmentPagerAdapter(
 				getChildFragmentManager(), fragmentsList));
 		mPager.setCurrentItem(0);
+		mPager.setOffscreenPageLimit(1);
 	}
 
 	

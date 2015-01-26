@@ -55,5 +55,6 @@
         android:background="#fff"
         android:flipInterval="30"
         android:persistentDrawingCache="animation" />
+    
 
 </LinearLayout>

@@ -3,7 +3,6 @@
  */
 package edu.fudan.se.support;
 
-
 import com.baidu.location.BDLocation;
 import com.baidu.location.BDLocationListener;
 import com.baidu.location.LocationClient;
@@ -101,8 +100,8 @@ public class MobileLocatorService extends Service {
 		locationOption.setIsNeedAddress(true); // 返回的定位结果包含地址信息
 		locationOption.setAddrType("all"); // 返回的定位结果包含地址信息
 		locationOption.setCoorType("bd09ll");// 返回的定位结果是百度经纬度,默认值gcj02
-//		locationOption.disableCache(true);// 禁止启用缓存定位
-//		locationOption.setPriority(LocationClientOption.GpsFirst);
+		// locationOption.disableCache(true);// 禁止启用缓存定位
+		// locationOption.setPriority(LocationClientOption.GpsFirst);
 		locationOption.setScanSpan(DELAY_TIME);// 设置发起定位请求的间隔时间
 
 		mLocationClient.setLocOption(locationOption);
@@ -191,8 +190,8 @@ public class MobileLocatorService extends Service {
 	 */
 	private void sendLocationToServer(String location) {
 
-//		Log.logDebug("MobileLocatorService", "sendLocationToServer()",
-//				"MobileLocatorService--sendLocationToServer()");
+		// Log.logDebug("MobileLocatorService", "sendLocationToServer()",
+		// "MobileLocatorService--sendLocationToServer()");
 		android.util.Log.i("MobileLocatorService",
 				"MobileLocatorService--sendLocationToServer()");
 		GetAgent.getAideAgentInterface((SGMApplication) getApplication())
@@ -207,8 +206,8 @@ public class MobileLocatorService extends Service {
 	 */
 	private void changeLocationInfo(String location) {
 
-//		Log.logDebug("MobileLocatorService", "changeLocationInfo()",
-//				"MobileLocatorService--changeLocationInfo()");
+		// Log.logDebug("MobileLocatorService", "changeLocationInfo()",
+		// "MobileLocatorService--changeLocationInfo()");
 		android.util.Log.i("MobileLocatorService",
 				"MobileLocatorService--changeLocationInfo()");
 		SGMApplication sgmApplication = (SGMApplication) getApplication();
@@ -229,8 +228,8 @@ public class MobileLocatorService extends Service {
 				return;
 			}
 
-//			Log.logDebug("MobileLocatorService", "onReceiveLocation()",
-//					"BDLocationListener--onReceiveLocation()");
+			// Log.logDebug("MobileLocatorService", "onReceiveLocation()",
+			// "BDLocationListener--onReceiveLocation()");
 			android.util.Log
 					.i("MobileLocatorService",
 							"MobileLocatorService--BDLocationListener--onReceiveLocation()");
@@ -256,16 +255,23 @@ public class MobileLocatorService extends Service {
 				sb.append("\nAddr:");
 				sb.append(location.getAddrStr());
 			}
-//			Log.logDebug("MobileLocatorService", "onReceiveLocation()", "sb: "
-//					+ sb.toString());
-			android.util.Log.i("MobileLocatorService",
-					"MobileLocatorService--sb: " + sb.toString());
+			// Log.logDebug("MobileLocatorService", "onReceiveLocation()",
+			// "sb: "
+			// + sb.toString());
+			// android.util.Log.i("MobileLocatorService",
+			// "MobileLocatorService--sb: " + sb.toString());
+
+			String locationToLog = "Latitude:" + location.getLatitude()
+					+ ";Longitude:" + location.getLongitude();
+			android.util.Log.i("MobileLocatorService", "locationToLog--"
+					+ locationToLog);
+
 			// 61或者161，定位成功
 			if (locType == BDLocation.TypeGpsLocation
 					|| locType == BDLocation.TypeNetWorkLocation) {
 				// 将定位结果上传到agent服务器，并且更改本地存储的位置信息
-				sendLocationToServer(sb.toString());
-				changeLocationInfo(sb.toString());
+				sendLocationToServer(locationToLog);
+				changeLocationInfo(locationToLog);
 			}
 			// 63或者68
 			else if (locType == BDLocation.TypeNetWorkException
@@ -276,7 +282,7 @@ public class MobileLocatorService extends Service {
 						Constant.Notification_Network_State);
 			}
 		}
-		
+
 	}
 
 }

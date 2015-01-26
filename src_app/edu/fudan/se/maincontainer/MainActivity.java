@@ -1,6 +1,7 @@
 package edu.fudan.se.maincontainer;
 
 import edu.fudan.se.R;
+import edu.fudan.se.contextmanager.ContextManager;
 import edu.fudan.se.mainfragments.MainFragment;
 import edu.fudan.se.utils.Constant;
 import edu.fudan.se.utils.NotificationUtil;
@@ -46,6 +47,9 @@ public class MainActivity extends FragmentActivity {
 		refreshChatFilter.addAction("jade.task.NOTIFICATION");
 		refreshChatFilter.addAction("jade.mes.NOTIFICATION");
 		registerReceiver(myReceiver, refreshChatFilter);
+		
+		//初始化ContextManager中的applicationContext，以便在UI条件检查时弹出对话框
+//		ContextManager.applicationContext = this;
 
 	}
 

@@ -15,6 +15,8 @@ public class TaskExecutingUtil {
 
 	private String abstractServiceName;
 	private String taskDescription;	//任务的描述，如果这个任务
+	private String taskLocation;
+	
 	private RequestData needRequestData;
 	private RequestData retRequestData;
 
@@ -24,6 +26,7 @@ public class TaskExecutingUtil {
 		this.taskDescription = taskDescription;
 		this.needRequestData = needRequestData;
 		this.retRequestData = retRequestData;
+		this.taskLocation = null;
 	}
 
 	public String getAbstractServiceName() {
@@ -56,6 +59,14 @@ public class TaskExecutingUtil {
 
 	public void setRetRequestData(RequestData retRequestData) {
 		this.retRequestData = retRequestData;
+	}
+
+	public String getTaskLocation() {
+		return taskLocation;
+	}
+
+	public void setTaskLocation(String taskLocation) {
+		this.taskLocation = taskLocation;
 	}
 
 	

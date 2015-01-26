@@ -3,8 +3,6 @@
  */
 package edu.fudan.se.support;
 
-import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
-import edu.fudan.se.goalmachine.message.MesHeader_Mes2Manger;
 import edu.fudan.se.goalmachine.message.SGMMessage;
 import edu.fudan.se.initial.SGMApplication;
 import android.app.Service;
@@ -39,8 +37,8 @@ public class SystemBroadcastListenerService extends Service {
 		android.util.Log.i("MY_LOG",
 				"-------SystemBroadcastListenerService onCreate()-------");
 		IntentFilter mFilter = new IntentFilter();
-		mFilter.addAction("android.provider.Telephony.SMS_RECEIVED");// 新短信
-		mFilter.addAction(Intent.ACTION_HEADSET_PLUG);// 耳机的插入和拔出
+//		mFilter.addAction("android.provider.Telephony.SMS_RECEIVED");// 新短信
+//		mFilter.addAction(Intent.ACTION_HEADSET_PLUG);// 耳机的插入和拔出
 		mFilter.addAction(Intent.ACTION_TIME_TICK); // 时间流逝
 		registerReceiver(mReceiver, mFilter);
 	}
@@ -58,41 +56,41 @@ public class SystemBroadcastListenerService extends Service {
 			String action = intent.getAction();
 			SGMMessage msgToMessage = null;
 			switch (action) {
-			case "android.provider.Telephony.SMS_RECEIVED":
-				android.util.Log
-						.i("MY_LOG",
-								"-------SystemBroadcastListenerService new SMS!!!-------");
+//			case "android.provider.Telephony.SMS_RECEIVED":
+//				android.util.Log
+//						.i("MY_LOG",
+//								"-------SystemBroadcastListenerService new SMS!!!-------");
+//
+//				msgToMessage = new SGMMessage(
+//						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null,
+//						null, MesBody_Mes2Manager.NewSMS);
+//				break;
 
-				msgToMessage = new SGMMessage(
-						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null,
-						null, MesBody_Mes2Manager.NewSMS);
-				break;
-
-			case Intent.ACTION_HEADSET_PLUG: // 耳机的插入和拔出
-				if (intent.hasExtra("state")) {
-					if (intent.getIntExtra("state", 0) == 0) {// 0代表拔出，1代表插入
-						// Toast.makeText(context, "headset not connected",
-						// Toast.LENGTH_LONG).show();
-					} else if (intent.getIntExtra("state", 0) == 1) {
-						// Toast.makeText(context, "headset  connected",
-						// Toast.LENGTH_LONG).show();
-
-						android.util.Log
-								.i("MY_LOG",
-										"-------SystemBroadcastListenerService headset  connected!!!-------");
-						msgToMessage = new SGMMessage(
-								MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
-								null, null, MesBody_Mes2Manager.NewSMS);
-
-					}
-				}
-				break;
+//			case Intent.ACTION_HEADSET_PLUG: // 耳机的插入和拔出
+//				if (intent.hasExtra("state")) {
+//					if (intent.getIntExtra("state", 0) == 0) {// 0代表拔出，1代表插入
+//						// Toast.makeText(context, "headset not connected",
+//						// Toast.LENGTH_LONG).show();
+//					} else if (intent.getIntExtra("state", 0) == 1) {
+//						// Toast.makeText(context, "headset  connected",
+//						// Toast.LENGTH_LONG).show();
+//
+//						android.util.Log
+//								.i("MY_LOG",
+//										"-------SystemBroadcastListenerService headset  connected!!!-------");
+//						msgToMessage = new SGMMessage(
+//								MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
+//								null, null, MesBody_Mes2Manager.NewSMS);
+//
+//					}
+//				}
+//				break;
 
 			case Intent.ACTION_TIME_TICK: // 耳机的插入和拔出
 
-				android.util.Log
-						.i("MY_LOG",
-								"-------SystemBroadcastListenerService ACTION_TIME_TICK time!!!!-------");
+//				android.util.Log
+//						.i("MY_LOG",
+//								"-------SystemBroadcastListenerService ACTION_TIME_TICK time!!!!-------");
 
 				break;
 

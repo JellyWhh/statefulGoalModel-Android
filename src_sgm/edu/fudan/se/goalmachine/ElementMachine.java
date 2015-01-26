@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import android.os.Looper;
+
 import edu.fudan.se.goalmachine.message.MesBody_Mes2Machine;
 import edu.fudan.se.goalmachine.message.MesHeader_Mes2Machine;
 import edu.fudan.se.goalmachine.message.SGMMessage;
@@ -87,7 +89,7 @@ public class ElementMachine implements Runnable {
 
 	@Override
 	public void run() {
-
+		Looper.prepare();
 		this.setCurrentState(State.Initial); // 刚开始是目标状态是initial状态
 		// this.setStartTime(new Date()); // 设置目标状态机开始运行时间为当前时间
 
@@ -98,7 +100,7 @@ public class ElementMachine implements Runnable {
 			// 如果contextCondition为空，表示没有设置上下文条件，这个goal是有意义的，可以检出消息，执行行为
 			doMainRunningBehaviour();
 			try {
-				Thread.sleep(2 * 1000);
+				Thread.sleep(500);//0.5s
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -247,7 +249,7 @@ public class ElementMachine implements Runnable {
 	 * initial状态的do所做的action：监听消息池，看是否有ACTIVATE消息到达
 	 */
 	public void initialDo(SGMMessage msg) {
-//		Log.logDebug(this.getName(), "initialDo()", "init.");
+		// Log.logDebug(this.getName(), "initialDo()", "init.");
 		// SGMMessage msg = this.getMsgPool().poll(); // 每次拿出一条消息
 		if (msg != null) {
 			Log.logEMDebug(
@@ -295,21 +297,22 @@ public class ElementMachine implements Runnable {
 	 * waiting状态中do所做的action：等待父目标的EXITWAITING消息，并且一直做checkPreCondition
 	 */
 	public void waitingDo() {
-//		Log.logDebug(this.getName(), "waitingDo()", "init.");
+		// Log.logDebug(this.getName(), "waitingDo()", "init.");
 
 		// 先判断等待时间是否超时
 		Date nowTime = new Date();
 		long waitTime = nowTime.getTime()
 				- this.getStartWaitingTime().getTime(); // 得到的差值单位是毫秒
-		// TODO 这里记得可能要在*1000前面加上*60，因为现在设的等待时间限制单位为秒，实际运行时可能需要设置为分钟
-		if (waitTime <= (this.getWaitingTimeLimit() * 1000)) { // 没有超时
+		// 单位是分钟
+		if (waitTime <= (this.getWaitingTimeLimit() * 60 * 1000)) { // 没有超时
 			// 然后再做条件检查，判断是否能够跳出waiting状态
 			checkPreCondition();
 			if (this.getPreCondition().isSatisfied()) {
 				this.setCurrentState(State.Executing);
 			}
 		} else { // 超时了
-			Log.logEMDebug(this.getName(), "waitingDo()", "Waiting Timeout!!!!!!");
+			Log.logEMDebug(this.getName(), "waitingDo()",
+					"Waiting Timeout!!!!!!");
 			this.setCurrentState(State.Failed);
 		}
 
@@ -337,7 +340,7 @@ public class ElementMachine implements Runnable {
 	 * @return true 表示需要挂起，直接进入挂起状态，不能再执行下面的代码；false 不需要挂起
 	 */
 	private boolean checkIfSuspend(SGMMessage msg) {
-//		Log.logDebug(this.getName(), "checkIfSuspend()", "init.");
+		// Log.logDebug(this.getName(), "checkIfSuspend()", "init.");
 
 		// 这里用peek()方法取消息，Retrieves, but does not
 		// remove，这样就不会影响接下来的executingDo()方法中取消息了
@@ -435,7 +438,7 @@ public class ElementMachine implements Runnable {
 	 * failed状态中do所做的action：停止自己的状态机，<code>GoalMachine</code>需要重写
 	 */
 	public void failedDo() {
-//		Log.logDebug(this.getName(), "failedDo()", "init.");
+		// Log.logDebug(this.getName(), "failedDo()", "init.");
 		this.stopMachine();
 		Log.logEMDebug(this.getName(), "failedDo()",
 				"It failed to achieved its goal and stopped its machine!");
@@ -463,7 +466,7 @@ public class ElementMachine implements Runnable {
 	 * achieved状态中do所做的action：在<code>GoalMachine</code>中需要重写
 	 */
 	public void achievedDo() {
-//		Log.logDebug(this.getName(), "achievedDo()", "init.");
+		// Log.logDebug(this.getName(), "achievedDo()", "init.");
 		this.stopMachine(); // 本身已完成
 		Log.logEMDebug(this.getName(), "achievedDo()",
 				"It has achieved its goal and stopped its machine!");
@@ -696,8 +699,8 @@ public class ElementMachine implements Runnable {
 
 		if (this.getGoalModel().getGoalModelManager().getMsgPool().offer(msg)) {
 			Log.logMessage(msg, true);
-			Log.logEMDebug(this.getName(), "sendMesToManager()",
-					"send a " + msg.getBody() + " message to Manager succeed!");
+			Log.logEMDebug(this.getName(), "sendMesToManager()", "send a "
+					+ msg.getBody() + " message to Manager succeed!");
 		} else {
 			Log.logMessage(msg, false);
 			Log.logError(this.getName(), "sendMesToManager()",
@@ -833,6 +836,8 @@ public class ElementMachine implements Runnable {
 		// 判断执行时间是否超时
 		Date nowTime = new Date();
 		long executingTime = nowTime.getTime() - this.getStartTime().getTime(); // 得到的差值单位是毫秒
+		System.out.println("checkCommitmentCondition--------executingTime: "
+				+ executingTime + ", timeLimit:" + timeLimit);
 
 		if (executingTime > (timeLimit * 60 * 1000)) { // 超时
 			Log.logEMDebug(this.getName(), "checkCommitmentCondition()",

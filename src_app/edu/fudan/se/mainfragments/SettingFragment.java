@@ -51,16 +51,12 @@ public class SettingFragment extends Fragment {
 
 			@Override
 			public void onClick(View v) {
-				// showNotification("Test title",
-				// "test content!\n金州勇士官方宣布球队已经解雇了主帅马克-杰克逊，随后宣布了最后的结果。",
-				// "New Msg From SGM!");
-//				invokeWeatherService("testGoalModelName", "testElementName",
-//						"Shanghai");
 				textView.setText(((SGMApplication)getActivity().getApplication()).getLocation());
 			}
 		});
 		return rootView;
 	}
+	
 
 	private void invokeWeatherService(String goalModelName, String elementName,
 			String city) {

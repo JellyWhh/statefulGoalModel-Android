@@ -1,40 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/fl_messagelayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="#fff"
-    android:padding="5dp" >
+    android:orientation="vertical"
+    android:padding="3dp" >
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/tv_mes_time"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="left"
-        android:orientation="vertical"
-        android:paddingLeft="5dp" 
-        android:layout_marginRight="70dp">
+        android:text="2015.01.26 17:49"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
 
-        <TextView
-            android:id="@+id/tv_mes_time"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Small Text"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
+    <TextView
+        android:id="@+id/tv_mes_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Medium Text"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
-        <TextView
-            android:id="@+id/tv_mes_content"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Medium Text"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
-    </LinearLayout>
-
-    <Button
-        android:id="@+id/bt_mes_del"
-        android:layout_width="wrap_content"
-        android:layout_height="40dp"
-        android:layout_gravity="right|center_vertical"
-        android:background="@drawable/btn_style_alert_dialog_button"
-        android:text="@string/del_mes" />
-
-</FrameLayout>
+</LinearLayout>

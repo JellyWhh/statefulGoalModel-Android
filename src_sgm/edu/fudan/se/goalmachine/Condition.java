@@ -5,6 +5,11 @@ package edu.fudan.se.goalmachine;
 
 import java.util.Hashtable;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+
 import edu.fudan.se.contextmanager.ContextManager;
 import edu.fudan.se.contextmanager.IContext;
 
@@ -21,9 +26,12 @@ public class Condition {
 	private boolean waitable; // 这个条件是否可以通过等待，重新改变是否满足的状态，只有pre condition需要设置
 
 	private String valueType;
+
 	private String leftValueDes;
 	private String operator;
 	private String rightValue;
+
+	private String description;
 
 	private Hashtable<String, IContext> contextHashtable;
 
@@ -69,9 +77,17 @@ public class Condition {
 	public void setContextHashtable(Hashtable<String, IContext> contextHashtable) {
 		this.contextHashtable = contextHashtable;
 	}
-	
+
 	public String getRightValue() {
 		return rightValue;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	public void check() {
@@ -118,7 +134,7 @@ public class Condition {
 				break;
 			}
 			break;
-			
+
 		case "Boolean":
 			boolean leftValueBoolean = (boolean) contextManager.getValue();
 			switch (this.operator) {
@@ -140,14 +156,61 @@ public class Condition {
 				break;
 			}
 			break;
-		case "Time":
-
-			break;
+//		case "UI":// 弹出对话框让用户确认的
+//
+//			this.satisfied = isUserSelectYes(ContextManager.applicationContext,
+//					description);
+//
+//			break;
 		}
 
 		System.out.println("---------check condition done!-------isSatisfied: "
 				+ this.isSatisfied());
 	}
 
-	
+//	private boolean isUserSelectYes(Context mContext, String description) {
+//
+//		// 弹出一个让用户确认的通知
+//		// 新任务广播
+//		Intent broadcast_nda = new Intent();
+//		broadcast_nda.setAction("jade.task.NOTIFICATION");
+//		broadcast_nda.putExtra("Content", "You have to confirm something!");
+//		mContext.sendBroadcast(broadcast_nda);
+//
+//		final String[] isYes = new String[1];
+//		AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+//		builder.setTitle("Confirm");
+//		builder.setIcon(android.R.drawable.ic_dialog_info);
+//		builder.setMessage(description);
+//
+//		builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+//
+//			@Override
+//			public void onClick(DialogInterface dialog, int which) {
+//				isYes[0] = "Yes";
+//			}
+//		});
+//
+//		builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+//
+//			@Override
+//			public void onClick(DialogInterface dialog, int which) {
+//				isYes[0] = "No";
+//			}
+//		});
+//
+//		AlertDialog dialog = builder.create();
+//		dialog.setCanceledOnTouchOutside(false);// 使除了dialog以外的地方不能被点击
+//		dialog.show();
+//
+//		System.out.println("Debug!!!!!!--isYes[0]:" + isYes[0]);
+//
+//		if (isYes[0].equals("Yes")) {
+//			return true;
+//		} else {
+//			return false;
+//		}
+//
+//	}
+
 }

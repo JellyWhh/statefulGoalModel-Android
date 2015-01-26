@@ -23,8 +23,8 @@ import java.util.logging.Level;
 import edu.fudan.se.goalmodel.GmXMLParser;
 import edu.fudan.se.goalmodel.GoalModel;
 import edu.fudan.se.goalmodel.GoalModelManager;
+import edu.fudan.se.messageFragment.UserLog;
 import edu.fudan.se.support.DownloadTask;
-import edu.fudan.se.userMes.UserMessage;
 import edu.fudan.se.userMes.UserTask;
 
 import android.app.Application;
@@ -44,7 +44,8 @@ public class SGMApplication extends Application implements Serializable {
 	private Logger logger = Logger.getJADELogger(this.getClass().getName());
 
 	private ArrayList<UserTask> userTaskList;
-	private ArrayList<UserMessage> userMessageList;
+//	private ArrayList<UserMessage> userMessageList;
+	private ArrayList<UserLog> userLogList;
 	private ArrayList<DownloadTask> downloadTaskList;
 
 	private String agentNickname;
@@ -67,7 +68,7 @@ public class SGMApplication extends Application implements Serializable {
 	 */
 	private void initialData() {
 		this.userTaskList = new ArrayList<>();
-		this.userMessageList = new ArrayList<>();
+		this.userLogList = new ArrayList<>();
 		this.downloadTaskList = new ArrayList<>();
 
 		goalModelManager = new GoalModelManager();
@@ -244,12 +245,12 @@ public class SGMApplication extends Application implements Serializable {
 		this.userTaskList.removeAll(toRemoveArrayList);
 	}
 
-	public ArrayList<UserMessage> getUserMessageList() {
-		return userMessageList;
+	public ArrayList<UserLog> getUserLogList() {
+		return userLogList;
 	}
 
-	public void clearUserMessages() {
-		this.userMessageList.clear();
+	public void clearUserLogs() {
+		this.userLogList.clear();
 	}
 
 	public String getLocation() {

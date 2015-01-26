@@ -25,6 +25,8 @@ public class SGMMessage implements Serializable {
 
 	private String abstractServiceName;
 	private String taskDescription; // 消息附加的描述
+	private String taskLocation;
+	
 	private RequestData needContent; // 执行任务时需要传入的数据
 	private RequestData retContent; // 这个任务执行完毕后会返回的数据
 
@@ -93,6 +95,14 @@ public class SGMMessage implements Serializable {
 
 	public void setTaskDescription(String taskDescription) {
 		this.taskDescription = taskDescription;
+	}
+
+	public String getTaskLocation() {
+		return taskLocation;
+	}
+
+	public void setTaskLocation(String taskLocation) {
+		this.taskLocation = taskLocation;
 	}
 
 	/**

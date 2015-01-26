@@ -3,6 +3,7 @@
  */
 package edu.fudan.se.contextmanager;
 
+
 /**
  * 上下文管理，使用策略模式来实现
  * 
@@ -10,7 +11,9 @@ package edu.fudan.se.contextmanager;
  * 
  */
 public class ContextManager {
-
+	
+//	public static Context applicationContext;
+	
 	private IContext context;
 
 	public ContextManager(IContext context) {

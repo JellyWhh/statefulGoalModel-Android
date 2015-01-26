@@ -72,7 +72,22 @@ public class DownloadFragment extends ListFragment {
 		super.onListItemClick(l, v, position, id);
 
 	}
+	
+	private boolean mHasLoadedOnce = false;
 
+	@Override
+	public void setUserVisibleHint(boolean isVisibleToUser) {
+		if (this.isVisible()) {
+			// we check that the fragment is becoming visible
+			if (isVisibleToUser && !mHasLoadedOnce) {
+				System.out.println("DEBUG!!!!!!!!!!-DownloadFragment---mHasLoadedOnce: " + mHasLoadedOnce);
+				adapter.notifyDataSetChanged();
+				// async http request here
+				mHasLoadedOnce = true;
+			}
+		}
+		super.setUserVisibleHint(isVisibleToUser);
+	}
 }
 
 /**
@@ -229,7 +244,7 @@ class DownloadListAdapter extends ArrayAdapter<DownloadTask> {
 				fileOutputStream.close();
 				inputStream.close();
 
-				// 文件已经保存到sbCard里了，解析它	//TODO
+				// 文件已经保存到sbCard里了，解析它 //TODO
 				GmXMLParser gmXMLParser = new GmXMLParser();
 				GoalModel goalModel = gmXMLParser.newGoalModel(sdCardDir
 						+ downloadTask.getName());
@@ -250,7 +265,6 @@ class DownloadListAdapter extends ArrayAdapter<DownloadTask> {
 			e.printStackTrace();
 		}
 	}
-	
 
 	class ViewHolder {
 		TextView text;

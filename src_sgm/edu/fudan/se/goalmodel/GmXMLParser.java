@@ -22,10 +22,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import android.util.Log;
-
+import edu.fudan.se.contextmanager.CAccountBalance;
+import edu.fudan.se.contextmanager.CAuthorization;
 import edu.fudan.se.contextmanager.CTemperature;
-import edu.fudan.se.contextmanager.CTime;
 import edu.fudan.se.contextmanager.CWeather;
 import edu.fudan.se.contextmanager.IContext;
 import edu.fudan.se.goalmachine.Condition;
@@ -47,7 +46,8 @@ public class GmXMLParser {
 		// 初始化条件检查时可能用到的上下文
 		this.contextHashtable.put("Temperature", new CTemperature());
 		this.contextHashtable.put("Weather", new CWeather());
-		this.contextHashtable.put("Time", new CTime());
+		this.contextHashtable.put("Authorization", new CAuthorization());
+		this.contextHashtable.put("AccountBalance", new CAccountBalance());
 
 	}
 
@@ -135,7 +135,7 @@ public class GmXMLParser {
 						String parentGoal = "";
 						int decomposition = 0, schedulerMethod = 0, priorityLevel = 0, waitingTimeLimit = 0, retryTimes = 0;
 
-						String executingRequestedServiceName = "";
+						String executingRequestedServiceName = "",taskExecutingLocation="";
 						Condition preCondition = null, postCondition = null, invariantCondition = null, commitmentCondition = null, contextCondition = null;
 
 						for (int j = 0; j < propertyNodeList.getLength(); j++) {
@@ -143,6 +143,7 @@ public class GmXMLParser {
 
 							String conditionType = "", conditionValueType = "", conditionLeftValue = "", conditionOperator = "", conditionRightValue = "";
 							boolean canRepairing = false;
+							String conditionDescription="";
 
 							if (propertyNode.getNodeType() == Node.ELEMENT_NODE) {
 								// System.err.println(propertyNode.getNodeName());
@@ -170,23 +171,12 @@ public class GmXMLParser {
 									retryTimes = Integer.parseInt(propertyNode
 											.getTextContent());
 									break;
-								// case "needDelegate":
-								// needDelegate = Boolean
-								// .parseBoolean(propertyNode
-								// .getTextContent());
-								// break;
-								// case "needPeopleInteraction":
-								// needPeopleInteraction = Boolean
-								// .parseBoolean(propertyNode
-								// .getTextContent());
-								// break;
 								case "executingRequestedServiceName":
-									// 要把xml中的短的service name映射成完成的服务地址
-									// executingRequestedServiceName =
-									// bindRequestServiceToIntentService(
-									// propertyNode.getTextContent(),
-									// allIntentServiceNameArrayList);
 									executingRequestedServiceName = propertyNode
+											.getTextContent();
+									break;
+								case "executingLocation":
+									taskExecutingLocation = propertyNode
 											.getTextContent();
 									break;
 
@@ -252,6 +242,9 @@ public class GmXMLParser {
 														.parseBoolean(conditionNode
 																.getTextContent());
 											}
+											if (conditionNode.getNodeName().equals("description")) {
+												conditionDescription = conditionNode.getTextContent();
+											}
 
 										}
 									}
@@ -267,6 +260,7 @@ public class GmXMLParser {
 												conditionRightValue);
 										contextCondition
 												.setContextHashtable(contextHashtable);
+										contextCondition.setDescription(conditionDescription);
 										break;
 									case "PRE":
 										preCondition = new Condition(
@@ -278,6 +272,7 @@ public class GmXMLParser {
 												canRepairing);
 										preCondition
 												.setContextHashtable(contextHashtable);
+										preCondition.setDescription(conditionDescription);
 										break;
 									case "POST":
 										postCondition = new Condition(
@@ -288,6 +283,7 @@ public class GmXMLParser {
 												conditionRightValue);
 										postCondition
 												.setContextHashtable(contextHashtable);
+										postCondition.setDescription(conditionDescription);
 										break;
 									case "COMMITMENT":
 										commitmentCondition = new Condition(
@@ -298,6 +294,7 @@ public class GmXMLParser {
 												conditionRightValue);
 										commitmentCondition
 												.setContextHashtable(contextHashtable);
+										commitmentCondition.setDescription(conditionDescription);
 										break;
 									case "INVARIANT":
 										invariantCondition = new Condition(
@@ -308,6 +305,7 @@ public class GmXMLParser {
 												conditionRightValue);
 										invariantCondition
 												.setContextHashtable(contextHashtable);
+										invariantCondition.setDescription(conditionDescription);
 										break;
 
 									}
@@ -341,6 +339,9 @@ public class GmXMLParser {
 							// ((TaskMachine) elementMachine)
 							// .setExecutingRequestedServiceName(executingRequestedServiceName);
 							// }
+							if (!taskExecutingLocation.equals("")) {
+								((TaskMachine) elementMachine).setExecutingLocation(taskExecutingLocation);
+							}
 						}
 
 						elementMachine.setDescription(description);

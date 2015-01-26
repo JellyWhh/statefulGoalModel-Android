@@ -4,19 +4,21 @@
     <color name="unclickable_grey">#777</color>
     <color name="clickable_black">#000</color>
     <color name="done_grey">#ccc</color>
-    <color name="nodone_white">#fff</color>
+    <color name="nodone_white">#FFA07B</color>
     <color name="nodone_green">#ACE1AF</color>
     <color name="nodone_pink">#fedcbd</color>
-    <color name="nodone_purple">#C3BED4</color>
+    <color name="nodone_purple">#DEA681</color>
     <color name="nodone_yellow">#fdb933</color>
     
     <color name="focus_black">#000</color>
     <color name="unfocus_grey">#888</color>
     
     <color name="gl_0">#AAFFFF</color>
-    <color name="gl_1">#CCFFFF</color>
-    <color name="gl_2">#EEFFFF</color>
-    <color name="gl_3">#FFFFFF</color>
+    <color name="gl_1">#BBFFFF</color>
+    <color name="gl_2">#CCFFFF</color>
+    <color name="gl_3">#DDFFFF</color>
+    <color name="gl_4">#EEFFFF</color>
+    <color name="gl_5">#FFFFFF</color>
     
     <color name="custom">#CCFFFF</color>
 

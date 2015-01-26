@@ -18,7 +18,9 @@ import edu.fudan.se.log.Log;
 public class TaskMachine extends ElementMachine {
 
 	// private boolean needPeopleInteraction; // 是否需要人的交互
-	private String executingRequestedServiceName; // 执行这个task时具体需要调用的服务名称，如果需要人的交互，这个就为空了
+	private String executingAbstractServiceName; // 执行这个task时具体需要调用的服务名称，如果需要人的交互，这个就为空了
+	private String executingLocation;	//执行任务时的地点
+	
 
 	// private boolean needDelegate; //
 	// 任务是否要委托出去，也就是委托给别人做，如果是，则它应该是没有subElements的
@@ -36,9 +38,10 @@ public class TaskMachine extends ElementMachine {
 	 *            执行时需要查找的服务
 	 */
 	public TaskMachine(String name, ElementMachine parentGoal, int level,
-			String executingRequestedServiceName) {
+			String executingAbstractServiceName) {
 		super(name, parentGoal, level);
-		this.executingRequestedServiceName = executingRequestedServiceName;
+		this.executingAbstractServiceName = executingAbstractServiceName;
+		this.executingLocation = null;
 	}
 
 	/**
@@ -109,7 +112,10 @@ public class TaskMachine extends ElementMachine {
 		// .getName(), this.getName(), null, null, null,
 		// MesBody_Mes2Manager.RequestService);
 		// 将需要调用的服务名称附加在description里
-		msgToManager.setAbstractServiceName(this.getExecutingRequestedServiceName());
+		msgToManager.setAbstractServiceName(this.getExecutingAbstractServiceName());
+		if (this.getExecutingLocation()!=null) {
+			msgToManager.setTaskLocation(this.getExecutingLocation());
+		}
 		msgToManager.setTaskDescription(this.getDescription());
 //		msgToManager.setDescription(this.getExecutingRequestedServiceName());
 		// }
@@ -183,13 +189,21 @@ public class TaskMachine extends ElementMachine {
 	// this.needPeopleInteraction = needPeopleInteraction;
 	// }
 
-	public String getExecutingRequestedServiceName() {
-		return executingRequestedServiceName;
+	public String getExecutingAbstractServiceName() {
+		return executingAbstractServiceName;
 	}
 
-	public void setExecutingRequestedServiceName(
-			String executingRequestedServiceName) {
-		this.executingRequestedServiceName = executingRequestedServiceName;
+	public void setExecutingAbstractServiceName(
+			String executingAbstractServiceName) {
+		this.executingAbstractServiceName = executingAbstractServiceName;
+	}
+
+	public String getExecutingLocation() {
+		return executingLocation;
+	}
+
+	public void setExecutingLocation(String executingLocation) {
+		this.executingLocation = executingLocation;
 	}
 
 }

@@ -48,6 +48,31 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <service android:name="jade.android.MicroRuntimeService" />
+        <service android:name="service.async.webservice.IntentServiceQueryBookFromLibrary" >
+            <intent-filter>
+                <action android:name="service.intentservice.queryBookFromLibrary" />
+            </intent-filter>
+        </service>
+        <service android:name="service.async.webservice.IntentServiceBorrowBookFromLibrary" >
+            <intent-filter>
+                <action android:name="service.intentservice.borrowBookFromLibrary" />
+            </intent-filter>
+        </service>
+        <service android:name="service.async.webservice.IntentServiceQueryBookFromShop" >
+            <intent-filter>
+                <action android:name="service.intentservice.queryBookFromShop" />
+            </intent-filter>
+        </service>
+        <service android:name="service.async.webservice.IntentServicePayToTheShop" >
+            <intent-filter>
+                <action android:name="service.intentservice.pay" />
+            </intent-filter>
+        </service>
+         <service android:name="service.async.webservice.IntentServiceQuerySeller" >
+            <intent-filter>
+                <action android:name="service.intentservice.querySeller" />
+            </intent-filter>
+        </service>
         <service android:name="service.async.webservice.IntentServiceWeather" >
             <intent-filter>
                 <action android:name="service.intentservice.weather" />
@@ -58,24 +83,9 @@
                 <action android:name="service.intentservice.weatherCandidate" />
             </intent-filter>
         </service>
-        <service android:name="service.async.webservice.TestIntentServiceSetCityName" >
-            <intent-filter>
-                <action android:name="service.intentservice.setcityname" />
-            </intent-filter>
-        </service>
         <service android:name="service.async.webservice.IntentServiceShowContent" >
             <intent-filter>
                 <action android:name="service.intentservice.showcontent" />
-            </intent-filter>
-        </service>
-        <service android:name="service.async.webservice.IntentServiceTakePicture" >
-            <intent-filter>
-                <action android:name="service.intentservice.takepicture" />
-            </intent-filter>
-        </service>
-        <service android:name="service.async.webservice.IntentServiceUserInput" >
-            <intent-filter>
-                <action android:name="service.intentservice.userinput" />
             </intent-filter>
         </service>
         <service android:name="edu.fudan.se.support.MobileLocatorService" >

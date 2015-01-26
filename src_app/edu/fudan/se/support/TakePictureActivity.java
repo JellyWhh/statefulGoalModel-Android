@@ -144,7 +144,7 @@ public class TakePictureActivity extends Activity {
 		aclmc_DelegateTask.setDone(true);
 		RequestData requestData = new RequestData(requestDataName, "Image");
 		requestData.setContent(EncodeDecodeRequestData.encodeBitmap(bitmap));
-		aclmc_DelegateTask.setRequestData(requestData);
+		aclmc_DelegateTask.setRetRequestData(requestData);
 		aideAgentInterface.sendMesToExternalAgent(aclmc_DelegateTask);
 	}
 

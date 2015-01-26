@@ -26,7 +26,8 @@ public class ACLMC_DelegateTask implements Serializable {
 	
 	private String taskDescription;
 	private boolean isDone;
-	private RequestData requestData;
+	private RequestData retRequestData;
+	private RequestData needRequestData;
 
 	public ACLMC_DelegateTask(DTHeader dtHeader, String fromAgentName,
 			String toAgentName, String goalModelName, String elementName) {
@@ -45,12 +46,12 @@ public class ACLMC_DelegateTask implements Serializable {
 		this.isDone = isDone;
 	}
 
-	public RequestData getRequestData() {
-		return requestData;
+	public RequestData getRetRequestData() {
+		return retRequestData;
 	}
 
-	public void setRequestData(RequestData requestData) {
-		this.requestData = requestData;
+	public void setRetRequestData(RequestData retRequestData) {
+		this.retRequestData = retRequestData;
 	}
 
 	public DTHeader getDtHeader() {
@@ -83,6 +84,14 @@ public class ACLMC_DelegateTask implements Serializable {
 
 	public void setTaskDescription(String taskDescription) {
 		this.taskDescription = taskDescription;
+	}
+
+	public RequestData getNeedRequestData() {
+		return needRequestData;
+	}
+
+	public void setNeedRequestData(RequestData needRequestData) {
+		this.needRequestData = needRequestData;
 	}
 
 	public static enum DTHeader {

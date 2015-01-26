@@ -21,13 +21,15 @@ import edu.fudan.se.agent.data.UserInformation;
 import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
 import edu.fudan.se.goalmachine.message.MesHeader_Mes2Manger;
 import edu.fudan.se.goalmachine.message.SGMMessage;
+import edu.fudan.se.goalmodel.EncodeDecodeRequestData;
 import edu.fudan.se.goalmodel.GoalModel;
 import edu.fudan.se.goalmodel.GoalModelManager;
 import edu.fudan.se.goalmodel.RequestData;
 import edu.fudan.se.initial.SGMApplication;
 import edu.fudan.se.log.Log;
+import edu.fudan.se.messageFragment.UserLog;
+import edu.fudan.se.userMes.UserConfirmTask;
 import edu.fudan.se.userMes.UserInputTextTask;
-import edu.fudan.se.userMes.UserMessage;
 import edu.fudan.se.userMes.UserTakePictureTask;
 import edu.fudan.se.userMes.UserTask;
 import jade.core.AID;
@@ -52,7 +54,7 @@ public class AideAgent extends Agent implements AideAgentInterface {
 	private GoalModelManager goalModelManager;
 
 	private ArrayList<UserTask> userTaskList;
-	private ArrayList<UserMessage> userMessageList;
+	private ArrayList<UserLog> userLogList;
 
 	private Context context;
 
@@ -79,7 +81,7 @@ public class AideAgent extends Agent implements AideAgentInterface {
 
 			goalModelManager = sgmApplication.getGoalModelManager();
 			userTaskList = sgmApplication.getUserTaskList();
-			userMessageList = sgmApplication.getUserMessageList();
+			userLogList = sgmApplication.getUserLogList();
 		}
 
 		registerO2AInterface(AideAgentInterface.class, this);
@@ -168,11 +170,44 @@ public class AideAgent extends Agent implements AideAgentInterface {
 			Log.logAADebug("AideAgent", "SendMesToManager()", "init.");
 			android.util.Log.i("MY_LOG", "Send mes to manager...");
 			// msg.getSender().setAgentName(a.getName());
-			// 当用户点击reset按钮后要把和那个goal model相关的两个adaptationUtilList中储存的数据清空
-			if (msg.getBody().equals(MesBody_Mes2Manager.ResetGM)) {
-				String goalModelName = msg.getGoalModelName();
-				AideAgentSupport.resetAdaptationUtilList(goalModelName,
-						taskExecutingAdaptionUtilList);
+
+			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			String logTime = df.format(new Date());
+
+			switch ((MesBody_Mes2Manager) msg.getBody()) {
+
+			case StartGM:
+				UserLog userLog1 = new UserLog(logTime, "GoalModel: "
+						+ msg.getGoalModelName() + " started!");
+				userLogList.add(0, userLog1);
+				break;
+			case StopGM:
+				UserLog userLog2 = new UserLog(logTime, "GoalModel: "
+						+ msg.getGoalModelName() + " stopped!");
+				userLogList.add(0, userLog2);
+				break;
+			case SuspendGM:
+				UserLog userLog3 = new UserLog(logTime, "GoalModel: "
+						+ msg.getGoalModelName() + " suspended!");
+				userLogList.add(0, userLog3);
+				break;
+			case ResumeGM:
+				UserLog userLog4 = new UserLog(logTime, "GoalModel: "
+						+ msg.getGoalModelName() + " resumed!");
+				userLogList.add(0, userLog4);
+				break;
+			case ResetGM:
+				// 当用户点击reset按钮后要把和那个goal model相关的两个adaptationUtilList中储存的数据清空
+				AideAgentSupport.resetAdaptationUtilList(
+						msg.getGoalModelName(), taskExecutingAdaptionUtilList);
+
+				UserLog userLog5 = new UserLog(logTime, "GoalModel: "
+						+ msg.getGoalModelName() + " reset!");
+				userLogList.add(0, userLog5);
+				break;
+
+			default:
+				break;
 			}
 
 			if (goalModelManager.getMsgPool().offer(msg)) {
@@ -223,6 +258,10 @@ public class AideAgent extends Agent implements AideAgentInterface {
 				TaskExecutingUtil taskExecutingUtil = new TaskExecutingUtil(
 						abstractServiceName, taskDescription,
 						msg.getNeedContent(), msg.getRetContent());
+				if (msg.getTaskLocation() != null) {
+					taskExecutingUtil.setTaskLocation(msg.getTaskLocation());
+				}
+
 				taskExecutingUtilList.put(goalModelName + "#" + elementName,
 						taskExecutingUtil);
 
@@ -240,27 +279,34 @@ public class AideAgent extends Agent implements AideAgentInterface {
 
 			case NoDelegatedAchieved:
 				String mesTime = df.format(new Date());
-				UserMessage userMessage = new UserMessage(mesTime,
-						"GoalModel: " + goalModelName + " achieved!");
-				userMessageList.add(userMessage);
+				UserLog userLog1 = new UserLog(mesTime, "GoalModel: "
+						+ goalModelName + " achieved!");
+				userLogList.add(0, userLog1);
+				// UserMessage userMessage = new UserMessage(mesTime,
+				// "GoalModel: " + goalModelName + " achieved!");
+				// userMessageList.add(userMessage);
 
-				Intent broadcast_nda = new Intent();
-				broadcast_nda.setAction("jade.mes.NOTIFICATION");
-				broadcast_nda.putExtra("Content", userMessage.getContent());
-				context.sendBroadcast(broadcast_nda);
+				// Intent broadcast_nda = new Intent();
+				// broadcast_nda.setAction("jade.mes.NOTIFICATION");
+				// broadcast_nda.putExtra("Content", userMessage.getContent());
+				// context.sendBroadcast(broadcast_nda);
 				break;
 
 			case NoDelegatedFailed:
 
 				String mesTime2 = df.format(new Date());
-				UserMessage userMessage2 = new UserMessage(mesTime2,
-						"GoalModel: " + goalModelName + " failed!");
-				userMessageList.add(userMessage2);
+				UserLog userLog2 = new UserLog(mesTime2, "GoalModel: "
+						+ goalModelName + " failed!");
+				userLogList.add(0, userLog2);
+				// UserMessage userMessage2 = new UserMessage(mesTime2,
+				// "GoalModel: " + goalModelName + " failed!");
+				// userMessageList.add(userMessage2);
 
-				Intent broadcast_nda2 = new Intent();
-				broadcast_nda2.setAction("jade.mes.NOTIFICATION");
-				broadcast_nda2.putExtra("Content", userMessage2.getContent());
-				context.sendBroadcast(broadcast_nda2);
+				// Intent broadcast_nda2 = new Intent();
+				// broadcast_nda2.setAction("jade.mes.NOTIFICATION");
+				// broadcast_nda2.putExtra("Content",
+				// userMessage2.getContent());
+				// context.sendBroadcast(broadcast_nda2);
 				break;
 
 			default:
@@ -358,7 +404,6 @@ public class AideAgent extends Agent implements AideAgentInterface {
 
 				// 来自其他aide agent的ACLMessage.INFORM消息
 				if (msg.getPerformative() == ACLMessage.INFORM) {
-					// TODO
 					try {
 						ACLMC_DelegateTask aclmc_DelegateTask = (ACLMC_DelegateTask) msg
 								.getContentObject();
@@ -401,6 +446,11 @@ public class AideAgent extends Agent implements AideAgentInterface {
 
 			String goalModelName = msg.getGoalModelName();
 			String elementName = msg.getToElementName();
+			
+			SimpleDateFormat df = new SimpleDateFormat(
+					"yyyy-MM-dd HH:mm:ss");
+			String logTime = df.format(new Date());
+			String logContent = "";
 
 			// 服务调用成功，直接把msg发送给manager，同时要把serviceInvocationUtilList里面储存的信息清空
 			if (msg.getBody().equals(MesBody_Mes2Manager.ServiceExecutingDone)) {
@@ -418,6 +468,7 @@ public class AideAgent extends Agent implements AideAgentInterface {
 
 				Log.logAdaption(goalModelName, elementName,
 						"Invoking service Done. Result: Succeed!");
+				logContent += "The task <" + goalModelName+"-"+elementName+"> was completed automatically.";
 			}
 			// 服务调用失败
 			else if (msg.getBody().equals(
@@ -428,7 +479,12 @@ public class AideAgent extends Agent implements AideAgentInterface {
 
 				Log.logAdaption(goalModelName, elementName,
 						"Invoking service Done. Result: Failed! Continue adaption.");
+				
+				logContent += "The task <" + goalModelName+"-"+elementName+"> was not completed automatically. Try again...";
 			}
+			
+			UserLog userLog = new UserLog(logTime, logContent);
+			userLogList.add(0, userLog);
 
 		}
 	}
@@ -560,6 +616,11 @@ public class AideAgent extends Agent implements AideAgentInterface {
 		serviceInvocationChoice.removeAll(serviceInvocationUtil
 				.getAlreadyTriedList());
 
+		SimpleDateFormat df = new SimpleDateFormat(
+				"yyyy-MM-dd HH:mm:ss");
+		String logTime = df.format(new Date());
+		String logContent = "";
+		
 		// 查看移除之后是否还有可选的服务列表
 		if (serviceInvocationChoice.isEmpty()) {// 没有，委托执行
 			// 向server agent请求朋友列表
@@ -568,6 +629,10 @@ public class AideAgent extends Agent implements AideAgentInterface {
 
 			Log.logAdaption(goalModelName, elementName,
 					"No service to invoke. Delegate the task to people.");
+			
+			
+			logContent += "The task <" + goalModelName + "-"
+					+ elementName + "> could not be completed automatically. Try to entrust it to people...";
 
 		} else {// 有，自动调用服务执行。只要有可选服务，就会调用，没有超过次数之说
 			// 将调用信息添加到记录中
@@ -593,7 +658,14 @@ public class AideAgent extends Agent implements AideAgentInterface {
 			Log.logAdaption(goalModelName, elementName,
 					"Invoking service. Service name: "
 							+ serviceInvocationChoice.get(0));
+			
+			logContent += "The task <" + goalModelName + "-"
+					+ elementName + "> could be completed automatically. Executing...";
+			
 		}
+		
+		UserLog userLog = new UserLog(logTime, logContent);
+		userLogList.add(0, userLog);
 	}
 
 	/**
@@ -619,9 +691,15 @@ public class AideAgent extends Agent implements AideAgentInterface {
 					"No delegateTo user. Task Failed!");
 
 		} else {
+			// 先获得委托任务在执行时需要的各种数据
+			TaskExecutingUtil taskExecutingUtil = taskExecutingUtilList
+					.get(goalModelName + "#" + elementName);
+
+			// 把位置信息传进去
 			ArrayList<String> delegaToChoice = AideAgentSupport
 					.getDelegateToListBasedRanking(userInformationList,
-							sgmApplication.getLocation(), selfAgentName);
+							taskExecutingUtil.getTaskLocation(), selfAgentName);
+
 			AdaptationUtil delegateAUtil = taskExecutingAdaptionUtilList
 					.get(goalModelName + "#" + elementName);// 不可能为空
 			// 先移除已经委托过的人
@@ -640,23 +718,37 @@ public class AideAgent extends Agent implements AideAgentInterface {
 						+ alreadyTriedTimes);
 				// 发送消息给委托对象agent
 				// 委托出去的任务，必须要人来做，无需给输入数据，只需要知道让用户返回什么数据即可
-				TaskExecutingUtil taskExecutingUtil = taskExecutingUtilList
-						.get(goalModelName + "#" + elementName);
 
 				ACLMC_DelegateTask aclmc_DelegateTask = new ACLMC_DelegateTask(
 						ACLMC_DelegateTask.DTHeader.NEWDT, selfAgentName,
 						delegateTo, goalModelName, elementName);
 				aclmc_DelegateTask.setTaskDescription(taskExecutingUtil
 						.getTaskDescription());
+
+				RequestData needRequestData = taskExecutingUtil
+						.getNeedRequestData();
+				if (needRequestData != null) {
+					aclmc_DelegateTask.setNeedRequestData(needRequestData);
+				}
+
 				RequestData retRequestData = taskExecutingUtil
 						.getRetRequestData();
 				if (retRequestData != null) {
 					android.util.Log.i("MY_LOG",
 							"delegateToPeopleExecuting---retRequestData name: "
 									+ retRequestData.getName());
-					aclmc_DelegateTask.setRequestData(retRequestData);
+					aclmc_DelegateTask.setRetRequestData(retRequestData);
 				}
 				sendMesToExternalAgent(aclmc_DelegateTask);// 这里有可能是发回给自己了
+
+				SimpleDateFormat df = new SimpleDateFormat(
+						"yyyy-MM-dd HH:mm:ss");
+				String logTime = df.format(new Date());
+				String logContent = "The task <" + goalModelName + "-"
+						+ elementName + "> was entrusted to [" + delegateTo
+						+ "].";
+				UserLog userLog = new UserLog(logTime, logContent);
+				userLogList.add(0, userLog);
 
 				Log.logAdaption(goalModelName, elementName,
 						"Delegate to people. DelegateToName: " + delegateTo
@@ -682,6 +774,13 @@ public class AideAgent extends Agent implements AideAgentInterface {
 	private void delegateFail(String goalModelName, String elementName) {
 		// 清空执行时储存的数据
 		clearTaskExecuting(goalModelName, elementName);
+
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		String logTime = df.format(new Date());
+		String logContent = "No more people can do the task <" + goalModelName
+				+ "-" + elementName + ">. Task failed!";
+		UserLog userLog = new UserLog(logTime, logContent);
+		userLogList.add(0, userLog);
 
 		android.util.Log.i("MY_LOG",
 				"no delegateTo user or alreadyTriedTimes >= canTriedTimes!!");
@@ -731,31 +830,60 @@ public class AideAgent extends Agent implements AideAgentInterface {
 
 		UserTask userTask = null;
 		// 不需要人返回某些数据，是普通的userTask
-		if (aclmc_DelegateTask.getRequestData() == null) {
+		if (aclmc_DelegateTask.getRetRequestData() == null) {
+			RequestData needRequestData = aclmc_DelegateTask
+					.getNeedRequestData();
 			userTask = new UserTask(userTaskTime, fromAgentName, goalModelName,
 					elementName);
 			userTaskDescription = "You need to do the task:\n"
 					+ aclmc_DelegateTask.getTaskDescription();
+			if (needRequestData != null
+					&& needRequestData.getContentType().equals("Text")) {
+				userTaskDescription += " "
+						+ EncodeDecodeRequestData.decodeToText(needRequestData
+								.getContent());
+			}
 		} else {
-			RequestData requestData = aclmc_DelegateTask.getRequestData();
+			RequestData retRequestData = aclmc_DelegateTask.getRetRequestData();
+			RequestData needRequestData = aclmc_DelegateTask
+					.getNeedRequestData();
 			// 让用户输入文本的任务
-			if (requestData.getContentType().equals("Text")) {
+			if (retRequestData.getContentType().equals("Text")) {
 				userTask = new UserInputTextTask(userTaskTime, fromAgentName,
 						goalModelName, elementName);
 				userTaskDescription = "You need to input a span of text about:\n"
-						+ requestData.getName();
+						+ retRequestData.getName();
+				if (needRequestData != null
+						&& needRequestData.getContentType().equals("Text")) {
+					userTaskDescription += " of "
+							+ EncodeDecodeRequestData
+									.decodeToText(needRequestData.getContent());
+				}
 			}
 			// 让用户拍照的任务
-			else if (requestData.getContentType().equals("Image")) {
+			else if (retRequestData.getContentType().equals("Image")) {
 				userTask = new UserTakePictureTask(userTaskTime, fromAgentName,
 						goalModelName, elementName);
 				userTaskDescription = "You need to take a picture about:\n"
-						+ requestData.getName();
+						+ retRequestData.getName();
 			}
-			userTask.setRequestDataName(requestData.getName());
+			// 让用户确认结果的任务
+			else if (retRequestData.getContentType().equals("Boolean")) {
+				userTask = new UserConfirmTask(userTaskTime, fromAgentName,
+						goalModelName, elementName);
+				userTaskDescription = "Please confirm: \n"
+						+ retRequestData.getName();
+				if (needRequestData != null
+						&& needRequestData.getContentType().equals("Text")) {
+					userTaskDescription += EncodeDecodeRequestData
+							.decodeToText(needRequestData.getContent());
+				}
+			}
+			userTask.setRequestDataName(retRequestData.getName());
 		}
 		userTask.setDescription(userTaskDescription);
-		userTaskList.add(userTask);
+		userTaskList.add(0, userTask);
+		// userTaskList.add(userTask);
 
 		// 新任务广播
 		Intent broadcast_nda = new Intent();
@@ -771,16 +899,25 @@ public class AideAgent extends Agent implements AideAgentInterface {
 	 * @param aclmc_DelegateTask
 	 */
 	private void handleDelegateTaskBack(ACLMC_DelegateTask aclmc_DelegateTask) {
-		// TODO
+		String fromAgentName = aclmc_DelegateTask.getFromAgentName();
 		String goalModelName = aclmc_DelegateTask.getGoalModelName();
 		String elementName = aclmc_DelegateTask.getElementName();
 
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		String logTime = df.format(new Date());
+		String logContent = "";
+
 		if (aclmc_DelegateTask.isDone() == true) { // 被委托对象完成了任务
+
+			logContent += "[" + fromAgentName + "] completed the task <"
+					+ goalModelName + "-" + elementName + ">. ";
+
 			SGMMessage sgmMessage = new SGMMessage(
 					MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, goalModelName,
 					null, elementName, MesBody_Mes2Manager.EndTE);
-			if (aclmc_DelegateTask.getRequestData() != null) {
-				sgmMessage.setRetContent(aclmc_DelegateTask.getRequestData());
+			if (aclmc_DelegateTask.getRetRequestData() != null) {
+				sgmMessage
+						.setRetContent(aclmc_DelegateTask.getRetRequestData());
 			}
 
 			// 清空serviceInvocationUtilList里面储存的相关信息清空
@@ -796,18 +933,23 @@ public class AideAgent extends Agent implements AideAgentInterface {
 
 			Log.logAdaption(goalModelName, elementName,
 					"Delegate to people Done. Result: Succeed! From: "
-							+ aclmc_DelegateTask.getFromAgentName());
+							+ fromAgentName);
 
 		} else {// 被委托对象没有完成任务，继续委托给其他人，也就是向server agent发出请求朋友的信息
+
+			logContent += "[" + fromAgentName + "] didn't complete the task <"
+					+ goalModelName + "-" + elementName + ">. Continue...";
 
 			obtainFriendsInfoFromServerAgent(goalModelName, elementName);
 			// 然后会一直等待server agent回复信息，在handleMesFromExternalAgent会对信息进行处理
 
 			Log.logAdaption(goalModelName, elementName,
 					"Delegate to people Done. Result: Failed! From: "
-							+ aclmc_DelegateTask.getFromAgentName()
-							+ ". Continue to adaption.");
+							+ fromAgentName + ". Continue to adaption.");
 
 		}
+
+		UserLog userLog = new UserLog(logTime, logContent);
+		userLogList.add(0, userLog);
 	}
 }

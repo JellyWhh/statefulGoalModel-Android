@@ -43,7 +43,6 @@ public class AideAgentSupport {
 		return ret;
 	}
 
-
 	/**
 	 * 当用户点击reset按钮后要把和那个goal model相关的taskExecutingAdaptionUtilList中储存的数据清空
 	 * 
@@ -54,18 +53,18 @@ public class AideAgentSupport {
 	 */
 	public static void resetAdaptationUtilList(String goalModelName,
 			Hashtable<String, AdaptationUtil> taskExecutingAdaptionUtilList) {
-		
+
 		ArrayList<String> toRemoveKeys = new ArrayList<>();
-		for (String key: taskExecutingAdaptionUtilList.keySet()) {
+		for (String key : taskExecutingAdaptionUtilList.keySet()) {
 			if (key.contains(goalModelName)) {
 				toRemoveKeys.add(key);
 			}
 		}
-		
-		for(String key: toRemoveKeys){
+
+		for (String key : toRemoveKeys) {
 			taskExecutingAdaptionUtilList.remove(key);
 		}
-		
+
 	}
 
 	/**
@@ -76,8 +75,13 @@ public class AideAgentSupport {
 		allIntentServiceNameArrayList
 				.add("service.intentservice.weatherCandidate");
 		allIntentServiceNameArrayList.add("service.intentservice.weather");
-		allIntentServiceNameArrayList.add("service.intentservice.setcityname");
 		allIntentServiceNameArrayList.add("service.intentservice.showcontent");
+
+		allIntentServiceNameArrayList.add("service.intentservice.queryBookFromLibrary");
+		allIntentServiceNameArrayList.add("service.intentservice.borrowBookFromLibrary");
+		allIntentServiceNameArrayList.add("service.intentservice.queryBookFromShop");
+		allIntentServiceNameArrayList.add("service.intentservice.pay");
+		allIntentServiceNameArrayList.add("service.intentservice.querySeller");
 	}
 
 	/**
@@ -105,81 +109,92 @@ public class AideAgentSupport {
 	 * @return 可委托对象的agent nick name list，第一个为最佳的
 	 */
 	public static ArrayList<String> getDelegateToListBasedRanking(
-			ArrayList<UserInformation> userInformations, String selfLocation,
+			ArrayList<UserInformation> userInformations, String taskLocation,
 			String selfAgentNickName) {
 
 		ArrayList<String> ret = new ArrayList<>();
 
-		// 获取与每个人的亲密度
-		for (UserInformation userInformation : userInformations) {
-			userInformation.setIntimacy(getIntimacy(selfAgentNickName,
-					userInformation.getUserAgentNickname()));
-		}
+		if (taskLocation!=null && taskLocation.equals("selfLocation")) {
+			ret.add(selfAgentNickName);
+		} else {
 
-		Map<String, Double> distance = new HashMap<String, Double>();
-
-		// LatLng selfLatLng = getLatLng(sgmApplication.getLocation());
-		// 获取与所有好友距离的最大距离和最小距离
-		double maxDis = 0, minDis = 0;
-		boolean isFirst = true;
-		for (UserInformation userInformation : userInformations) {
-			// double dis = DistanceUtil.getDistance(selfLatLng,
-			// getLatLng(userInformation.getLocation()));
-			double dis = getShortDistance(selfLocation,
-					userInformation.getLocation());
-			if (isFirst) {
-				maxDis = dis;
-				minDis = dis;
-				isFirst = false;
-			} else {
-				if (maxDis < dis) {
-					maxDis = dis;
-				}
-				if (minDis > dis) {
-					minDis = dis;
-				}
+			// 获取与每个人的亲密度
+			for (UserInformation userInformation : userInformations) {
+				userInformation.setIntimacy(getIntimacy(selfAgentNickName,
+						userInformation.getUserAgentNickname()));
 			}
-		}
-		// 对位置距离进行归一化，然后算与所有好友的“距离”
-		for (UserInformation userInformation : userInformations) {
-			double locationDis = 0;
-			if (maxDis != minDis) {
-				locationDis = (getShortDistance(selfLocation,
-						userInformation.getLocation()) / (maxDis - minDis));
-			}
-			double dis = (locationDis + userInformation.getReputation() + userInformation
-					.getIntimacy()) / 3;
-			distance.put(userInformation.getUserAgentNickname(), dis);
-		}
 
-		List<Map.Entry<String, Double>> sortList = new ArrayList<Map.Entry<String, Double>>(
-				distance.entrySet());
-		Collections.sort(sortList, new Comparator<Map.Entry<String, Double>>() {
-			/**
-			 * 按照距离从小到大排序
-			 * 
-			 * @param lhs
-			 * @param rhs
-			 * @return
-			 */
-			@Override
-			public int compare(Entry<String, Double> lhs,
-					Entry<String, Double> rhs) {
-				if (lhs.getValue() == rhs.getValue()) {
-					return 0;
-				} else if (lhs.getValue() > rhs.getValue()) {
-					return 1;
-				} else {
-					return -1;
+			Map<String, Double> distance = new HashMap<String, Double>();
+
+			// 获取与所有好友距离的最大距离和最小距离
+			double maxDis = 0, minDis = 0;
+
+			if (taskLocation != null) {// 执行任务时需要位置信息
+				boolean isFirst = true;
+				for (UserInformation userInformation : userInformations) {
+					double dis = getShortDistance(
+							getSpecificLocation(taskLocation),
+							userInformation.getLocation());
+					if (isFirst) {
+						maxDis = dis;
+						minDis = dis;
+						isFirst = false;
+					} else {
+						if (maxDis < dis) {
+							maxDis = dis;
+						}
+						if (minDis > dis) {
+							minDis = dis;
+						}
+					}
 				}
 			}
 
-		});
+			// 对位置距离进行归一化，然后算与所有好友的“距离”
+			for (UserInformation userInformation : userInformations) {
+				double locationDis = 0;
+				if (taskLocation != null) {// 执行任务时需要位置信息
+					if (maxDis != minDis) {
+						locationDis = (getShortDistance(
+								getSpecificLocation(taskLocation),
+								userInformation.getLocation()) / (maxDis - minDis));
+					}
+				}
 
-		for (Map.Entry<String, Double> item : sortList) {
-			ret.add(item.getKey());
+				double dis = (locationDis + userInformation.getReputation() + userInformation
+						.getIntimacy()) / 3;
+				distance.put(userInformation.getUserAgentNickname(), dis);
+			}
+
+			List<Map.Entry<String, Double>> sortList = new ArrayList<Map.Entry<String, Double>>(
+					distance.entrySet());
+			Collections.sort(sortList,
+					new Comparator<Map.Entry<String, Double>>() {
+						/**
+						 * 按照距离从小到大排序
+						 * 
+						 * @param lhs
+						 * @param rhs
+						 * @return
+						 */
+						@Override
+						public int compare(Entry<String, Double> lhs,
+								Entry<String, Double> rhs) {
+							if (lhs.getValue() == rhs.getValue()) {
+								return 0;
+							} else if (lhs.getValue() > rhs.getValue()) {
+								return 1;
+							} else {
+								return -1;
+							}
+						}
+
+					});
+
+			for (Map.Entry<String, Double> item : sortList) {
+				ret.add(item.getKey());
+			}
 		}
-
 		// 返回排在第一个的
 		return ret;
 	}
@@ -195,15 +210,11 @@ public class AideAgentSupport {
 	 */
 	private static double getShortDistance(String location1, String location2) {
 
-		double lon1 = Double
-				.parseDouble(location1.split("\n")[2].split(":")[1]);
-		double lat1 = Double
-				.parseDouble(location1.split("\n")[3].split(":")[1]);
+		double lat1 = Double.parseDouble(location1.split(";")[0].split(":")[1]);
+		double lon1 = Double.parseDouble(location1.split(";")[1].split(":")[1]);
 
-		double lon2 = Double
-				.parseDouble(location2.split("\n")[2].split(":")[1]);
-		double lat2 = Double
-				.parseDouble(location2.split("\n")[3].split(":")[1]);
+		double lat2 = Double.parseDouble(location2.split(";")[0].split(":")[1]);
+		double lon2 = Double.parseDouble(location2.split(";")[1].split(":")[1]);
 
 		double a, b, R;
 		R = 6378137; // 地球半径
@@ -220,5 +231,21 @@ public class AideAgentSupport {
 				* Math.asin(Math.sqrt(sa2 * sa2 + Math.cos(lat1)
 						* Math.cos(lat2) * sb2 * sb2));
 		return d;
+	}
+
+	/**
+	 * 根据抽象地点（e.g. "图书馆"）返回具体的经纬度坐标位置
+	 * 
+	 * @param abstractlocation
+	 *            抽象地点
+	 * @return 具体的经纬度坐标位置
+	 */
+	private static String getSpecificLocation(String abstractlocation) {
+		HashMap<String, String> locationMap = new HashMap<>();
+		locationMap.put("Library", "Latitude:31.19491;Longitude:121.603517");
+		locationMap.put("ClassBuilding","Latitude:31.196645;Longitude:121.604512");
+		locationMap.put("Bookstore", "Latitude:31.195278;Longitude:121.603857");//食堂
+		
+		return locationMap.get(abstractlocation);
 	}
 }

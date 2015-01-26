@@ -24,8 +24,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import edu.fudan.agent.support.ACLMC_DelegateTask;
 import edu.fudan.se.R;
@@ -37,6 +37,7 @@ import edu.fudan.se.goalmodel.EncodeDecodeRequestData;
 import edu.fudan.se.goalmodel.RequestData;
 import edu.fudan.se.initial.SGMApplication;
 import edu.fudan.se.support.TakePictureActivity;
+import edu.fudan.se.userMes.UserConfirmTask;
 import edu.fudan.se.userMes.UserInputTextTask;
 import edu.fudan.se.userMes.UserShowContentTask;
 import edu.fudan.se.userMes.UserTakePictureTask;
@@ -80,6 +81,7 @@ public class TaskFragment extends ListFragment {
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
+		setUserVisibleHint(true);
 		super.onActivityCreated(savedInstanceState);
 		adapter = new UserTaskAdapter(getActivity(),
 				R.layout.listview_usertask, application.getUserTaskList(),
@@ -94,11 +96,10 @@ public class TaskFragment extends ListFragment {
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
 	}
-
 }
 
 class UserTaskAdapter extends ArrayAdapter<UserTask> {
-	
+
 	private int mResource;
 	private Context mContext;
 	private LayoutInflater mInflater;
@@ -152,9 +153,11 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 			holder = new ViewHolder();
 			convertView = mInflater.inflate(resource, parent, false);
 
-			holder.taskLayout = (LinearLayout) convertView
+			holder.taskLayout = (RelativeLayout) convertView
 					.findViewById(R.id.ll_tasklayout);
 			holder.time = (TextView) convertView.findViewById(R.id.tv_taskTime);
+			holder.fromAgent = (TextView) convertView
+					.findViewById(R.id.tv_taskFromName);
 			holder.description = (TextView) convertView
 					.findViewById(R.id.tv_taskDescription);
 			holder.done = (Button) convertView.findViewById(R.id.bt_taskDone);
@@ -169,6 +172,7 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 		// 下面部分不可缺少，是设置每个item具体显示的地方！
 		final UserTask usertask = getItem(position);
 		holder.time.setText(usertask.getTime());
+		holder.fromAgent.setText("From: " + usertask.getFromAgentName());
 
 		holder.done.setOnClickListener(new UserTaskDoneListener(usertask));
 		holder.quit.setOnClickListener(new UserTaskQuitListener(usertask));
@@ -182,6 +186,9 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 			holder.done.setText("Camera");
 		} else if (usertask instanceof UserInputTextTask) {// 让用户输入一段文本的task
 			holder.done.setText("Input");
+		} else if (usertask instanceof UserConfirmTask) {
+			holder.done.setText("Yes");
+			holder.quit.setText("No");
 		} else {// 普通的user task
 			holder.done.setText("Done");
 		}
@@ -261,10 +268,11 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 				intent.putExtra("fromAgentName", userTask.getFromAgentName());
 				intent.putExtra("goalmodelname", userTask.getGoalModelName());
 				intent.putExtra("elementname", userTask.getElementName());
-				intent.putExtra("requestDataName", userTask.getRequestDataName());
+				intent.putExtra("requestDataName",
+						userTask.getRequestDataName());
 				mContext.startActivity(intent);
 			}
-			// 普通的user task
+			// 普通的user task 或者让用户确认结果的task
 			else {
 				ACLMC_DelegateTask aclmc_DelegateTask = new ACLMC_DelegateTask(
 						ACLMC_DelegateTask.DTHeader.DTBACK, null,
@@ -323,8 +331,9 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 	}
 
 	private class ViewHolder {
-		LinearLayout taskLayout;
+		RelativeLayout taskLayout;
 		TextView time;
+		TextView fromAgent;
 		TextView description;
 		Button done;
 		Button quit;
@@ -362,8 +371,8 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 				RequestData requestData = new RequestData(userTask
 						.getRequestDataName(), "Text");
 				requestData.setContent(userInput.getBytes());
-				
-				aclmc_DelegateTask.setRequestData(requestData);
+
+				aclmc_DelegateTask.setRetRequestData(requestData);
 				aideAgentInterface.sendMesToExternalAgent(aclmc_DelegateTask);
 
 				// SGMMessage msg = new SGMMessage(
@@ -397,7 +406,8 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 	 */
 	private void showContentDialog(final UserTask userTask) {
 
-		RequestData requestData = ((UserShowContentTask) userTask).getRequestData();
+		RequestData requestData = ((UserShowContentTask) userTask)
+				.getRequestData();
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
 		builder.setTitle("Content:");

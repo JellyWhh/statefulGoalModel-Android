@@ -11,8 +11,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.DisplayMetrics;
@@ -46,7 +44,7 @@ public class MainFragment extends Fragment {
 	private int bmpW;// 横线图片宽度
 	private int offset;// 图片移动的偏移量
 
-	Fragment messageFragment, mygoalFragment, downloadFragment,
+	private Fragment messageFragment, mygoalFragment, downloadFragment,
 			settingFragment;
 
 	@Override
@@ -89,7 +87,9 @@ public class MainFragment extends Fragment {
 
 		return rootView;
 	}
+	
 
+	
 	/**
 	 * 自定义底部横线的宽度
 	 * 
@@ -125,17 +125,18 @@ public class MainFragment extends Fragment {
 		mygoalFragment = new MyGoalFragment();
 		downloadFragment = new DownloadFragment();
 		settingFragment = new SettingFragment();
-
+		
 		fragmentsList.add(messageFragment);
 		fragmentsList.add(mygoalFragment);
 		fragmentsList.add(downloadFragment);
 		fragmentsList.add(settingFragment);
 
-
 		mPager.setAdapter(new MyFragmentPagerAdapter(getChildFragmentManager(),
 				fragmentsList));
 		mPager.setOnPageChangeListener(new MyOnPageChangeListener());
 		mPager.setCurrentItem(0);
+		
+		mPager.setOffscreenPageLimit(1);
 	}
 
 	/**

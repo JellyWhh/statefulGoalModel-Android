@@ -5,6 +5,8 @@ package edu.fudan.se.activity;
 
 import java.util.logging.Level;
 
+import service.sync.webservice.ClientAuthorization;
+
 import edu.fudan.se.R;
 import edu.fudan.se.agent.AideAgent;
 import edu.fudan.se.initial.SGMApplication;
@@ -89,6 +91,9 @@ public class StartAgentActivity extends Activity {
 							.setAgentNickname(nickname);
 					((SGMApplication) getApplication()).getGoalModelManager()
 							.setAgentNickname(nickname);
+					
+					ClientAuthorization.agentNickName = nickname;
+					
 					Log.i("start agent",
 							"agent nickname: "
 									+ ((SGMApplication) getApplication())
