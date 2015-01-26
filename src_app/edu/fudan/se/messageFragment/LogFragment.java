@@ -39,7 +39,6 @@ public class LogFragment extends ListFragment {
 				R.layout.listview_usermessage, application.getUserLogList());
 
 		setListAdapter(adapter);
-		getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
 		// 用户定时刷新
 		handler = new Handler();
@@ -64,6 +63,7 @@ public class LogFragment extends ListFragment {
 		// setListAdapter(adapter);
 		//
 		// getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+		getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 	}
 
 	private boolean mHasLoadedOnce = false;
