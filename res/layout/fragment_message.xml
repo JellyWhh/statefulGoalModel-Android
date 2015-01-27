@@ -25,7 +25,8 @@
                 android:gravity="center"
                 android:text="@string/tab_message_task"
                 android:textColor="@color/focus_black"
-                android:textSize="18sp" />
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
             <ImageView
                 android:id="@+id/iv_middle_line"
@@ -40,9 +41,10 @@
                 android:layout_height="fill_parent"
                 android:layout_weight="1.0"
                 android:gravity="center"
-                android:text="@string/tab_message_mes"
+                android:text="@string/tab_message_log"
                 android:textColor="@color/unfocus_grey"
-                android:textSize="18sp" />
+                android:textSize="18sp"
+                android:textStyle="bold" />
         </LinearLayout>
     </LinearLayout>
 
@@ -55,6 +57,5 @@
         android:background="#fff"
         android:flipInterval="30"
         android:persistentDrawingCache="animation" />
-    
 
 </LinearLayout>

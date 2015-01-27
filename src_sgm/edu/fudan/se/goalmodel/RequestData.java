@@ -16,7 +16,7 @@ public class RequestData implements Serializable {
 	private static final long serialVersionUID = -4140392933528054478L;
 
 	private String name;
-	private String contentType; // 数据的类型，比如Image,Text,Voice等，在真正用数据时解码用
+	private String contentType; // 数据的类型，比如Image,Text,Voice,ArrayList<String>(type是List)等，在真正用数据时解码用
 	private byte[] content; // 储存具体内容的字节流
 	
 
@@ -48,6 +48,10 @@ public class RequestData implements Serializable {
 
 	public void setContent(byte[] content) {
 		this.content = content;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 }

@@ -42,7 +42,7 @@ public class IntentServiceQueryBookFromLibrary extends IntentService {
 	@Override
 	protected void onHandleIntent(Intent intent) {
 		RequestData requestData = (RequestData) intent
-				.getSerializableExtra("REQUEST_DATA_CONTENT");
+				.getSerializableExtra("NEED_REQUEST_DATA_CONTENT");
 
 		bookName = EncodeDecodeRequestData.decodeToText(requestData
 				.getContent());

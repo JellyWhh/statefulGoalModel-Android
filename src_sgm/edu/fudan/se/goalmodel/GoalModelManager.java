@@ -219,7 +219,22 @@ public class GoalModelManager implements Runnable {
 
 				if (requestElementName != null) {
 					// 如果需要，就从数据赋值表里拿出这个它需要的数据
-					msg.setNeedContent(temp.get(requestElementName));
+					RequestData needRequestData = temp.get(requestElementName);
+					msg.setNeedContent(needRequestData);
+
+					// 拦截地址
+					if (msg.getTaskLocation() != null
+							&& msg.getTaskLocation().equals("needLocation")
+							&& needRequestData.getContentType().equals("Text")) {
+						String dataContent = EncodeDecodeRequestData
+								.decodeToText(needRequestData.getContent());
+						if (dataContent.contains("Addr")) {
+							String locationString = dataContent.split(";")[2]
+									.split(":")[1];
+							msg.setTaskLocation(locationString);
+						}
+					}
+
 				}
 
 				// 再看一下这个element完成后是不是会返回某些数据，如果是，那么这个任务委托给人执行的时候，直接让人输入这些数据
@@ -247,6 +262,7 @@ public class GoalModelManager implements Runnable {
 	 */
 
 	private void start(GoalModel goalModel, SGMMessage msg) {
+		Log.logAdaption(goalModel.getName(), "null", "goal model started!");
 		Log.logGMMDebug("start()", "goal model: " + goalModel.getName()
 				+ " start!");
 		if (goalModel.getElementMachines() != null
@@ -272,6 +288,7 @@ public class GoalModelManager implements Runnable {
 	 *            要stop的goal model
 	 */
 	private void stop(GoalModel goalModel, SGMMessage msg) {
+		Log.logAdaption(goalModel.getName(), "null", "goal model stopped!");
 		Log.logGMMDebug("stop()", "goal model: " + goalModel.getName()
 				+ " stop!");
 		SGMMessage newMessage = copyMessage(msg);
@@ -286,6 +303,7 @@ public class GoalModelManager implements Runnable {
 	 *            要suspend的goal model
 	 */
 	private void suspend(GoalModel goalModel, SGMMessage msg) {
+		Log.logAdaption(goalModel.getName(), "null", "goal model suspended!");
 		Log.logGMMDebug("suspend()", "goal model: " + goalModel.getName()
 				+ " suspend!");
 		SGMMessage newMessage = copyMessage(msg);
@@ -300,6 +318,7 @@ public class GoalModelManager implements Runnable {
 	 *            要resume的goal model
 	 */
 	private void resume(GoalModel goalModel, SGMMessage msg) {
+		Log.logAdaption(goalModel.getName(), "null", "goal model resumed!");
 		Log.logGMMDebug("resume()", "goal model: " + goalModel.getName()
 				+ " resume!");
 		SGMMessage newMessage = copyMessage(msg);
@@ -314,6 +333,7 @@ public class GoalModelManager implements Runnable {
 	 *            要reset的goal model
 	 */
 	private void reset(GoalModel goalModel) {
+		Log.logAdaption(goalModel.getName(), "null", "goal model resetted!");
 		Log.logGMMDebug("reset()", "goal model: " + goalModel.getName()
 				+ " reset!");
 		if (goalModel.getElementMachines() != null
@@ -370,43 +390,6 @@ public class GoalModelManager implements Runnable {
 
 	}
 
-	// /**
-	// * 给一个goal machine发送是否完成的消息，这个goal
-	// * machine是委托出去做的，现在是收到了外部agent发回来的反馈，根据反馈结果来设置goal machine是否完成
-	// *
-	// * @param goalMachine
-	// * 之前委托出去的goal machine
-	// * @param msg
-	// * 消息
-	// */
-	// private void endGoalMachine(GoalMachine goalMachine, SGMMessage msg) {
-	// Log.logDebug("GoalModelManager:" + goalMachine.getName(),
-	// "endGoalMachine()", "init.");
-	//
-	// SGMMessage newMessage = copyMessage(msg);
-	//
-	// if (newMessage.getBody().equals(MesBody_Mes2Manager.DelegatedAchieved)) {
-	// newMessage.setBody(MesBody_Mes2Machine.ACHIEVEDDONE);
-	// } else if (newMessage.getBody().equals(
-	// MesBody_Mes2Manager.DelegatedFailed)
-	// || newMessage.getBody().equals(MesBody_Mes2Manager.QuitGM)) {
-	// newMessage.setBody(MesBody_Mes2Machine.FAILED);
-	// }
-	//
-	// if (goalMachine.getMsgPool().offer(newMessage)) {
-	// Log.logMessage(newMessage, true);
-	// Log.logDebug("GoalModelManager:" + goalMachine.getName(),
-	// "endGoalMachine()",
-	// "External agent or UI send a " + newMessage.getBody()
-	// + " msg to " + goalMachine.getName() + " succeed!");
-	// } else {
-	// Log.logMessage(newMessage, false);
-	// Log.logError("GoalModelManager:" + goalMachine.getName(),
-	// "endGoalMachine()",
-	// "External agent send a " + newMessage.getBody()
-	// + " msg to " + goalMachine.getName() + " error!");
-	// }
-	// }
 
 	/**
 	 * 发送一条消息给goal model中的root goal

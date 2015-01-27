@@ -40,49 +40,24 @@ public class LogFragment extends ListFragment {
 
 		setListAdapter(adapter);
 
-		// 用户定时刷新
+		// 用于定时刷新
 		handler = new Handler();
 		runnable = new Runnable() {
 			@Override
 			public void run() {
-				System.out.println("----LogFragment----refresh!!!!!!!!!!!");
 				adapter.notifyDataSetChanged();
-				handler.postDelayed(this, 10 * 1000);
+				handler.postDelayed(this, 1 * 1000);
 			}
 		};
-		handler.postDelayed(runnable, 10 * 1000); // 10s刷新一次
+		handler.postDelayed(runnable, 1 * 1000); // 10s刷新一次
 	}
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		//
-		// adapter = new UserMessageAdapter(getActivity(),
-		// R.layout.listview_usermessage, application.getUserLogList());
-		//
-		// setListAdapter(adapter);
-		//
-		// getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 		getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 	}
 
-	private boolean mHasLoadedOnce = false;
-
-	@Override
-	public void setUserVisibleHint(boolean isVisibleToUser) {
-		if (this.isVisible()) {
-			// we check that the fragment is becoming visible
-			if (isVisibleToUser && !mHasLoadedOnce) {
-				System.out
-						.println("DEBUG!!!!!!!!!!-MesFragment---mHasLoadedOnce: "
-								+ mHasLoadedOnce);
-				adapter.notifyDataSetChanged();
-				// async http request here
-				mHasLoadedOnce = true;
-			}
-		}
-		super.setUserVisibleHint(isVisibleToUser);
-	}
 
 	@Override
 	public void onDestroy() {

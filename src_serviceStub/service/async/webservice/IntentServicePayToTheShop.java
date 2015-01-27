@@ -41,7 +41,7 @@ public class IntentServicePayToTheShop extends IntentService {
 	protected void onHandleIntent(Intent intent) {
 		
 		RequestData requestData = (RequestData) intent
-				.getSerializableExtra("REQUEST_DATA_CONTENT");
+				.getSerializableExtra("NEED_REQUEST_DATA_CONTENT");
 		
 		System.out
 		.println("IntentServicePayToTheShop, requestData content is null?:"

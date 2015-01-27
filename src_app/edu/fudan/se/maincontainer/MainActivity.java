@@ -1,7 +1,11 @@
 package edu.fudan.se.maincontainer;
 
+import jade.core.MicroRuntime;
+import jade.wrapper.ControllerException;
+import jade.wrapper.StaleProxyException;
 import edu.fudan.se.R;
-import edu.fudan.se.contextmanager.ContextManager;
+import edu.fudan.se.agent.AideAgentInterface;
+import edu.fudan.se.initial.SGMApplication;
 import edu.fudan.se.mainfragments.MainFragment;
 import edu.fudan.se.utils.Constant;
 import edu.fudan.se.utils.NotificationUtil;
@@ -13,7 +17,6 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.view.Menu;
-import android.view.MenuItem;
 
 /**
  * 主体activity，加载了一个fragment
@@ -31,25 +34,45 @@ public class MainActivity extends FragmentActivity {
 		setContentView(R.layout.activity_main);
 		if (savedInstanceState == null) {
 			// 休眠5s是为了让agent能够启动起来，不然在MessageFragment里得不到agent的引用
+
 			try {
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+				MicroRuntime.getAgent(
+						((SGMApplication) getApplication()).getAgentNickname())
+						.getO2AInterface(AideAgentInterface.class);
+			} catch (StaleProxyException e) {
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+				}
+			} catch (ControllerException e) {
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+				}
 			}
+
+			//
+			// try {
+			// Thread.sleep(5000);
+			// } catch (InterruptedException e) {
+			// e.printStackTrace();
+			// }
 			FragmentTransaction transaction = getSupportFragmentManager()
 					.beginTransaction();
 			transaction.add(R.id.container, new MainFragment()).commit();
 		}
-		
+
 		// 处理agent弹窗相关
 		myReceiver = new MyReceiver();
 		IntentFilter refreshChatFilter = new IntentFilter();
 		refreshChatFilter.addAction("jade.task.NOTIFICATION");
 		refreshChatFilter.addAction("jade.mes.NOTIFICATION");
 		registerReceiver(myReceiver, refreshChatFilter);
-		
-		//初始化ContextManager中的applicationContext，以便在UI条件检查时弹出对话框
-//		ContextManager.applicationContext = this;
+
+		// 初始化ContextManager中的applicationContext，以便在UI条件检查时弹出对话框
+		// ContextManager.applicationContext = this;
 
 	}
 
@@ -58,18 +81,6 @@ public class MainActivity extends FragmentActivity {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
-		int id = item.getItemId();
-		if (id == R.id.action_settings) {
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
 	}
 
 	@Override
@@ -98,8 +109,8 @@ public class MainActivity extends FragmentActivity {
 			}
 			if (action.equalsIgnoreCase("jade.mes.NOTIFICATION")) {
 				mNotificationUtil.showNotification("New Mes", intent
-						.getExtras().getString("Content"),
-						"New Mes From SGM!", Constant.Notification_New_Mes);
+						.getExtras().getString("Content"), "New Mes From SGM!",
+						Constant.Notification_New_Mes);
 			}
 		}
 	}

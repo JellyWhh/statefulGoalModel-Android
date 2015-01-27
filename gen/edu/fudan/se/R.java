@@ -237,7 +237,7 @@ public final class R {
         /**  标签页内容 
          */
         public static final int tab_message=0x7f070004;
-        public static final int tab_message_mes=0x7f070009;
+        public static final int tab_message_log=0x7f070009;
         /**  Message标签页的两个标签 
          */
         public static final int tab_message_task=0x7f070008;

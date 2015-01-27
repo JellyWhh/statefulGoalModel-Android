@@ -69,8 +69,8 @@ public class MobileLocatorService extends Service {
 	public void onCreate() {
 		Log.logEMDebug("MobileLocatorService", "onCreate()",
 				"-------MobileLocatorService onCreate()-------");
-		android.util.Log.i("MY_LOG",
-				"-------MobileLocatorService onCreate()-------");
+//		android.util.Log.i("MY_LOG",
+//				"-------MobileLocatorService onCreate()-------");
 
 		// 休眠5s是为了让agent能够启动起来，不然得不到agent的引用
 		try {
@@ -122,10 +122,10 @@ public class MobileLocatorService extends Service {
 						Constant.Notification_GPS_State);
 			}
 
-			Log.logEMDebug("MobileLocatorService", "checkNetwork()",
-					"MobileLocatorService start Location Service!");
-			android.util.Log.i("MY_LOG",
-					"MobileLocatorService start Location Service!");
+//			Log.logEMDebug("MobileLocatorService", "checkNetwork()",
+//					"MobileLocatorService start Location Service!");
+//			android.util.Log.i("MY_LOG",
+//					"MobileLocatorService start Location Service!");
 			// 开启定位服务
 			mLocationClient.start();
 			return true;
@@ -192,8 +192,8 @@ public class MobileLocatorService extends Service {
 
 		// Log.logDebug("MobileLocatorService", "sendLocationToServer()",
 		// "MobileLocatorService--sendLocationToServer()");
-		android.util.Log.i("MobileLocatorService",
-				"MobileLocatorService--sendLocationToServer()");
+//		android.util.Log.i("MobileLocatorService",
+//				"MobileLocatorService--sendLocationToServer()");
 		GetAgent.getAideAgentInterface((SGMApplication) getApplication())
 				.sendLocationToServerAgent(location);
 	}
@@ -208,8 +208,8 @@ public class MobileLocatorService extends Service {
 
 		// Log.logDebug("MobileLocatorService", "changeLocationInfo()",
 		// "MobileLocatorService--changeLocationInfo()");
-		android.util.Log.i("MobileLocatorService",
-				"MobileLocatorService--changeLocationInfo()");
+//		android.util.Log.i("MobileLocatorService",
+//				"MobileLocatorService--changeLocationInfo()");
 		SGMApplication sgmApplication = (SGMApplication) getApplication();
 		sgmApplication.setLocation(location);
 	}
@@ -263,8 +263,8 @@ public class MobileLocatorService extends Service {
 
 			String locationToLog = "Latitude:" + location.getLatitude()
 					+ ";Longitude:" + location.getLongitude();
-			android.util.Log.i("MobileLocatorService", "locationToLog--"
-					+ locationToLog);
+//			android.util.Log.i("MobileLocatorService", "locationToLog--"
+//					+ locationToLog);
 
 			// 61或者161，定位成功
 			if (locType == BDLocation.TypeGpsLocation

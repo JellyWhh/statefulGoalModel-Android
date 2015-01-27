@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 /**
  * @author whh
- *
+ * 
  */
 public class AdaptationUtil {
 
@@ -16,13 +16,16 @@ public class AdaptationUtil {
 	 */
 	private int triedTimes;
 
+	private int triedLocationNums;
+
 	private ArrayList<String> alreadyTriedList;
-	
-	public AdaptationUtil(){
+
+	public AdaptationUtil() {
 		this.triedTimes = 0;
+		this.triedLocationNums = 0;
 		this.alreadyTriedList = new ArrayList<>();
 	}
-	
+
 	public int getTriedTimes() {
 		return triedTimes;
 	}
@@ -33,5 +36,13 @@ public class AdaptationUtil {
 
 	public ArrayList<String> getAlreadyTriedList() {
 		return alreadyTriedList;
+	}
+
+	public int getTriedLocationNums() {
+		return triedLocationNums;
+	}
+
+	public void setTriedLocationNums(int triedLocationNums) {
+		this.triedLocationNums = triedLocationNums;
 	}
 }

@@ -528,6 +528,11 @@ public class ElementMachine implements Runnable {
 						ret = State.Activated;
 					} else {
 						// context condition不满足，直接failed
+//						SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//						String logTime = df.format(new Date());
+//						String logContent= "Condition: " + condition.getDescription() +" is violated. " + this.getDescription() + " failed.";
+//						UserLog userLog = new UserLog(logTime, logContent);
+						
 						ret = State.Failed;
 						this.setCauseToFailed(CauseToFailed.ActivatedFail);
 					}
@@ -836,8 +841,6 @@ public class ElementMachine implements Runnable {
 		// 判断执行时间是否超时
 		Date nowTime = new Date();
 		long executingTime = nowTime.getTime() - this.getStartTime().getTime(); // 得到的差值单位是毫秒
-		System.out.println("checkCommitmentCondition--------executingTime: "
-				+ executingTime + ", timeLimit:" + timeLimit);
 
 		if (executingTime > (timeLimit * 60 * 1000)) { // 超时
 			Log.logEMDebug(this.getName(), "checkCommitmentCondition()",

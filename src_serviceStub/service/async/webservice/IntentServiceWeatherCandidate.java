@@ -42,7 +42,7 @@ public class IntentServiceWeatherCandidate extends IntentService {
 	@Override
 	protected void onHandleIntent(Intent intent) {
 		RequestData requestData = (RequestData) intent
-				.getSerializableExtra("REQUEST_DATA_CONTENT");
+				.getSerializableExtra("NEED_REQUEST_DATA_CONTENT");
 		System.out
 				.println("IntentServiceWeatherCandidate, requestData content is null?:"
 						+ (requestData.getContent() == null)

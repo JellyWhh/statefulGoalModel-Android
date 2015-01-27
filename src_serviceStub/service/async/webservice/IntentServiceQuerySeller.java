@@ -24,7 +24,7 @@ public class IntentServiceQuerySeller extends IntentService {
 
 	private String bookName = "";
 
-	private String sellerName = "";
+	private String sellerInfos = "";
 
 	private String goalModelName, elementName;
 
@@ -45,7 +45,7 @@ public class IntentServiceQuerySeller extends IntentService {
 	@Override
 	protected void onHandleIntent(Intent intent) {
 		RequestData requestData = (RequestData) intent
-				.getSerializableExtra("REQUEST_DATA_CONTENT");
+				.getSerializableExtra("NEED_REQUEST_DATA_CONTENT");
 
 		bookName = EncodeDecodeRequestData.decodeToText(requestData
 				.getContent());
@@ -60,8 +60,8 @@ public class IntentServiceQuerySeller extends IntentService {
 					MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, goalModelName,
 					null, elementName, MesBody_Mes2Manager.ServiceExecutingDone);
 
-			RequestData retRequestData = new RequestData("seller name", "Text");
-			retRequestData.setContent(sellerName.getBytes());
+			RequestData retRequestData = new RequestData("seller infos", "List");
+			retRequestData.setContent(sellerInfos.getBytes());
 			msg.setRetContent(retRequestData);
 
 			GetAgent.getAideAgentInterface((SGMApplication) getApplication())
@@ -111,17 +111,40 @@ public class IntentServiceQuerySeller extends IntentService {
 		bookList3.add("Geography");
 		bookList3.add("Piano");
 
-		seller.put("alice", bookList1);
-		seller.put("bob", bookList2);
-		seller.put("tom", bookList3);
+		seller.put("Alice", bookList1);
+		seller.put("Bob", bookList2);
+		seller.put("Tom", bookList3);
+		seller.put("May", bookList1);
+		seller.put("Ward", bookList2);
+		seller.put("Skye", bookList3);
+
+		HashMap<String, String> addrs = new HashMap<>();
+		addrs.put("Alice", "TeachingBuilding");
+		addrs.put("Bob", "SE Lab");
+		addrs.put("Tom", "Dormitory");
+		addrs.put("May", "SE Lab");
+		addrs.put("Ward", "Dormitory");
+		addrs.put("Skye", "TeachingBuilding");
 
 		boolean ret = false;
 
+		ArrayList<String> sellerInfoList = new ArrayList<>();
+
 		for (String selleName : seller.keySet()) {
 			if (seller.get(selleName).contains(bookname)) {
-				sellerName = selleName;
-				ret = true;
-				break;
+				String listItem = "Seller:" + selleName + ";Price:";
+				int price = (int) (Math.random() * 40 + 2);
+				listItem += price + ";Addr:" + addrs.get(selleName);
+				sellerInfoList.add(listItem);
+			}
+		}
+
+		if (sellerInfoList.isEmpty()) {
+			ret = false;
+		} else {
+			ret = true;
+			for (String item : sellerInfoList) {
+				sellerInfos += item + "###";
 			}
 		}
 

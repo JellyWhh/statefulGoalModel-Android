@@ -76,6 +76,9 @@ public class AideAgentSupport {
 				.add("service.intentservice.weatherCandidate");
 		allIntentServiceNameArrayList.add("service.intentservice.weather");
 		allIntentServiceNameArrayList.add("service.intentservice.showcontent");
+		allIntentServiceNameArrayList.add("service.intentservice.inputText");
+		allIntentServiceNameArrayList.add("service.intentservice.takePicture");
+		allIntentServiceNameArrayList.add("service.intentservice.userConfirm");
 
 		allIntentServiceNameArrayList.add("service.intentservice.queryBookFromLibrary");
 		allIntentServiceNameArrayList.add("service.intentservice.borrowBookFromLibrary");
@@ -114,8 +117,8 @@ public class AideAgentSupport {
 
 		ArrayList<String> ret = new ArrayList<>();
 
-		if (taskLocation!=null && taskLocation.equals("selfLocation")) {
-			ret.add(selfAgentNickName);
+		if (taskLocation.equals("selfLocation")) {
+			ret.add(selfAgentNickName + "#" +taskLocation);
 		} else {
 
 			// 获取与每个人的亲密度
@@ -129,7 +132,7 @@ public class AideAgentSupport {
 			// 获取与所有好友距离的最大距离和最小距离
 			double maxDis = 0, minDis = 0;
 
-			if (taskLocation != null) {// 执行任务时需要位置信息
+			if (!taskLocation.equals("null")) {// 执行任务时需要位置信息
 				boolean isFirst = true;
 				for (UserInformation userInformation : userInformations) {
 					double dis = getShortDistance(
@@ -153,7 +156,7 @@ public class AideAgentSupport {
 			// 对位置距离进行归一化，然后算与所有好友的“距离”
 			for (UserInformation userInformation : userInformations) {
 				double locationDis = 0;
-				if (taskLocation != null) {// 执行任务时需要位置信息
+				if (!taskLocation.equals("null")) {// 执行任务时需要位置信息
 					if (maxDis != minDis) {
 						locationDis = (getShortDistance(
 								getSpecificLocation(taskLocation),
@@ -192,7 +195,7 @@ public class AideAgentSupport {
 					});
 
 			for (Map.Entry<String, Double> item : sortList) {
-				ret.add(item.getKey());
+				ret.add(item.getKey() + "#" + taskLocation);
 			}
 		}
 		// 返回排在第一个的
@@ -242,9 +245,15 @@ public class AideAgentSupport {
 	 */
 	private static String getSpecificLocation(String abstractlocation) {
 		HashMap<String, String> locationMap = new HashMap<>();
-		locationMap.put("Library", "Latitude:31.19491;Longitude:121.603517");
-		locationMap.put("ClassBuilding","Latitude:31.196645;Longitude:121.604512");
+		locationMap.put("Library1", "Latitude:31.19491;Longitude:121.603517");
+
+		locationMap.put("Library2", "Latitude:31.19788;Longitude:121.606103");	//拐角
 		locationMap.put("Bookstore", "Latitude:31.195278;Longitude:121.603857");//食堂
+		
+		//二手卖家的地址
+		locationMap.put("SE Lab", "Latitude:31.19758;Longitude:121.606131");
+		locationMap.put("TeachingBuilding","Latitude:31.196645;Longitude:121.604512");//二教
+		locationMap.put("Dormitory", "Latitude:31.195983;Longitude:121.606005");//微电楼
 		
 		return locationMap.get(abstractlocation);
 	}

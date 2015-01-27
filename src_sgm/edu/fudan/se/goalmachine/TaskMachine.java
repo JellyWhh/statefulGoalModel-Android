@@ -94,31 +94,15 @@ public class TaskMachine extends ElementMachine {
 	public void executingEntry() {
 		Log.logEMDebug(this.getName(), "executingEntry()", "init.");
 
-		// SGMMessage msgToManager = null;
-		// if (this.isNeedPeopleInteraction()) { // 需要人的参与
-		// // 发送消息给agent,让agent提醒用户需要他的参与
-		// msgToManager = new SGMMessage(MesHeader_Mes2Manger.ELEMENT_MESSAGE,
-		// null, this.getGoalModel().getName(), this.getName(), null,
-		// null, null, MesBody_Mes2Manager.RequestPersonIA);
-		// msgToManager.setDescription(this.getDescription());
-		// } else {// 不需要人的参与，而是需要调服务
 		SGMMessage msgToManager = new SGMMessage(
 				MesHeader_Mes2Manger.ELEMENT_MESSAGE, this.getGoalModel()
 						.getName(), this.getName(), null,
 				MesBody_Mes2Manager.RequestService);
-
-		// SGMMessage msgToManager = new SGMMessage(
-		// MesHeader_Mes2Manger.ELEMENT_MESSAGE, null, this.getGoalModel()
-		// .getName(), this.getName(), null, null, null,
-		// MesBody_Mes2Manager.RequestService);
-		// 将需要调用的服务名称附加在description里
 		msgToManager.setAbstractServiceName(this.getExecutingAbstractServiceName());
 		if (this.getExecutingLocation()!=null) {
 			msgToManager.setTaskLocation(this.getExecutingLocation());
 		}
 		msgToManager.setTaskDescription(this.getDescription());
-//		msgToManager.setDescription(this.getExecutingRequestedServiceName());
-		// }
 
 		sendMesToManager(msgToManager);
 

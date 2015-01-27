@@ -20,11 +20,6 @@ public class UserShowContentTask extends UserTask {
 		super(time, fromAgentName, goalModelName, elementName);
 	}
 
-	public UserShowContentTask(String time, String goalModelName,
-			String elementName) {
-		super(time, null, goalModelName, elementName);
-	}
-
 	public RequestData getRequestData() {
 		return requestData;
 	}

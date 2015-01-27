@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:background="#fff"
     android:orientation="vertical"
-    android:padding="3dp" >
+    android:padding="10dp" >
 
     <TextView
         android:id="@+id/tv_mes_time"

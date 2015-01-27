@@ -14,6 +14,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -87,39 +88,73 @@ public class MessageFragment extends Fragment {
 
 		mPager.setAdapter(new MyMessageFragmentPagerAdapter(
 				getChildFragmentManager(), fragmentsList));
-		mPager.setCurrentItem(0);
+		mPager.setOnPageChangeListener(new MyMessageOnPageChangeListener());
+		mPager.setCurrentItem(1);
 		mPager.setOffscreenPageLimit(1);
 	}
+	
+	
+	class MyMessageOnPageChangeListener implements OnPageChangeListener {
 
+		@Override
+		public void onPageScrolled(int arg0, float arg1, int arg2) {
+
+		}
+		@Override
+		public void onPageScrollStateChanged(int arg0) {
+
+		}
+
+		@Override
+		public void onPageSelected(int arg0) {
+
+			// 设置按钮的显示
+			switch (arg0) {
+			case 0:
+				tv_tab_task.setTextColor(resources.getColor(R.color.focus_black));
+				tv_tab_message.setTextColor(resources.getColor(R.color.unfocus_grey));
+				break;
+
+			case 1:
+				tv_tab_message.setTextColor(resources.getColor(R.color.focus_black));
+				tv_tab_task.setTextColor(resources.getColor(R.color.unfocus_grey));
+				break;
+			}
+
+
+		}
+	}
+	class MyMessageFragmentPagerAdapter extends FragmentPagerAdapter {
+		private ArrayList<Fragment> fragmentsList;
+
+		public MyMessageFragmentPagerAdapter(FragmentManager fm) {
+			super(fm);
+		}
+
+		public MyMessageFragmentPagerAdapter(FragmentManager fm,
+				ArrayList<Fragment> fragments) {
+			super(fm);
+			this.fragmentsList = fragments;
+		}
+
+		@Override
+		public int getCount() {
+			return fragmentsList.size();
+		}
+
+		@Override
+		public Fragment getItem(int arg0) {
+			return fragmentsList.get(arg0);
+		}
+
+		@Override
+		public int getItemPosition(Object object) {
+			return super.getItemPosition(object);
+		}
+	}
 	
 }
 
-class MyMessageFragmentPagerAdapter extends FragmentPagerAdapter {
-	private ArrayList<Fragment> fragmentsList;
 
-	public MyMessageFragmentPagerAdapter(FragmentManager fm) {
-		super(fm);
-	}
 
-	public MyMessageFragmentPagerAdapter(FragmentManager fm,
-			ArrayList<Fragment> fragments) {
-		super(fm);
-		this.fragmentsList = fragments;
-	}
 
-	@Override
-	public int getCount() {
-		return fragmentsList.size();
-	}
-
-	@Override
-	public Fragment getItem(int arg0) {
-		return fragmentsList.get(arg0);
-	}
-
-	@Override
-	public int getItemPosition(Object object) {
-		return super.getItemPosition(object);
-	}
-
-}

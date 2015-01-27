@@ -6,10 +6,11 @@ package service.async.webservice;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import service.sync.webservice.ClientAuthorization;
+
 import edu.fudan.se.goalmodel.RequestData;
 import edu.fudan.se.initial.SGMApplication;
 import edu.fudan.se.userMes.UserShowContentTask;
-import edu.fudan.se.userMes.UserTask;
 import android.app.IntentService;
 import android.content.Intent;
 
@@ -33,13 +34,16 @@ public class IntentServiceShowContent extends IntentService {
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
-		RequestData requestData = (RequestData) intent
-				.getSerializableExtra("REQUEST_DATA_CONTENT");
+		RequestData needRequestData = (RequestData) intent
+				.getSerializableExtra("NEED_REQUEST_DATA_CONTENT");
+
+		RequestData retRequestData = (RequestData) intent
+				.getSerializableExtra("RET_REQUEST_DATA_CONTENT");
 
 		goalModelName = intent.getExtras().getString("GOAL_MODEL_NAME");
 		elementName = intent.getExtras().getString("ELEMENT_NAME");
 
-		createUserShowContentTask(requestData);
+		createUserShowContentTask(needRequestData, retRequestData);
 	}
 
 	@Override
@@ -54,11 +58,15 @@ public class IntentServiceShowContent extends IntentService {
 	 * @param requestData
 	 *            要展示的内容
 	 */
-	private void createUserShowContentTask(RequestData requestData) {
+	private void createUserShowContentTask(RequestData requestData,
+			RequestData retRequestData) {
 
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String delegateOutTaskTime = df.format(new Date());
-		UserShowContentTask userShowContentTask = new UserShowContentTask(delegateOutTaskTime, goalModelName, elementName);
+		UserShowContentTask userShowContentTask = new UserShowContentTask(
+				delegateOutTaskTime, ClientAuthorization.agentNickName,
+				goalModelName, elementName);
+		userShowContentTask.setRequestDataName(retRequestData.getName());
 		// UserShowContentTask userShowContentTask = new UserShowContentTask(
 		// delegateOutTaskTime, goalModelName, elementName, false);
 		// 有需要展示的数据
@@ -71,9 +79,14 @@ public class IntentServiceShowContent extends IntentService {
 			description += "a span of text.";
 		} else if (requestData.getContentType().equals("Image")) {
 			description += "an image.";
+		} else if (requestData.getContentType().equals("List")) {
+			description += "a list of " + requestData.getName()
+					+ ". Please select one.";
 		}
+
 		userShowContentTask.setDescription(description);
-		((SGMApplication) getApplication()).getUserTaskList().add(
+
+		((SGMApplication) getApplication()).getUserTaskList().add(0,
 				userShowContentTask);
 
 		// 发送 弹窗广播，在MainActivity会监听这个广播然后弹出通知窗口

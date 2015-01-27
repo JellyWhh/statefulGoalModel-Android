@@ -39,14 +39,16 @@ public class IntentServiceBorrowBookFromLibrary extends IntentService {
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
-		RequestData requestData = (RequestData) intent
-				.getSerializableExtra("REQUEST_DATA_CONTENT");
-
-		bookName = EncodeDecodeRequestData.decodeToText(requestData
-				.getContent());
+		
+		RequestData needRequestData = (RequestData) intent
+				.getSerializableExtra("NEED_REQUEST_DATA_CONTENT");
 
 		goalModelName = intent.getExtras().getString("GOAL_MODEL_NAME");
 		elementName = intent.getExtras().getString("ELEMENT_NAME");
+
+		bookName = EncodeDecodeRequestData.decodeToText(needRequestData
+				.getContent());
+
 
 		if (borrowBookFromLibrary(bookName)) {
 

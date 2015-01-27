@@ -14,6 +14,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -56,6 +57,9 @@ public class TaskFragment extends ListFragment {
 
 	// private ProgressDialog progressDialog;
 
+	private Handler handler;
+	private Runnable runnable;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -77,17 +81,29 @@ public class TaskFragment extends ListFragment {
 			e.printStackTrace();
 		}
 
+		adapter = new UserTaskAdapter(getActivity(),
+				R.layout.listview_usertask, application.getUserTaskList(),
+				aideAgentInterface);
+
+		setListAdapter(adapter);
+
+		// 用于定时刷新
+		handler = new Handler();
+		runnable = new Runnable() {
+			@Override
+			public void run() {
+				adapter.notifyDataSetChanged();
+				handler.postDelayed(this, 500);
+			}
+		};
+		handler.postDelayed(runnable, 500); // 0.5s刷新一次
+
 	}
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		setUserVisibleHint(true);
 		super.onActivityCreated(savedInstanceState);
-		adapter = new UserTaskAdapter(getActivity(),
-				R.layout.listview_usertask, application.getUserTaskList(),
-				aideAgentInterface);
-
-		setListAdapter(adapter);
 
 		getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 	}
@@ -95,6 +111,12 @@ public class TaskFragment extends ListFragment {
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
+	}
+
+	@Override
+	public void onDestroy() {
+		handler.removeCallbacks(runnable);
+		super.onDestroy();
 	}
 }
 
@@ -261,7 +283,7 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 			// 让用户拍照的task
 			else if (userTask instanceof UserTakePictureTask) {
 				userTask.setDone(true);
-				notifyDataSetChanged();
+				// notifyDataSetChanged();
 
 				Intent intent = new Intent();
 				intent.setClass(mContext, TakePictureActivity.class);
@@ -287,7 +309,7 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 				// null, null, userTask.getGoalModelName(), userTask
 				// .getElementName(), MesBody_Mes2Manager.EndTE));
 				userTask.setDone(true);
-				notifyDataSetChanged();
+				// notifyDataSetChanged();
 			}
 		}
 
@@ -325,7 +347,7 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 			}
 
 			userTask.setDone(true);
-			notifyDataSetChanged();
+			// notifyDataSetChanged();
 		}
 
 	}
@@ -375,19 +397,8 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 				aclmc_DelegateTask.setRetRequestData(requestData);
 				aideAgentInterface.sendMesToExternalAgent(aclmc_DelegateTask);
 
-				// SGMMessage msg = new SGMMessage(
-				// MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null,
-				// null, null, userTask.getGoalModelName(), userTask
-				// .getElementName(),
-				// MesBody_Mes2Manager.ServiceExecutingDone);
-				// RequestData requestData = new RequestData("Text");
-				// requestData.setContent(userInput.getBytes());
-				// msg.setContent(requestData);
-				//
-				// aideAgentInterface.sendMesToManager(msg);
-
 				userTask.setDone(true);
-				notifyDataSetChanged();
+				// notifyDataSetChanged();
 
 				dialog.cancel();
 			}
@@ -410,38 +421,95 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 				.getRequestData();
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-		builder.setTitle("Content:");
-		builder.setIcon(android.R.drawable.ic_dialog_info);
 
-		if (requestData.getContentType().equals("Text")) {
-			builder.setMessage(EncodeDecodeRequestData.decodeToText(requestData
-					.getContent()));
-		} else if (requestData.getContentType().equals("Image")) {
-			View view = LayoutInflater.from(mContext).inflate(
-					R.layout.dialog_showcontent, null);
-			ImageView imageView = (ImageView) view
-					.findViewById(R.id.iv_dialog_content);
-			imageView.setImageBitmap(EncodeDecodeRequestData
-					.decodeToBitmap(requestData.getContent()));
-			builder.setView(view);
-		}
+		if (requestData.getContentType().equals("List")) {
 
-		builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+			builder.setTitle("Select:");
+			
+			//seller:tom;price:20;addr:room10###seller:
+			String listString= EncodeDecodeRequestData.decodeToText(requestData.getContent());
+			final String[] sellerInfos= listString.split("###");
+			
+			final int[] selectIndex=new int[1];
+			builder.setSingleChoiceItems(sellerInfos, 0, new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					selectIndex[0] = which;
+					
+				}
+			});
+			
+			builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					System.out.println("DEBUG!!!!----TaskFragment,dialog. you select:" + sellerInfos[selectIndex[0]]);
+					
+					String select=sellerInfos[selectIndex[0]];
+					//将选中的结果发回去
+					RequestData retRequestData = new RequestData(userTask.getRequestDataName(), "Text");
+					retRequestData.setContent(select.getBytes());
+					
+					ACLMC_DelegateTask aclmc_DelegateTask = new ACLMC_DelegateTask(
+							ACLMC_DelegateTask.DTHeader.DTBACK, null, userTask
+									.getFromAgentName(), userTask
+									.getGoalModelName(), userTask.getElementName());
+					aclmc_DelegateTask.setDone(true);
+					aclmc_DelegateTask.setRetRequestData(retRequestData);
+					aideAgentInterface.sendMesToExternalAgent(aclmc_DelegateTask);
+					
+					userTask.setDone(true);
+					dialog.cancel();
+				}
+			});
+			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.cancel();
+				}
+			});
+			
+			
+		} else {
 
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
 
-				// 只要点击了show按钮就表示这个“展示任务”完成了
-				aideAgentInterface.sendMesToManager(new SGMMessage(
-						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, userTask
-								.getGoalModelName(), null, userTask
-								.getElementName(), MesBody_Mes2Manager.EndTE));
-				userTask.setDone(true);
-				notifyDataSetChanged();
-
-				dialog.cancel();
+			builder.setTitle("Content:");
+			builder.setIcon(android.R.drawable.ic_dialog_info);
+			
+			if (requestData.getContentType().equals("Text")) {
+				builder.setMessage(EncodeDecodeRequestData
+						.decodeToText(requestData.getContent()));
+			} else if (requestData.getContentType().equals("Image")) {
+				View view = LayoutInflater.from(mContext).inflate(
+						R.layout.dialog_showcontent, null);
+				ImageView imageView = (ImageView) view
+						.findViewById(R.id.iv_dialog_content);
+				imageView.setImageBitmap(EncodeDecodeRequestData
+						.decodeToBitmap(requestData.getContent()));
+				builder.setView(view);
 			}
-		});
+
+			builder.setNeutralButton("OK",
+					new DialogInterface.OnClickListener() {
+
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+
+							// 只要点击了show按钮就表示这个“展示任务”完成了
+							aideAgentInterface.sendMesToManager(new SGMMessage(
+									MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE,
+									userTask.getGoalModelName(), null, userTask
+											.getElementName(),
+									MesBody_Mes2Manager.EndTE));
+							userTask.setDone(true);
+							// notifyDataSetChanged();
+
+							dialog.cancel();
+						}
+					});
+
+		}
 
 		AlertDialog dialog = builder.create();
 		dialog.show();

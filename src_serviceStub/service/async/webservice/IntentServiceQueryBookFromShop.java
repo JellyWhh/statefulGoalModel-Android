@@ -37,7 +37,7 @@ public class IntentServiceQueryBookFromShop extends IntentService {
 	@Override
 	protected void onHandleIntent(Intent intent) {
 		RequestData requestData = (RequestData) intent
-				.getSerializableExtra("REQUEST_DATA_CONTENT");
+				.getSerializableExtra("NEED_REQUEST_DATA_CONTENT");
 
 		bookName = EncodeDecodeRequestData.decodeToText(requestData
 				.getContent());
@@ -99,7 +99,7 @@ public class IntentServiceQueryBookFromShop extends IntentService {
 		bookList.add("Computer");
 		
 		if (bookList.contains(bookname)) {
-			double random = (double) (Math.random() * 100); // [0,100)
+			int random = (int) (Math.random() * 100); // [0,100)
 			bookPrice = String.valueOf(random);
 			return true;
 		}else {
