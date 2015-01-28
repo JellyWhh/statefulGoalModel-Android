@@ -12,18 +12,17 @@
         <LinearLayout
             android:id="@+id/ll_message"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#eee"
-            android:paddingBottom="5dp"
-            android:paddingTop="10dp" >
+            android:layout_height="38dp"
+            android:background="#eee" >
 
             <TextView
                 android:id="@+id/tv_tab_task"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1.0"
+                android:background="#ddffff"
                 android:gravity="center"
-                android:text="@string/tab_message_task"
+                android:text="@string/tab_message_unread"
                 android:textColor="@color/focus_black"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -32,16 +31,18 @@
                 android:id="@+id/iv_middle_line"
                 android:layout_width="2dp"
                 android:layout_height="match_parent"
+                android:paddingBottom="8dp"
+                android:paddingTop="8dp"
                 android:scaleType="matrix"
                 android:src="#222" />
 
             <TextView
                 android:id="@+id/tv_tab_message"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_weight="1.0"
                 android:gravity="center"
-                android:text="@string/tab_message_log"
+                android:text="@string/tab_message_read"
                 android:textColor="@color/unfocus_grey"
                 android:textSize="18sp"
                 android:textStyle="bold" />

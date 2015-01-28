@@ -46,7 +46,7 @@ public class IntentServiceTakePicture extends IntentService {
 		
 		userTask.setRequestDataName(retRequestData.getName());
 		userTask.setDescription(userTaskDescription);
-		((SGMApplication) getApplication()).getUserTaskList().add(0, userTask);
+		((SGMApplication) getApplication()).getUserCurrentTaskList().add(0, userTask);
 
 		// 新任务广播
 		Intent broadcast_nda = new Intent();

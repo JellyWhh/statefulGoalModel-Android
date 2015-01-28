@@ -6,8 +6,8 @@ package edu.fudan.se.mainfragments;
 import java.util.ArrayList;
 
 import edu.fudan.se.R;
-import edu.fudan.se.messageFragment.LogFragment;
-import edu.fudan.se.messageFragment.TaskFragment;
+import edu.fudan.se.messageFragment.ReadFragment;
+import edu.fudan.se.messageFragment.UnreadFragment;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -32,7 +32,7 @@ public class MessageFragment extends Fragment {
 	Resources resources;
 	private ViewPager mPager;
 	private ArrayList<Fragment> fragmentsList;
-	private TextView tv_tab_task, tv_tab_message;
+	private TextView tv_tab_unread, tv_tab_read;
 
 	public final static int num = 2;
 
@@ -45,32 +45,32 @@ public class MessageFragment extends Fragment {
 		initTextView(view);
 		initViewPager(view);
 		
-		tv_tab_task.setTextColor(resources.getColor(R.color.focus_black));
+		tv_tab_unread.setTextColor(resources.getColor(R.color.focus_black));
 		return view;
 	}
 
 	
 
 	private void initTextView(View parentView) {
-		tv_tab_task = (TextView) parentView.findViewById(R.id.tv_tab_task);
-		tv_tab_message = (TextView) parentView
+		tv_tab_unread = (TextView) parentView.findViewById(R.id.tv_tab_task);
+		tv_tab_read = (TextView) parentView
 				.findViewById(R.id.tv_tab_message);
 
-		tv_tab_task.setOnClickListener(new OnClickListener() {
+		tv_tab_unread.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
-				tv_tab_task.setTextColor(resources.getColor(R.color.focus_black));
-				tv_tab_message.setTextColor(resources.getColor(R.color.unfocus_grey));
+				tv_tab_unread.setTextColor(resources.getColor(R.color.focus_black));
+				tv_tab_read.setTextColor(resources.getColor(R.color.unfocus_grey));
 				mPager.setCurrentItem(0);
 			}
 		});
-		tv_tab_message.setOnClickListener(new OnClickListener() {
+		tv_tab_read.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
-				tv_tab_message.setTextColor(resources.getColor(R.color.focus_black));
-				tv_tab_task.setTextColor(resources.getColor(R.color.unfocus_grey));
+				tv_tab_read.setTextColor(resources.getColor(R.color.focus_black));
+				tv_tab_unread.setTextColor(resources.getColor(R.color.unfocus_grey));
 				mPager.setCurrentItem(1);
 			}
 		});
@@ -80,16 +80,16 @@ public class MessageFragment extends Fragment {
 		mPager = (ViewPager) parentView.findViewById(R.id.vp_message);
 		fragmentsList = new ArrayList<Fragment>();
 
-		Fragment taskFragment = new TaskFragment();
-		Fragment mesFragment = new LogFragment();
+		Fragment unreadFragment = new UnreadFragment();
+		Fragment readFragment = new ReadFragment();
 
-		fragmentsList.add(taskFragment);
-		fragmentsList.add(mesFragment);
+		fragmentsList.add(unreadFragment);
+		fragmentsList.add(readFragment);
 
 		mPager.setAdapter(new MyMessageFragmentPagerAdapter(
 				getChildFragmentManager(), fragmentsList));
 		mPager.setOnPageChangeListener(new MyMessageOnPageChangeListener());
-		mPager.setCurrentItem(1);
+		mPager.setCurrentItem(0);
 		mPager.setOffscreenPageLimit(1);
 	}
 	
@@ -111,13 +111,17 @@ public class MessageFragment extends Fragment {
 			// 设置按钮的显示
 			switch (arg0) {
 			case 0:
-				tv_tab_task.setTextColor(resources.getColor(R.color.focus_black));
-				tv_tab_message.setTextColor(resources.getColor(R.color.unfocus_grey));
+				tv_tab_unread.setTextColor(resources.getColor(R.color.focus_black));
+				tv_tab_unread.setBackgroundColor(resources.getColor(R.color.mes_focus_yellow));
+				tv_tab_read.setTextColor(resources.getColor(R.color.unfocus_grey));
+				tv_tab_read.setBackgroundColor(resources.getColor(R.color.mes_unfocus_grey));
 				break;
 
 			case 1:
-				tv_tab_message.setTextColor(resources.getColor(R.color.focus_black));
-				tv_tab_task.setTextColor(resources.getColor(R.color.unfocus_grey));
+				tv_tab_read.setTextColor(resources.getColor(R.color.focus_black));
+				tv_tab_read.setBackgroundColor(resources.getColor(R.color.mes_focus_yellow));
+				tv_tab_unread.setTextColor(resources.getColor(R.color.unfocus_grey));
+				tv_tab_unread.setBackgroundColor(resources.getColor(R.color.mes_unfocus_grey));
 				break;
 			}
 

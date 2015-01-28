@@ -48,14 +48,12 @@ import edu.fudan.se.userMes.UserTask;
  * @author whh
  * 
  */
-public class TaskFragment extends ListFragment {
+public class UnreadFragment extends ListFragment {
 
 	private SGMApplication application; // 获取应用程序，以得到里面的全局变量
-	private UserTaskAdapter adapter;
+	private UnreadUserTaskAdapter adapter;
 
 	private AideAgentInterface aideAgentInterface; // agent interface
-
-	// private ProgressDialog progressDialog;
 
 	private Handler handler;
 	private Runnable runnable;
@@ -67,7 +65,6 @@ public class TaskFragment extends ListFragment {
 		application = (SGMApplication) getActivity().getApplication();
 
 		try {
-			Thread.sleep(2 * 1000);
 			aideAgentInterface = MicroRuntime.getAgent(
 					application.getAgentNickname()).getO2AInterface(
 					AideAgentInterface.class);
@@ -77,13 +74,12 @@ public class TaskFragment extends ListFragment {
 		} catch (ControllerException e) {
 			Log.e("MessageFragment", "ControllerException");
 			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
 		}
 
-		adapter = new UserTaskAdapter(getActivity(),
-				R.layout.listview_usertask, application.getUserTaskList(),
-				aideAgentInterface);
+		adapter = new UnreadUserTaskAdapter(getActivity(),
+				R.layout.listview_unreadmes,
+				application.getUserCurrentTaskList(),
+				application.getUserDoneTaskList(), aideAgentInterface);
 
 		setListAdapter(adapter);
 
@@ -120,29 +116,32 @@ public class TaskFragment extends ListFragment {
 	}
 }
 
-class UserTaskAdapter extends ArrayAdapter<UserTask> {
+class UnreadUserTaskAdapter extends ArrayAdapter<UserTask> {
 
 	private int mResource;
 	private Context mContext;
 	private LayoutInflater mInflater;
 	private List<UserTask> mObjects;
+	private List<UserTask> doneTaskList;
 	private AideAgentInterface aideAgentInterface; // agent interface
 
 	// private ProgressDialog progressDialog;
 
-	public UserTaskAdapter(Context context, int resource,
-			List<UserTask> objects, AideAgentInterface aideAgentInterface) {
+	public UnreadUserTaskAdapter(Context context, int resource,
+			List<UserTask> objects, List<UserTask> doneTaskList,
+			AideAgentInterface aideAgentInterface) {
 		super(context, resource, objects);
-		init(context, resource, objects, aideAgentInterface);
+		init(context, resource, objects, doneTaskList, aideAgentInterface);
 	}
 
 	private void init(Context context, int resource, List<UserTask> objects,
-			AideAgentInterface aideAgentInterface) {
+			List<UserTask> doneTaskList, AideAgentInterface aideAgentInterface) {
 		this.mContext = context;
 		this.mInflater = (LayoutInflater) context
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		this.mResource = resource;
 		this.mObjects = objects;
+		this.doneTaskList = doneTaskList;
 		this.aideAgentInterface = aideAgentInterface;
 		// this.progressDialog = progressDialog;
 	}
@@ -283,6 +282,8 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 			// 让用户拍照的task
 			else if (userTask instanceof UserTakePictureTask) {
 				userTask.setDone(true);
+				mObjects.remove(userTask);
+				doneTaskList.add(0,userTask);
 				// notifyDataSetChanged();
 
 				Intent intent = new Intent();
@@ -309,6 +310,8 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 				// null, null, userTask.getGoalModelName(), userTask
 				// .getElementName(), MesBody_Mes2Manager.EndTE));
 				userTask.setDone(true);
+				mObjects.remove(userTask);
+				doneTaskList.add(0,userTask);
 				// notifyDataSetChanged();
 			}
 		}
@@ -347,6 +350,8 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 			}
 
 			userTask.setDone(true);
+			mObjects.remove(userTask);
+			doneTaskList.add(0,userTask);
 			// notifyDataSetChanged();
 		}
 
@@ -398,6 +403,8 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 				aideAgentInterface.sendMesToExternalAgent(aclmc_DelegateTask);
 
 				userTask.setDone(true);
+				mObjects.remove(userTask);
+				doneTaskList.add(0,userTask);
 				// notifyDataSetChanged();
 
 				dialog.cancel();
@@ -425,58 +432,68 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 		if (requestData.getContentType().equals("List")) {
 
 			builder.setTitle("Select:");
-			
-			//seller:tom;price:20;addr:room10###seller:
-			String listString= EncodeDecodeRequestData.decodeToText(requestData.getContent());
-			final String[] sellerInfos= listString.split("###");
-			
-			final int[] selectIndex=new int[1];
-			builder.setSingleChoiceItems(sellerInfos, 0, new DialogInterface.OnClickListener() {
-				
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					selectIndex[0] = which;
-					
-				}
-			});
-			
-			builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					System.out.println("DEBUG!!!!----TaskFragment,dialog. you select:" + sellerInfos[selectIndex[0]]);
-					
-					String select=sellerInfos[selectIndex[0]];
-					//将选中的结果发回去
-					RequestData retRequestData = new RequestData(userTask.getRequestDataName(), "Text");
-					retRequestData.setContent(select.getBytes());
-					
-					ACLMC_DelegateTask aclmc_DelegateTask = new ACLMC_DelegateTask(
-							ACLMC_DelegateTask.DTHeader.DTBACK, null, userTask
-									.getFromAgentName(), userTask
-									.getGoalModelName(), userTask.getElementName());
-					aclmc_DelegateTask.setDone(true);
-					aclmc_DelegateTask.setRetRequestData(retRequestData);
-					aideAgentInterface.sendMesToExternalAgent(aclmc_DelegateTask);
-					
-					userTask.setDone(true);
-					dialog.cancel();
-				}
-			});
-			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-				
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					dialog.cancel();
-				}
-			});
-			
-			
-		} else {
 
+			// seller:tom;price:20;addr:room10###seller:
+			String listString = EncodeDecodeRequestData
+					.decodeToText(requestData.getContent());
+			final String[] sellerInfos = listString.split("###");
+
+			final int[] selectIndex = new int[1];
+			builder.setSingleChoiceItems(sellerInfos, 0,
+					new DialogInterface.OnClickListener() {
+
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							selectIndex[0] = which;
+
+						}
+					});
+
+			builder.setPositiveButton("OK",
+					new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+//							System.out
+//									.println("DEBUG!!!!----TaskFragment,dialog. you select:"
+//											+ sellerInfos[selectIndex[0]]);
+
+							String select = sellerInfos[selectIndex[0]];
+							// 将选中的结果发回去
+							RequestData retRequestData = new RequestData(
+									userTask.getRequestDataName(), "Text");
+							retRequestData.setContent(select.getBytes());
+
+							ACLMC_DelegateTask aclmc_DelegateTask = new ACLMC_DelegateTask(
+									ACLMC_DelegateTask.DTHeader.DTBACK, null,
+									userTask.getFromAgentName(), userTask
+											.getGoalModelName(), userTask
+											.getElementName());
+							aclmc_DelegateTask.setDone(true);
+							aclmc_DelegateTask
+									.setRetRequestData(retRequestData);
+							aideAgentInterface
+									.sendMesToExternalAgent(aclmc_DelegateTask);
+
+							userTask.setDone(true);
+							mObjects.remove(userTask);
+							doneTaskList.add(0,userTask);
+							dialog.cancel();
+						}
+					});
+			builder.setNegativeButton("Cancel",
+					new DialogInterface.OnClickListener() {
+
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							dialog.cancel();
+						}
+					});
+
+		} else {
 
 			builder.setTitle("Content:");
 			builder.setIcon(android.R.drawable.ic_dialog_info);
-			
+
 			if (requestData.getContentType().equals("Text")) {
 				builder.setMessage(EncodeDecodeRequestData
 						.decodeToText(requestData.getContent()));
@@ -503,6 +520,8 @@ class UserTaskAdapter extends ArrayAdapter<UserTask> {
 											.getElementName(),
 									MesBody_Mes2Manager.EndTE));
 							userTask.setDone(true);
+							mObjects.remove(userTask);
+							doneTaskList.add(0,userTask);
 							// notifyDataSetChanged();
 
 							dialog.cancel();

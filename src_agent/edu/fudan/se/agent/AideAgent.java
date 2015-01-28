@@ -27,11 +27,11 @@ import edu.fudan.se.goalmodel.GoalModelManager;
 import edu.fudan.se.goalmodel.RequestData;
 import edu.fudan.se.initial.SGMApplication;
 import edu.fudan.se.log.Log;
-import edu.fudan.se.messageFragment.UserLog;
 import edu.fudan.se.userMes.UserConfirmTask;
 import edu.fudan.se.userMes.UserInputTextTask;
 import edu.fudan.se.userMes.UserTakePictureTask;
 import edu.fudan.se.userMes.UserTask;
+import edu.fudan.se.utils.UserLog;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
@@ -53,7 +53,7 @@ public class AideAgent extends Agent implements AideAgentInterface {
 	private SGMApplication sgmApplication;
 	private GoalModelManager goalModelManager;
 
-	private ArrayList<UserTask> userTaskList;
+	private ArrayList<UserTask> userCurrentTaskList;
 	private ArrayList<UserLog> userLogList;
 
 	private Context context;
@@ -80,7 +80,7 @@ public class AideAgent extends Agent implements AideAgentInterface {
 			}
 
 			goalModelManager = sgmApplication.getGoalModelManager();
-			userTaskList = sgmApplication.getUserTaskList();
+			userCurrentTaskList = sgmApplication.getUserCurrentTaskList();
 			userLogList = sgmApplication.getUserLogList();
 		}
 
@@ -1002,7 +1002,7 @@ public class AideAgent extends Agent implements AideAgentInterface {
 			userTask.setRequestDataName(retRequestData.getName());
 		}
 		userTask.setDescription(userTaskDescription);
-		userTaskList.add(0, userTask);
+		userCurrentTaskList.add(0, userTask);
 		// userTaskList.add(userTask);
 
 		// 新任务广播

@@ -45,7 +45,7 @@
             android:orientation="horizontal" >
 
             <LinearLayout
-                android:id="@+id/ll_tab_message"
+                android:id="@+id/ll_tab_mygoal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1.0"
@@ -55,10 +55,40 @@
                 android:padding="5dp" >
 
                 <ImageView
+                    android:id="@+id/iv_tab_mygoal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/icon_mygoal_sel"
+                    android:contentDescription="@string/app_name"
+                    android:focusable="false"
+                    android:padding="3dp" >
+                </ImageView>
+
+                <TextView
+                    android:id="@+id/tv_tab_mygoal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/tab_mygoal"
+                    android:textColor="#ffffff"
+                    android:textSize="12sp" >
+                </TextView>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_tab_message"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.0"
+                android:background="@drawable/maintab_toolbar_bg"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="5dp" >
+
+                <ImageView
                     android:id="@+id/iv_tab_message"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/icon_message_sel"
+                    android:background="@drawable/icon_message_nor"
                     android:contentDescription="@string/app_name"
                     android:focusable="false"
                     android:padding="3dp" >
@@ -75,7 +105,7 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/ll_tab_mygoal"
+                android:id="@+id/ll_tab_procedure"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1.0"
@@ -85,20 +115,20 @@
                 android:padding="5dp" >
 
                 <ImageView
-                    android:id="@+id/iv_tab_mygoal"
+                    android:id="@+id/iv_tab_procedure"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/icon_mygoal_nor"
+                    android:background="@drawable/icon_setting_nor"
                     android:contentDescription="@string/app_name"
                     android:focusable="false"
                     android:padding="3dp" >
                 </ImageView>
 
                 <TextView
-                    android:id="@+id/tv_tab_mygoal"
+                    android:id="@+id/tv_tab_procedure"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/tab_mygoal"
+                    android:text="@string/tab_procedure"
                     android:textColor="#ffffff"
                     android:textSize="12sp" >
                 </TextView>
@@ -129,36 +159,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/tab_download"
-                    android:textColor="#ffffff"
-                    android:textSize="12sp" >
-                </TextView>
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/ll_tab_setting"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1.0"
-                android:background="@drawable/maintab_toolbar_bg"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:padding="5dp" >
-
-                <ImageView
-                    android:id="@+id/iv_tab_setting"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/icon_setting_nor"
-                    android:contentDescription="@string/app_name"
-                    android:focusable="false"
-                    android:padding="3dp" >
-                </ImageView>
-
-                <TextView
-                    android:id="@+id/tv_tab_setting"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/tab_setting"
                     android:textColor="#ffffff"
                     android:textSize="12sp" >
                 </TextView>

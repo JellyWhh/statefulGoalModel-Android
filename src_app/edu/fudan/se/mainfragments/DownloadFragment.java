@@ -73,21 +73,6 @@ public class DownloadFragment extends ListFragment {
 
 	}
 	
-	private boolean mHasLoadedOnce = false;
-
-	@Override
-	public void setUserVisibleHint(boolean isVisibleToUser) {
-		if (this.isVisible()) {
-			// we check that the fragment is becoming visible
-			if (isVisibleToUser && !mHasLoadedOnce) {
-				System.out.println("DEBUG!!!!!!!!!!-DownloadFragment---mHasLoadedOnce: " + mHasLoadedOnce);
-				adapter.notifyDataSetChanged();
-				// async http request here
-				mHasLoadedOnce = true;
-			}
-		}
-		super.setUserVisibleHint(isVisibleToUser);
-	}
 }
 
 /**

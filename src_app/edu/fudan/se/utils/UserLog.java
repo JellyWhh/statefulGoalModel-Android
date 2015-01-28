@@ -1,7 +1,7 @@
 /**
  * 
  */
-package edu.fudan.se.messageFragment;
+package edu.fudan.se.utils;
 
 /**
  * 

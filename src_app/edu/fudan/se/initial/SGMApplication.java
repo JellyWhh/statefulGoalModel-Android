@@ -23,9 +23,9 @@ import java.util.logging.Level;
 import edu.fudan.se.goalmodel.GmXMLParser;
 import edu.fudan.se.goalmodel.GoalModel;
 import edu.fudan.se.goalmodel.GoalModelManager;
-import edu.fudan.se.messageFragment.UserLog;
 import edu.fudan.se.support.DownloadTask;
 import edu.fudan.se.userMes.UserTask;
+import edu.fudan.se.utils.UserLog;
 
 import android.app.Application;
 import android.content.SharedPreferences;
@@ -43,14 +43,12 @@ public class SGMApplication extends Application implements Serializable {
 
 	private Logger logger = Logger.getJADELogger(this.getClass().getName());
 
-	private ArrayList<UserTask> userTaskList;
-//	private ArrayList<UserMessage> userMessageList;
+	private ArrayList<UserTask> userDoneTaskList;
+	private ArrayList<UserTask> userCurrentTaskList;
 	private ArrayList<UserLog> userLogList;
 	private ArrayList<DownloadTask> downloadTaskList;
 
 	private String agentNickname;
-
-	// private GoalModelController goalModelController;
 
 	private GoalModelManager goalModelManager;
 
@@ -67,7 +65,8 @@ public class SGMApplication extends Application implements Serializable {
 	 * 把用户的goal model list数据加载进来，如果以后要从xml文件里读取，就是在这里设置
 	 */
 	private void initialData() {
-		this.userTaskList = new ArrayList<>();
+		this.userDoneTaskList = new ArrayList<>();
+		this.userCurrentTaskList = new ArrayList<>();
 		this.userLogList = new ArrayList<>();
 		this.downloadTaskList = new ArrayList<>();
 
@@ -109,8 +108,8 @@ public class SGMApplication extends Application implements Serializable {
 				DownloadTask downloadTask = new DownloadTask(fileName,
 						serverFileList.get(fileName));
 				if (localFileList.containsKey(fileName)) { // 本地文件中有这个文件，说明这个是已经被下载的
-					System.out.println("SGMApplication--localFileList.containsKey():"
-							+ fileName);
+//					System.out.println("SGMApplication--localFileList.containsKey():"
+//							+ fileName);
 					downloadTask.setAlreadyDownload(true);
 				} else {
 					downloadTask.setAlreadyDownload(false);
@@ -182,7 +181,7 @@ public class SGMApplication extends Application implements Serializable {
 				inputStream.read(buffer);
 				String[] filenames = new String(buffer).split(",");
 				for (int i = 0; i < filenames.length - 1; i++) {
-					System.out.println("SGMApplication---"+filenames[i] + ".xml");
+//					System.out.println("SGMApplication---"+filenames[i] + ".xml");
 					serverFileList.put(filenames[i] + ".xml",
 							"http://10.131.252.246:8080/sgmfiles/xml/"
 									+ filenames[i] + ".xml");
@@ -231,18 +230,30 @@ public class SGMApplication extends Application implements Serializable {
 		this.agentNickname = agentNickname;
 	}
 
-	public ArrayList<UserTask> getUserTaskList() {
-		return userTaskList;
+	public ArrayList<UserTask> getUserDoneTaskList() {
+		return userDoneTaskList;
+	}
+	
+	public ArrayList<UserTask> getUserCurrentTaskList(){
+		return userCurrentTaskList;
 	}
 
 	public void clearTasksOfGoalModel(GoalModel goalModel) {
 		ArrayList<UserTask> toRemoveArrayList = new ArrayList<>();
-		for (UserTask userTask : this.userTaskList) {
+		for (UserTask userTask : this.userDoneTaskList) {
 			if (userTask.getGoalModelName().equals(goalModel.getName())) {
 				toRemoveArrayList.add(userTask);
 			}
 		}
-		this.userTaskList.removeAll(toRemoveArrayList);
+		this.userDoneTaskList.removeAll(toRemoveArrayList);
+		
+		ArrayList<UserTask> toRemoveArrayList2 = new ArrayList<>();
+		for(UserTask userTask : this.userCurrentTaskList) {
+			if (userTask.getGoalModelName().equals(goalModel.getName())) {
+				toRemoveArrayList.add(userTask);
+			}
+		}
+		this.userCurrentTaskList.removeAll(toRemoveArrayList2);
 	}
 
 	public ArrayList<UserLog> getUserLogList() {

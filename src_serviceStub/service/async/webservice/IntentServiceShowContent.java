@@ -86,7 +86,7 @@ public class IntentServiceShowContent extends IntentService {
 
 		userShowContentTask.setDescription(description);
 
-		((SGMApplication) getApplication()).getUserTaskList().add(0,
+		((SGMApplication) getApplication()).getUserCurrentTaskList().add(0,
 				userShowContentTask);
 
 		// 发送 弹窗广播，在MainActivity会监听这个广播然后弹出通知窗口

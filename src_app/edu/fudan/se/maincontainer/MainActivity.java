@@ -53,15 +53,16 @@ public class MainActivity extends FragmentActivity {
 				}
 			}
 
-			//
-			// try {
-			// Thread.sleep(5000);
-			// } catch (InterruptedException e) {
-			// e.printStackTrace();
-			// }
+			int initialIndex = 0;
+			Intent intent = getIntent();
+			if (intent.getExtras() != null) {
+				initialIndex = (int) intent.getExtras().get("INITIALINDEX");
+			}
+
 			FragmentTransaction transaction = getSupportFragmentManager()
 					.beginTransaction();
-			transaction.add(R.id.container, new MainFragment()).commit();
+			transaction.add(R.id.container, new MainFragment(initialIndex))
+					.commit();
 		}
 
 		// 处理agent弹窗相关

@@ -9,12 +9,12 @@
     <!-- 标签页内容 -->
     <string name="tab_message">Message</string>
     <string name="tab_mygoal">MyGoal</string>
-    <string name="tab_setting">Setting</string>
+    <string name="tab_procedure">Procedure</string>
     <string name="tab_download">Download</string>
 
     <!-- Message标签页的两个标签 -->
-    <string name="tab_message_task">Task</string>
-    <string name="tab_message_log">Log</string>
+    <string name="tab_message_unread">New</string>
+    <string name="tab_message_read">History</string>
 
     <!-- menu弹出框中的两个选项 -->
     <string name="menu_abstract">Abstract</string>

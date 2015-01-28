@@ -227,9 +227,10 @@ public class GoalModelFragment extends Fragment {
 				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				
 				//跳到消息界面
-				Intent startAgent = new Intent(getActivity(),
+				Intent startMain = new Intent(getActivity(),
 						MainActivity.class);
-				startActivity(startAgent);
+				startMain.putExtra("INITIALINDEX", 2);
+				startActivity(startMain);
 				
 				break;
 
