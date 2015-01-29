@@ -225,12 +225,17 @@ public class GoalModelManager implements Runnable {
 					// 拦截地址
 					if (msg.getTaskLocation() != null
 							&& msg.getTaskLocation().equals("needLocation")
-							&& needRequestData.getContentType().equals("Text")) {
+							&& needRequestData.getContentType().contains("Text")) {
 						String dataContent = EncodeDecodeRequestData
 								.decodeToText(needRequestData.getContent());
+
 						if (dataContent.contains("Addr")) {
 							String locationString = dataContent.split(";")[2]
 									.split(":")[1];
+							msg.setTaskLocation(locationString);
+						}
+						if (dataContent.contains(" at ")) {
+							String locationString = dataContent.split(" at ")[1];
 							msg.setTaskLocation(locationString);
 						}
 					}

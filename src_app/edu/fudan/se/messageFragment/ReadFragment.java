@@ -10,7 +10,6 @@ import edu.fudan.se.R;
 import edu.fudan.se.initial.SGMApplication;
 import edu.fudan.se.userMes.UserTask;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;

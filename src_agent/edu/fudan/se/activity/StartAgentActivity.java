@@ -91,9 +91,9 @@ public class StartAgentActivity extends Activity {
 							.setAgentNickname(nickname);
 					((SGMApplication) getApplication()).getGoalModelManager()
 							.setAgentNickname(nickname);
-					
+
 					ClientAuthorization.agentNickName = nickname;
-					
+
 					Log.i("start agent",
 							"agent nickname: "
 									+ ((SGMApplication) getApplication())
@@ -108,17 +108,19 @@ public class StartAgentActivity extends Activity {
 							MainActivity.class);
 					// intent.putExtra("agentname", nickname);
 					startActivity(intent);
-					
-					//开启定位服务
+
+					// 开启定位服务
 					android.util.Log.i("MY_LOG", "startLocationService......");
-					Intent locationServiceIntent = new Intent("service.appservice.locator");
+					Intent locationServiceIntent = new Intent(
+							"service.appservice.locator");
 					startService(locationServiceIntent);
-					
-					//开启监听系统广播的服务
-					android.util.Log.i("MY_LOG", "startSystemBroadcastListenerService......");
-					Intent sblistenerIntent = new Intent("service.appservice.sblistener");
+
+					// 开启监听系统广播的服务
+					android.util.Log.i("MY_LOG",
+							"startSystemBroadcastListenerService......");
+					Intent sblistenerIntent = new Intent(
+							"service.appservice.sblistener");
 					startService(sblistenerIntent);
-					
 
 				} catch (Exception ex) {
 					System.out.println(ex.toString()
@@ -199,8 +201,6 @@ public class StartAgentActivity extends Activity {
 			};
 			logger.log(Level.INFO, "Binding Gateway to MicroRuntimeService...");
 
-			// this.startService(service);
-			// this.bindService(service, conn, flags)
 			bindService(new Intent(getApplicationContext(),
 					MicroRuntimeService.class), serviceConnection,
 					Context.BIND_AUTO_CREATE);
@@ -261,11 +261,9 @@ public class StartAgentActivity extends Activity {
 				agentStartupCallback.onFailure(throwable);
 			}
 		};
-		microRuntimeServiceBinder.startAgent(nickname, AideAgent.class
-				.getName(), new Object[] { getApplicationContext(), (SGMApplication) getApplication()
-//				((SGMApplication) getApplication()).getGoalModelManager(),
-//				((SGMApplication) getApplication()).getUserTaskList(),
-//				((SGMApplication) getApplication()).getUserMessageList() 
-				}, rc);
+		microRuntimeServiceBinder.startAgent(nickname,
+				AideAgent.class.getName(), new Object[] {
+						getApplicationContext(),
+						(SGMApplication) getApplication() }, rc);
 	}
 }

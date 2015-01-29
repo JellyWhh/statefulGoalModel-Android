@@ -4,6 +4,7 @@
 package service.async.webservice;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import android.app.IntentService;
 import android.content.Intent;
@@ -22,6 +23,7 @@ import edu.fudan.se.support.GetAgent;
 public class IntentServiceQueryBookFromLibrary extends IntentService {
 	
 	private String bookName = "";
+	private String bookandLib="";
 
 	private String goalModelName, elementName;
 	
@@ -57,6 +59,10 @@ public class IntentServiceQueryBookFromLibrary extends IntentService {
 					MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE,
 					goalModelName, null, elementName,
 					MesBody_Mes2Manager.ServiceExecutingDone);
+			
+			RequestData retRequestData = new RequestData("book name", "BooleanText");
+			retRequestData.setContent(bookandLib.getBytes());
+			msg.setRetContent(retRequestData);
 
 
 			GetAgent.getAideAgentInterface((SGMApplication) getApplication())
@@ -85,22 +91,32 @@ public class IntentServiceQueryBookFromLibrary extends IntentService {
 	}
 	
 	private boolean queryBookFromLibrary(String bookname){
+		boolean ret=false;
+		
+		HashMap<String, ArrayList<String>> libraryBookList = new HashMap<>();
 
 		//这里应该是调用图书馆的web service来返回结果
-		ArrayList<String> bookList = new ArrayList<>();
-		bookList.add("Math");
-		bookList.add("Chinese");
-		bookList.add("Language");
-		bookList.add("Geography");
-		bookList.add("Biology");
-		bookList.add("Piano");
-		bookList.add("English");
+		ArrayList<String> bookList1 = new ArrayList<>();
+		bookList1.add("Thinking in Java");
+		bookList1.add("Computer Systems Architecture");
 		
-		if (bookList.contains(bookname)) {
-			return true;
-		}else {
-			return false;
+		ArrayList<String> bookList2 = new ArrayList<>();
+		bookList2.add("Thinking in Java");
+		bookList2.add("Design Patterns");
+		
+		libraryBookList.put("Library1", bookList1);
+		libraryBookList.put("Library2", bookList2);
+		
+		for (String lib:libraryBookList.keySet()) {
+			ArrayList<String> bookList= libraryBookList.get(lib);
+			if (bookList.contains(bookname)) {
+				bookandLib = bookname + " at " + lib;
+				ret = true;
+				break;
+			}
 		}
+		
+		return ret;
 	}
 	
 }

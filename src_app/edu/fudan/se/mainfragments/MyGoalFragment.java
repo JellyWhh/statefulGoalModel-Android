@@ -35,6 +35,7 @@ import edu.fudan.se.goalmodel.GoalModel;
 import edu.fudan.se.goalmodel.GoalModelActivity;
 import edu.fudan.se.goalmodel.GoalModelManager;
 import edu.fudan.se.initial.SGMApplication;
+import edu.fudan.se.log.Log;
 import edu.fudan.se.R;
 
 /**
@@ -199,6 +200,7 @@ class MyGoalListAdapter extends ArrayAdapter<GoalModel> {
 							}
 						});
 			} else {
+				Log.logCustomization(goalModel.getName(), "customization started!");
 				// 先找出or分解的子目标，让用户设定优先级
 				ArrayList<CustomItem> customItemList = new ArrayList<>();
 
@@ -265,6 +267,7 @@ class MyGoalListAdapter extends ArrayAdapter<GoalModel> {
 								goalModelManager.addGoalModel(newGoalModel);
 								notifyDataSetChanged();
 
+								Log.logCustomization(goalModel.getName(), "customization finished! reparse finished!");
 							}
 						});
 				builder.setNegativeButton("Cancel",
@@ -274,6 +277,8 @@ class MyGoalListAdapter extends ArrayAdapter<GoalModel> {
 							public void onClick(DialogInterface dialog,
 									int which) {
 								dialog.dismiss();
+
+								Log.logCustomization(goalModel.getName(), "customization canceled!");
 							}
 						});
 			}

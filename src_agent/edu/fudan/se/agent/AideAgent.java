@@ -22,12 +22,12 @@ import edu.fudan.se.goalmachine.message.MesBody_Mes2Manager;
 import edu.fudan.se.goalmachine.message.MesHeader_Mes2Manger;
 import edu.fudan.se.goalmachine.message.SGMMessage;
 import edu.fudan.se.goalmodel.EncodeDecodeRequestData;
-import edu.fudan.se.goalmodel.GoalModel;
 import edu.fudan.se.goalmodel.GoalModelManager;
 import edu.fudan.se.goalmodel.RequestData;
 import edu.fudan.se.initial.SGMApplication;
 import edu.fudan.se.log.Log;
 import edu.fudan.se.userMes.UserConfirmTask;
+import edu.fudan.se.userMes.UserConfirmWithRetTask;
 import edu.fudan.se.userMes.UserInputTextTask;
 import edu.fudan.se.userMes.UserTakePictureTask;
 import edu.fudan.se.userMes.UserTask;
@@ -39,7 +39,6 @@ import jade.core.behaviours.OneShotBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
-import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
 
@@ -92,12 +91,12 @@ public class AideAgent extends Agent implements AideAgentInterface {
 		/* 在黄页服务中注册所有的goal model服务 */
 		DFAgentDescription dfd = new DFAgentDescription();
 		dfd.setName(getAID());
-		for (GoalModel gm : goalModelManager.getGoalModelList().values()) {
-			ServiceDescription sd = new ServiceDescription();
-			sd.setType("GOALMODEL");
-			sd.setName(gm.getName());
-			dfd.addServices(sd);
-		}
+//		for (GoalModel gm : goalModelManager.getGoalModelList().values()) {
+//			ServiceDescription sd = new ServiceDescription();
+//			sd.setType("GOALMODEL");
+//			sd.setName(gm.getName());
+//			dfd.addServices(sd);
+//		}
 
 		try {
 			DFService.register(this, dfd);
@@ -144,10 +143,10 @@ public class AideAgent extends Agent implements AideAgentInterface {
 		this.addBehaviour(new SendLocationToServerAgent(this, userLocation));
 	}
 
-	@Override
-	public void registerGoalModelService(GoalModel goalModel) {
-		this.addBehaviour(new RegisterGoalModelService(this, goalModel));
-	}
+//	@Override
+//	public void registerGoalModelService(GoalModel goalModel) {
+//		this.addBehaviour(new RegisterGoalModelService(this, goalModel));
+//	}
 
 	/**
 	 * 发送消息给本地manager
@@ -507,45 +506,45 @@ public class AideAgent extends Agent implements AideAgentInterface {
 		}
 
 	}
-
-	/**
-	 * 发送位置信息给ServerAgent
-	 * 
-	 * @author whh
-	 * 
-	 */
-	private class RegisterGoalModelService extends OneShotBehaviour {
-
-		private static final long serialVersionUID = -8674488872785177053L;
-		private Agent a;
-		private GoalModel goalModel;
-
-		public RegisterGoalModelService(Agent a, GoalModel goalModel) {
-			super(a);
-			this.a = a;
-			this.goalModel = goalModel;
-		}
-
-		@Override
-		public void action() {
-
-			// 在黄页服务中注册所有的goal model服务
-			DFAgentDescription dfd = new DFAgentDescription();
-			dfd.setName(getAID());
-			ServiceDescription sd = new ServiceDescription();
-			sd.setType("GOALMODEL");
-			sd.setName(goalModel.getName());
-			dfd.addServices(sd);
-
-			try {
-				// 这里是更新服务，而不是重新注册服务
-				DFService.modify(a, dfd);
-			} catch (FIPAException e) {
-				e.printStackTrace();
-			}
-		}
-
-	}
+//
+//	/**
+//	 * 发送位置信息给ServerAgent
+//	 * 
+//	 * @author whh
+//	 * 
+//	 */
+//	private class RegisterGoalModelService extends OneShotBehaviour {
+//
+//		private static final long serialVersionUID = -8674488872785177053L;
+//		private Agent a;
+//		private GoalModel goalModel;
+//
+//		public RegisterGoalModelService(Agent a, GoalModel goalModel) {
+//			super(a);
+//			this.a = a;
+//			this.goalModel = goalModel;
+//		}
+//
+//		@Override
+//		public void action() {
+//
+//			// 在黄页服务中注册所有的goal model服务
+//			DFAgentDescription dfd = new DFAgentDescription();
+//			dfd.setName(getAID());
+//			ServiceDescription sd = new ServiceDescription();
+//			sd.setType("GOALMODEL");
+//			sd.setName(goalModel.getName());
+//			dfd.addServices(sd);
+//
+//			try {
+//				// 这里是更新服务，而不是重新注册服务
+//				DFService.modify(a, dfd);
+//			} catch (FIPAException e) {
+//				e.printStackTrace();
+//			}
+//		}
+//
+//	}
 
 	/**
 	 * 向server agent发送请求所有用户信息的ACLMessage，发送后会进入等待server agent回复过程中
@@ -738,8 +737,14 @@ public class AideAgent extends Agent implements AideAgentInterface {
 					ACLMC_DelegateTask aclmc_DelegateTask = new ACLMC_DelegateTask(
 							ACLMC_DelegateTask.DTHeader.NEWDT, selfAgentName,
 							toAgentName, goalModelName, elementName);
-					aclmc_DelegateTask.setTaskDescription(taskExecutingUtil
-							.getTaskDescription());
+					//替换地址信息
+					String taskDescription=taskExecutingUtil
+							.getTaskDescription();
+					if (taskDescription.contains("?location?")) {
+						taskDescription = taskDescription.replace("?location?", locationArray[triedLocationNums]);
+					}
+					System.out.println("debug!!!!!!!!!!!!!!!!+taskDescription: " + taskDescription);
+					aclmc_DelegateTask.setTaskDescription(taskDescription);
 
 					RequestData needRequestData = taskExecutingUtil
 							.getNeedRequestData();
@@ -798,70 +803,6 @@ public class AideAgent extends Agent implements AideAgentInterface {
 				}
 
 			}
-			//
-			// // 把位置信息传进去
-			// ArrayList<String> delegaToChoice = AideAgentSupport
-			// .getDelegateToListBasedRanking(userInformationList,
-			// taskLocation, selfAgentName);
-			//
-			// // 先移除已经委托过的人
-			// delegaToChoice.removeAll(delegateAUtil.getAlreadyTriedList());
-			// int alreadyTriedTimes = delegateAUtil.getTriedTimes();
-			//
-			// // 还可以委托
-			// if ((!delegaToChoice.isEmpty())
-			// && (alreadyTriedTimes < (canTriedTimes * locationNum))) {
-			// String delegateTo = delegaToChoice.get(0);
-			// delegateAUtil.setTriedTimes(alreadyTriedTimes++);
-			// delegateAUtil.getAlreadyTriedList().add(delegateTo);
-			//
-			// android.util.Log.i("MY_LOG", "DelegateTo user is: "
-			// + delegateTo + ", alreadyTriedTimes: "
-			// + alreadyTriedTimes);
-			// // 发送消息给委托对象agent
-			// // 委托出去的任务，必须要人来做，无需给输入数据，只需要知道让用户返回什么数据即可
-			//
-			// ACLMC_DelegateTask aclmc_DelegateTask = new ACLMC_DelegateTask(
-			// ACLMC_DelegateTask.DTHeader.NEWDT, selfAgentName,
-			// delegateTo, goalModelName, elementName);
-			// aclmc_DelegateTask.setTaskDescription(taskExecutingUtil
-			// .getTaskDescription());
-			//
-			// RequestData needRequestData = taskExecutingUtil
-			// .getNeedRequestData();
-			// if (needRequestData != null) {
-			// aclmc_DelegateTask.setNeedRequestData(needRequestData);
-			// }
-			//
-			// RequestData retRequestData = taskExecutingUtil
-			// .getRetRequestData();
-			// if (retRequestData != null) {
-			// android.util.Log.i("MY_LOG",
-			// "delegateToPeopleExecuting---retRequestData name: "
-			// + retRequestData.getName());
-			// aclmc_DelegateTask.setRetRequestData(retRequestData);
-			// }
-			// sendMesToExternalAgent(aclmc_DelegateTask);// 这里有可能是发回给自己了
-			//
-			// SimpleDateFormat df = new SimpleDateFormat(
-			// "yyyy-MM-dd HH:mm:ss");
-			// String logTime = df.format(new Date());
-			// String logContent = "The task <" + goalModelName + "-"
-			// + elementName + "> is delegated to [" + delegateTo
-			// + "].";
-			// UserLog userLog = new UserLog(logTime, logContent);
-			// userLogList.add(0, userLog);
-			//
-			// Log.logAdaption(goalModelName, elementName,
-			// "Delegate to people. DelegateToName: " + delegateTo
-			// + ", AlreadyTriedTimes: " + alreadyTriedTimes);
-			//
-			// } else {// 没有可委托对象或者超过了重试次数
-			// delegateFail(goalModelName, elementName);
-			//
-			// Log.logAdaption(goalModelName, elementName,
-			// "No delegateTo user. Task Failed!");
-			// }
 		}
 	}
 
@@ -957,7 +898,7 @@ public class AideAgent extends Agent implements AideAgentInterface {
 			userTaskDescription = "You need to do the task:\n"
 					+ aclmc_DelegateTask.getTaskDescription();
 			if (needRequestData != null
-					&& needRequestData.getContentType().equals("Text")) {
+					&& needRequestData.getContentType().contains("Text")) {
 				userTaskDescription += " "
 						+ EncodeDecodeRequestData.decodeToText(needRequestData
 								.getContent());
@@ -996,6 +937,20 @@ public class AideAgent extends Agent implements AideAgentInterface {
 						&& needRequestData.getContentType().equals("Text")) {
 					userTaskDescription += EncodeDecodeRequestData
 							.decodeToText(needRequestData.getContent());
+				}
+			}
+			else if (retRequestData.getContentType().equals("BooleanText")) {
+				userTask = new UserConfirmWithRetTask(userTaskTime, fromAgentName, goalModelName, elementName);
+				
+				System.out.println("debug!!!!!!!!!AideAgent handleNewDelegateTask--retRequestData.getName():"+retRequestData.getName());
+				
+				userTaskDescription = "Please confirm: \n"
+						+ retRequestData.getName().split("%")[0];
+				if (needRequestData != null
+						&& needRequestData.getContentType().equals("Text")) {
+					userTaskDescription += EncodeDecodeRequestData
+							.decodeToText(needRequestData.getContent());
+					((UserConfirmWithRetTask)userTask).setNeedRequestData(needRequestData);
 				}
 			}
 

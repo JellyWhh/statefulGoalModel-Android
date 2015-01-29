@@ -83,7 +83,7 @@ public class IntentServiceBorrowBookFromLibrary extends IntentService {
 	private boolean borrowBookFromLibrary(String bookname) {
 
 		int random = (int) (Math.random() * 10); // [0,10)
-		if (random > 1) {	//80%的概率
+		if (random > 100) {	//100%的概率
 			// 借书成功
 			return true;
 		} else {

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<GoalModel name="get a book" description="This is a goal model about getting a book!">
+<GoalModel name="get_a_book" description="This is a goal model about getting a book!">
 
 	<ElementMachine id="0" type="GoalMachine" name="book acquired"
 		level="0" description="tell book info">
@@ -35,7 +35,7 @@
 		<priorityLevel>2</priorityLevel>
 	</ElementMachine>
 	
-	<ElementMachine id="4" type="TaskMachine" name="query book from Llbrary"
+	<ElementMachine id="4" type="TaskMachine" name="query book from library"
 		level="3" description="query book">
 		<parentGoal>provided by library</parentGoal>
 		<priorityLevel>1</priorityLevel>
@@ -44,10 +44,11 @@
 	</ElementMachine>
 	
 	<ElementMachine id="5" type="TaskMachine" name="borrow book"
-		level="3" description="borrow the book from library: ">
+		level="3" description="borrow the book : ">
 		<parentGoal>provided by library</parentGoal>
 		<priorityLevel>1</priorityLevel>
 		<executingRequestedServiceName>borrowBookFromLibrary</executingRequestedServiceName>
+		<executingLocation>needLocation</executingLocation>
 	</ElementMachine>
 	
 	<ElementMachine id="6" type="GoalMachine" name="provided by bookstore"
@@ -129,9 +130,8 @@
 		<executingLocation>needLocation</executingLocation>
 	</ElementMachine>
 	
-	<RequestData name="book name" from="tell book info" to="query book from Llbrary" contentType="Text"></RequestData>
-	<RequestData name="Does ?location? has the book? " from="query book from Llbrary" to="noUse1" contentType="Boolean"></RequestData>
-	<RequestData name="book name" from="tell book info" to="borrow book" contentType="Text"></RequestData>
+	<RequestData name="book name" from="tell book info" to="query book from library" contentType="Text"></RequestData>
+	<RequestData name="Does ?location? have the book? Title: %?location?" from="query book from library" to="borrow book" contentType="BooleanText"></RequestData>
 	
 	<RequestData name="book name" from="tell book info" to="query from CBS" contentType="Text"></RequestData>
 	<RequestData name="book price in bookstore" from="query from CBS" to="comfirm book info" contentType="Text"></RequestData>

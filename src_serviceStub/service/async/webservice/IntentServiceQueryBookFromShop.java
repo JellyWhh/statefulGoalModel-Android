@@ -1,6 +1,6 @@
 package service.async.webservice;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 import android.app.IntentService;
 import android.content.Intent;
@@ -85,22 +85,15 @@ public class IntentServiceQueryBookFromShop extends IntentService {
 	private boolean queryBookFromShop(String bookname){
 
 		//这里应该是调用图书馆的web service来返回结果
-		ArrayList<String> bookList = new ArrayList<>();
-		bookList.add("Math");
-		bookList.add("Science");
-		bookList.add("Chinese");
-		bookList.add("Language");
-		bookList.add("Geography");
-		bookList.add("Biology");
-		bookList.add("Art");
-		bookList.add("Piano");
-		bookList.add("English");
-		bookList.add("Chemistry");
-		bookList.add("Computer");
+		HashMap<String,String> bookList = new HashMap<String, String>();
+		bookList.put("OSGi in Action","99");
+		bookList.put("Software Engineering","189");
+		bookList.put("Thinking in Java","159");
+		bookList.put("Design Patterns","49");
+
 		
-		if (bookList.contains(bookname)) {
-			int random = (int) (Math.random() * 100); // [0,100)
-			bookPrice = String.valueOf(random);
+		if (bookList.keySet().contains(bookname)) {
+			bookPrice = bookList.get(bookname);
 			return true;
 		}else {
 			return false;

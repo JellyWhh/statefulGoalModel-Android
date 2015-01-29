@@ -81,7 +81,6 @@ public class AideAgentSupport {
 		allIntentServiceNameArrayList.add("service.intentservice.userConfirm");
 
 		allIntentServiceNameArrayList.add("service.intentservice.queryBookFromLibrary");
-		allIntentServiceNameArrayList.add("service.intentservice.borrowBookFromLibrary");
 		allIntentServiceNameArrayList.add("service.intentservice.queryBookFromShop");
 		allIntentServiceNameArrayList.add("service.intentservice.pay");
 		allIntentServiceNameArrayList.add("service.intentservice.querySeller");
@@ -245,15 +244,12 @@ public class AideAgentSupport {
 	 */
 	private static String getSpecificLocation(String abstractlocation) {
 		HashMap<String, String> locationMap = new HashMap<>();
-		locationMap.put("Library1", "Latitude:31.19491;Longitude:121.603517");
-
-		locationMap.put("Library2", "Latitude:31.19788;Longitude:121.606103");	//拐角
-		locationMap.put("Bookstore", "Latitude:31.195278;Longitude:121.603857");//食堂
 		
-		//二手卖家的地址
-		locationMap.put("SE Lab", "Latitude:31.19758;Longitude:121.606131");
-		locationMap.put("TeachingBuilding","Latitude:31.196645;Longitude:121.604512");//二教
-		locationMap.put("Dormitory", "Latitude:31.195983;Longitude:121.606005");//微电楼
+		locationMap.put("Library1", "Latitude:31.197595;Longitude:121.606087");//lib1在软件楼401
+		locationMap.put("Library2", "Latitude:31.197006;Longitude:121.605141");	//lib2在二教自习室
+		locationMap.put("Bookstore", "Latitude:31.197402;Longitude:121.606208");//bookstore在软件楼403
+		locationMap.put("TeachingBuilding","Latitude:31.197091;Longitude:121.604791");//seller1(YuHan)的位置，在二教走廊
+		locationMap.put("MEBuilding", "Latitude:31.196523;Longitude:121.606115");//seller2(ChaiNing)的位置，在微电楼
 		
 		return locationMap.get(abstractlocation);
 	}

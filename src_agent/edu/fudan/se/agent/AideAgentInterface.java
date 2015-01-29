@@ -2,7 +2,6 @@ package edu.fudan.se.agent;
 
 import edu.fudan.agent.support.ACLMC_DelegateTask;
 import edu.fudan.se.goalmachine.message.SGMMessage;
-import edu.fudan.se.goalmodel.GoalModel;
 
 public interface AideAgentInterface {
 
@@ -18,6 +17,6 @@ public interface AideAgentInterface {
 	
 	public void sendLocationToServerAgent(String userLocation);
 	
-	public void registerGoalModelService(GoalModel goalModel);
+//	public void registerGoalModelService(GoalModel goalModel);
 
 }

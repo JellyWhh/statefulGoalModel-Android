@@ -39,6 +39,7 @@ import edu.fudan.se.goalmodel.RequestData;
 import edu.fudan.se.initial.SGMApplication;
 import edu.fudan.se.support.TakePictureActivity;
 import edu.fudan.se.userMes.UserConfirmTask;
+import edu.fudan.se.userMes.UserConfirmWithRetTask;
 import edu.fudan.se.userMes.UserInputTextTask;
 import edu.fudan.se.userMes.UserShowContentTask;
 import edu.fudan.se.userMes.UserTakePictureTask;
@@ -207,7 +208,7 @@ class UnreadUserTaskAdapter extends ArrayAdapter<UserTask> {
 			holder.done.setText("Camera");
 		} else if (usertask instanceof UserInputTextTask) {// 让用户输入一段文本的task
 			holder.done.setText("Input");
-		} else if (usertask instanceof UserConfirmTask) {
+		} else if (usertask instanceof UserConfirmTask || usertask instanceof UserConfirmWithRetTask) {
 			holder.done.setText("Yes");
 			holder.quit.setText("No");
 		} else {// 普通的user task
@@ -283,8 +284,7 @@ class UnreadUserTaskAdapter extends ArrayAdapter<UserTask> {
 			else if (userTask instanceof UserTakePictureTask) {
 				userTask.setDone(true);
 				mObjects.remove(userTask);
-				doneTaskList.add(0,userTask);
-				// notifyDataSetChanged();
+				doneTaskList.add(0, userTask);
 
 				Intent intent = new Intent();
 				intent.setClass(mContext, TakePictureActivity.class);
@@ -294,6 +294,31 @@ class UnreadUserTaskAdapter extends ArrayAdapter<UserTask> {
 				intent.putExtra("requestDataName",
 						userTask.getRequestDataName());
 				mContext.startActivity(intent);
+			} else if (userTask instanceof UserConfirmWithRetTask) {
+
+				RequestData needRequestData = ((UserConfirmWithRetTask) userTask)
+						.getNeedRequestData();
+				RequestData retRequestData = new RequestData(
+						needRequestData.getName(), "BooleanText");
+				String toReturn = EncodeDecodeRequestData
+						.decodeToText(needRequestData.getContent())
+						+ " at "
+						+ userTask.getRequestDataName().split("%")[1];
+				retRequestData.setContent(toReturn.getBytes());
+				
+				System.out.println("debug!!!!!!UnreadFragement---------toReturn:"+toReturn);
+
+				ACLMC_DelegateTask aclmc_DelegateTask = new ACLMC_DelegateTask(
+						ACLMC_DelegateTask.DTHeader.DTBACK, null,
+						userTask.getFromAgentName(),
+						userTask.getGoalModelName(), userTask.getElementName());
+				aclmc_DelegateTask.setRetRequestData(retRequestData);
+				aclmc_DelegateTask.setDone(true);// 完成了
+				aideAgentInterface.sendMesToExternalAgent(aclmc_DelegateTask);
+
+				userTask.setDone(true);
+				mObjects.remove(userTask);
+				doneTaskList.add(0, userTask);
 			}
 			// 普通的user task 或者让用户确认结果的task
 			else {
@@ -305,14 +330,9 @@ class UnreadUserTaskAdapter extends ArrayAdapter<UserTask> {
 				aclmc_DelegateTask.setDone(true);// 完成了
 				aideAgentInterface.sendMesToExternalAgent(aclmc_DelegateTask);
 
-				// aideAgentInterface.sendMesToManager(new SGMMessage(
-				// MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null,
-				// null, null, userTask.getGoalModelName(), userTask
-				// .getElementName(), MesBody_Mes2Manager.EndTE));
 				userTask.setDone(true);
 				mObjects.remove(userTask);
-				doneTaskList.add(0,userTask);
-				// notifyDataSetChanged();
+				doneTaskList.add(0, userTask);
 			}
 		}
 
@@ -351,8 +371,7 @@ class UnreadUserTaskAdapter extends ArrayAdapter<UserTask> {
 
 			userTask.setDone(true);
 			mObjects.remove(userTask);
-			doneTaskList.add(0,userTask);
-			// notifyDataSetChanged();
+			doneTaskList.add(0, userTask);
 		}
 
 	}
@@ -404,8 +423,7 @@ class UnreadUserTaskAdapter extends ArrayAdapter<UserTask> {
 
 				userTask.setDone(true);
 				mObjects.remove(userTask);
-				doneTaskList.add(0,userTask);
-				// notifyDataSetChanged();
+				doneTaskList.add(0, userTask);
 
 				dialog.cancel();
 			}
@@ -453,9 +471,9 @@ class UnreadUserTaskAdapter extends ArrayAdapter<UserTask> {
 					new DialogInterface.OnClickListener() {
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
-//							System.out
-//									.println("DEBUG!!!!----TaskFragment,dialog. you select:"
-//											+ sellerInfos[selectIndex[0]]);
+							// System.out
+							// .println("DEBUG!!!!----TaskFragment,dialog. you select:"
+							// + sellerInfos[selectIndex[0]]);
 
 							String select = sellerInfos[selectIndex[0]];
 							// 将选中的结果发回去
@@ -476,7 +494,7 @@ class UnreadUserTaskAdapter extends ArrayAdapter<UserTask> {
 
 							userTask.setDone(true);
 							mObjects.remove(userTask);
-							doneTaskList.add(0,userTask);
+							doneTaskList.add(0, userTask);
 							dialog.cancel();
 						}
 					});
@@ -521,8 +539,7 @@ class UnreadUserTaskAdapter extends ArrayAdapter<UserTask> {
 									MesBody_Mes2Manager.EndTE));
 							userTask.setDone(true);
 							mObjects.remove(userTask);
-							doneTaskList.add(0,userTask);
-							// notifyDataSetChanged();
+							doneTaskList.add(0, userTask);
 
 							dialog.cancel();
 						}

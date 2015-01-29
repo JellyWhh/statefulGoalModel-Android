@@ -28,13 +28,14 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 import edu.fudan.se.R;
 import edu.fudan.se.goalmodel.GmXMLParser;
 import edu.fudan.se.goalmodel.GoalModel;
 import edu.fudan.se.goalmodel.GoalModelManager;
 import edu.fudan.se.initial.SGMApplication;
+import edu.fudan.se.log.Log;
 import edu.fudan.se.support.DownloadTask;
-import edu.fudan.se.support.GetAgent;
 
 /**
  * 从服务器上下载goal model xml文件的fragment
@@ -72,7 +73,7 @@ public class DownloadFragment extends ListFragment {
 		super.onListItemClick(l, v, position, id);
 
 	}
-	
+
 }
 
 /**
@@ -167,15 +168,23 @@ class DownloadListAdapter extends ArrayAdapter<DownloadTask> {
 							.newCachedThreadPool();
 					DownLoadGoalModelTask task = new DownLoadGoalModelTask(
 							downloadTask);
-					Future<Integer> result = executorService.submit(task);
+					Future<Boolean> result = executorService.submit(task);
 					try {
-						System.out.println("下载成功： " + result.get());
+						
+						if (result.get()==true) {
+							System.out.println("下载成功： " + result.get());
+
+							Toast.makeText(getContext(), "Download Succeed!", Toast.LENGTH_LONG);
+							// 把downloadTask标记为已下载
+							downloadTask.setAlreadyDownload(true);
+							notifyDataSetChanged();
+						}else {
+							Toast.makeText(getContext(), "Download Error! Please Retry!", Toast.LENGTH_LONG);
+						}
 					} catch (InterruptedException | ExecutionException e) {
 						e.printStackTrace();
 					}
-					// 把downloadTask标记为已下载
-					downloadTask.setAlreadyDownload(true);
-					notifyDataSetChanged();
+					
 
 				}
 			});
@@ -184,7 +193,7 @@ class DownloadListAdapter extends ArrayAdapter<DownloadTask> {
 		return convertView;
 	}
 
-	class DownLoadGoalModelTask implements Callable<Integer> {
+	class DownLoadGoalModelTask implements Callable<Boolean> {
 
 		private DownloadTask downloadTask;
 
@@ -193,9 +202,8 @@ class DownloadListAdapter extends ArrayAdapter<DownloadTask> {
 		}
 
 		@Override
-		public Integer call() throws Exception {
-			downloadGoalModel(downloadTask);
-			return 1;
+		public Boolean call() throws Exception {
+			return downloadGoalModel(downloadTask);
 		}
 
 	}
@@ -206,11 +214,13 @@ class DownloadListAdapter extends ArrayAdapter<DownloadTask> {
 	 * @param downloadTask
 	 *            要下载的goal model的downloadTask
 	 */
-	private void downloadGoalModel(DownloadTask downloadTask) {
+	private Boolean downloadGoalModel(DownloadTask downloadTask) {
+		Boolean ret = false;
 		String sdCardDir = Environment.getExternalStorageDirectory().getPath()
 				+ "/sgm/fxml/";
 		try {
-			System.err.println("DownloadFragment--downloadGoalModel()--开始下载");
+			Log.logCustomization(downloadTask.getName(), "downloading started!");
+			System.out.println("DownloadFragment--downloadGoalModel()--开始下载");
 			URL url = new URL(downloadTask.getUrl());
 			HttpURLConnection connection = (HttpURLConnection) url
 					.openConnection();
@@ -235,20 +245,29 @@ class DownloadListAdapter extends ArrayAdapter<DownloadTask> {
 						+ downloadTask.getName());
 				goalModelManager.addGoalModel(goalModel);
 
-				// 把下载的服务注册到agent platform上
-				GetAgent.getAideAgentInterface(application)
-						.registerGoalModelService(goalModel);
-
+//				// 把下载的服务注册到agent platform上
+//				GetAgent.getAideAgentInterface(application)
+//						.registerGoalModelService(goalModel);
+				ret = true;
+				Log.logCustomization(downloadTask.getName(),
+						"downloading finished. parse finished.");
 			} else {
 				System.err
 						.println("DownloadFragment--downloadGoalModel()--网络连接失败, Error Code: "
 								+ connection.getResponseCode());
+
+				Log.logCustomization(downloadTask.getName(),
+						"downloading failed.");
 			}
 		} catch (IOException e) {
 			System.err
 					.println("DownloadFragment--downloadGoalModel()--IOException");
+
+			Log.logCustomization(downloadTask.getName(),
+					"downloading IOException.");
 			e.printStackTrace();
 		}
+		return ret;
 	}
 
 	class ViewHolder {

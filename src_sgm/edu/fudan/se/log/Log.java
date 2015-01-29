@@ -23,6 +23,21 @@ import edu.fudan.se.goalmachine.message.SGMMessage;
 public class Log {
 
 	/**
+	 * 记录定制化的日志
+	 * 
+	 * @param content
+	 */
+	public static void logCustomization(String goalModelName, String content) {
+		String customFile = "customization.txt";
+		try {
+			String con = "[" + goalModelName + "], " + content;
+			writeAndroidLog(customFile, con);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
 	 * 记录自适应过程
 	 * 
 	 * @param goalModelName
@@ -41,7 +56,6 @@ public class Log {
 					+ content;
 			writeAndroidLog(adaptionFile, con);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -61,7 +75,6 @@ public class Log {
 			String con = "[GoalModelManager] " + methodName + ", " + content;
 			writeAndroidLog(debugFile, con);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -85,7 +98,6 @@ public class Log {
 					+ content;
 			writeAndroidLog(debugFile, con);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -109,7 +121,6 @@ public class Log {
 					+ content;
 			writeAndroidLog(debugFile, con);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -133,7 +144,6 @@ public class Log {
 					+ content;
 			writeAndroidLog(errorFile, con);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -162,7 +172,6 @@ public class Log {
 		try {
 			writeAndroidLog(messageFile, content);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

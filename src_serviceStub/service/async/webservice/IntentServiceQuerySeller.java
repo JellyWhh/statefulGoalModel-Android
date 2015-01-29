@@ -89,52 +89,34 @@ public class IntentServiceQuerySeller extends IntentService {
 
 	private boolean querySellerName(String bookname) {
 
-		HashMap<String, ArrayList<String>> seller = new HashMap<>();
+		HashMap<String, HashMap<String,String>> seller = new HashMap<>();
 
-		ArrayList<String> bookList1 = new ArrayList<>();
-		bookList1.add("Math");
-		bookList1.add("Science");
-		bookList1.add("Language");
-		bookList1.add("Biology");
-		bookList1.add("English");
+		HashMap<String,String> bookList1 = new HashMap<String, String>();
+		bookList1.put("Java Web Service","40");
+		bookList1.put("OSGi in Action","20");
+		bookList1.put("Java Script","30");
 
-		ArrayList<String> bookList2 = new ArrayList<>();
-		bookList2.add("Math");
-		bookList2.add("Geography");
-		bookList2.add("Biology");
-		bookList2.add("Piano");
-		bookList2.add("English");
+		HashMap<String,String> bookList2 = new HashMap<String, String>();
+		bookList2.put("Java Web Service","20");
+		bookList2.put("OSGi in Action","40");
+		bookList2.put("Data Mining","30");
 
-		ArrayList<String> bookList3 = new ArrayList<>();
-		bookList3.add("Science");
-		bookList3.add("Language");
-		bookList3.add("Geography");
-		bookList3.add("Piano");
-
-		seller.put("Alice", bookList1);
-		seller.put("Bob", bookList2);
-		seller.put("Tom", bookList3);
-		seller.put("May", bookList1);
-		seller.put("Ward", bookList2);
-		seller.put("Skye", bookList3);
+		seller.put("YuHan", bookList1);
+		seller.put("ChaiNing", bookList2);
 
 		HashMap<String, String> addrs = new HashMap<>();
-		addrs.put("Alice", "TeachingBuilding");
-		addrs.put("Bob", "SE Lab");
-		addrs.put("Tom", "Dormitory");
-		addrs.put("May", "SE Lab");
-		addrs.put("Ward", "Dormitory");
-		addrs.put("Skye", "TeachingBuilding");
+		addrs.put("YuHan", "TeachingBuilding");
+		addrs.put("ChaiNing", "MEBuilding");
 
 		boolean ret = false;
 
 		ArrayList<String> sellerInfoList = new ArrayList<>();
 
 		for (String selleName : seller.keySet()) {
-			if (seller.get(selleName).contains(bookname)) {
+			if (seller.get(selleName).keySet().contains(bookname)) {
 				String listItem = "Seller:" + selleName + ";Price:";
-				int price = (int) (Math.random() * 40 + 2);
-				listItem += price + ";Addr:" + addrs.get(selleName);
+				String price = seller.get(selleName).get(bookname);
+				listItem += price + ";Addr:" + addrs.get(selleName) +";Book:"+bookname;
 				sellerInfoList.add(listItem);
 			}
 		}

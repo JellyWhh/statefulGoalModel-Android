@@ -77,6 +77,11 @@ public class SGMApplication extends Application implements Serializable {
 		String sdCardDir = Environment.getExternalStorageDirectory().getPath()
 				+ "/sgm/fxml/";
 		File file = new File(sdCardDir);
+		// 如果路径不存在，创建一个目录
+		if (!file.exists()) {
+			file.mkdirs();
+		}
+
 		HashMap<String, String> localFileList = new HashMap<String, String>();
 		getLocalFileList(file, localFileList);
 
@@ -108,8 +113,8 @@ public class SGMApplication extends Application implements Serializable {
 				DownloadTask downloadTask = new DownloadTask(fileName,
 						serverFileList.get(fileName));
 				if (localFileList.containsKey(fileName)) { // 本地文件中有这个文件，说明这个是已经被下载的
-//					System.out.println("SGMApplication--localFileList.containsKey():"
-//							+ fileName);
+					// System.out.println("SGMApplication--localFileList.containsKey():"
+					// + fileName);
 					downloadTask.setAlreadyDownload(true);
 				} else {
 					downloadTask.setAlreadyDownload(false);
@@ -181,7 +186,8 @@ public class SGMApplication extends Application implements Serializable {
 				inputStream.read(buffer);
 				String[] filenames = new String(buffer).split(",");
 				for (int i = 0; i < filenames.length - 1; i++) {
-//					System.out.println("SGMApplication---"+filenames[i] + ".xml");
+					// System.out.println("SGMApplication---"+filenames[i] +
+					// ".xml");
 					serverFileList.put(filenames[i] + ".xml",
 							"http://10.131.252.246:8080/sgmfiles/xml/"
 									+ filenames[i] + ".xml");
@@ -233,8 +239,8 @@ public class SGMApplication extends Application implements Serializable {
 	public ArrayList<UserTask> getUserDoneTaskList() {
 		return userDoneTaskList;
 	}
-	
-	public ArrayList<UserTask> getUserCurrentTaskList(){
+
+	public ArrayList<UserTask> getUserCurrentTaskList() {
 		return userCurrentTaskList;
 	}
 
@@ -246,9 +252,9 @@ public class SGMApplication extends Application implements Serializable {
 			}
 		}
 		this.userDoneTaskList.removeAll(toRemoveArrayList);
-		
+
 		ArrayList<UserTask> toRemoveArrayList2 = new ArrayList<>();
-		for(UserTask userTask : this.userCurrentTaskList) {
+		for (UserTask userTask : this.userCurrentTaskList) {
 			if (userTask.getGoalModelName().equals(goalModel.getName())) {
 				toRemoveArrayList.add(userTask);
 			}
