@@ -3,18 +3,6 @@
 
     <color name="unclickable_grey">#777</color>
     <color name="clickable_black">#000</color>
-    <color name="done_grey">#ccc</color>
-    <color name="nodone_white">#FFA07B</color>
-    <color name="nodone_green">#ACE1AF</color>
-    <color name="nodone_pink">#fedcbd</color>
-    <color name="nodone_purple">#DEA681</color>
-    <color name="nodone_yellow">#fdb933</color>
-    
-    <color name="focus_black">#000</color>
-    <color name="unfocus_grey">#999</color>
-    
-    <color name="mes_focus_yellow">#ddffff</color>
-    <color name="mes_unfocus_grey">#eee</color>
     
     <color name="gl_0">#AAFFFF</color>
     <color name="gl_1">#BBFFFF</color>
@@ -24,5 +12,15 @@
     <color name="gl_5">#FFFFFF</color>
     
     <color name="custom">#CCFFFF</color>
+    
+    <color name="tab_grey">#3e3a39</color>
+    <color name="tab_blue">#1874CD</color>
+    
+    <color name="mes_tab_grey">#ffffff</color>
+    <color name="mes_tab_blue">#1874CD</color>
+    
+    <color name="mes_header_bg_grey">#eeeeee</color>
+    <color name="mes_header_tv_blue">#1874CD</color>
+    <color name="mes_border_blue">#1874CD</color>
 
 </resources>

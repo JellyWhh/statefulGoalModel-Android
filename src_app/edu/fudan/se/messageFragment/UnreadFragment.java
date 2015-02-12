@@ -26,7 +26,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import edu.fudan.agent.support.ACLMC_DelegateTask;
 import edu.fudan.se.R;
@@ -175,8 +174,6 @@ class UnreadUserTaskAdapter extends ArrayAdapter<UserTask> {
 			holder = new ViewHolder();
 			convertView = mInflater.inflate(resource, parent, false);
 
-			holder.taskLayout = (RelativeLayout) convertView
-					.findViewById(R.id.ll_tasklayout);
 			holder.time = (TextView) convertView.findViewById(R.id.tv_taskTime);
 			holder.fromAgent = (TextView) convertView
 					.findViewById(R.id.tv_taskFromName);
@@ -214,43 +211,23 @@ class UnreadUserTaskAdapter extends ArrayAdapter<UserTask> {
 		} else {// 普通的user task
 			holder.done.setText("Done");
 		}
-
-		// 必须把setClickable放在setOnClickListener后面，否则不起作用
-		if (usertask.isDone()) { // 用户已经完成的
-			holder.taskLayout.setBackgroundColor(mContext.getResources()
-					.getColor(R.color.done_grey));
-			holder.done.setClickable(false);
-			holder.quit.setClickable(false);
-			holder.done.setTextColor(mContext.getResources().getColor(
-					R.color.unclickable_grey));
-			holder.quit.setTextColor(mContext.getResources().getColor(
-					R.color.unclickable_grey));
-		} else {
-			// if (usertask instanceof UserDelegateInTask) {
-			// holder.taskLayout.setBackgroundColor(mContext.getResources()
-			// .getColor(R.color.nodone_green));
-			// } else
-			if (usertask instanceof UserShowContentTask) {
-				holder.taskLayout.setBackgroundColor(mContext.getResources()
-						.getColor(R.color.nodone_pink));
-			} else if (usertask instanceof UserTakePictureTask) {
-				holder.taskLayout.setBackgroundColor(mContext.getResources()
-						.getColor(R.color.nodone_purple));
-			} else if (usertask instanceof UserInputTextTask) {
-				holder.taskLayout.setBackgroundColor(mContext.getResources()
-						.getColor(R.color.nodone_yellow));
-			} else {
-				holder.taskLayout.setBackgroundColor(mContext.getResources()
-						.getColor(R.color.nodone_white));
-			}
-			holder.done.setClickable(true);
-			holder.quit.setClickable(true);
-			holder.done.setTextColor(mContext.getResources().getColor(
-					R.color.clickable_black));
-			holder.quit.setTextColor(mContext.getResources().getColor(
-					R.color.clickable_black));
-
-		}
+//
+//		// 必须把setClickable放在setOnClickListener后面，否则不起作用
+//		if (usertask.isDone()) { // 用户已经完成的
+//			holder.done.setClickable(false);
+//			holder.quit.setClickable(false);
+//			holder.done.setTextColor(mContext.getResources().getColor(
+//					R.color.unclickable_grey));
+//			holder.quit.setTextColor(mContext.getResources().getColor(
+//					R.color.unclickable_grey));
+//		} else {
+//			holder.done.setClickable(true);
+//			holder.quit.setClickable(true);
+//			holder.done.setTextColor(mContext.getResources().getColor(
+//					R.color.clickable_black));
+//			holder.quit.setTextColor(mContext.getResources().getColor(
+//					R.color.clickable_black));
+//		}
 
 		holder.description.setText(usertask.getDescription());
 
@@ -377,7 +354,6 @@ class UnreadUserTaskAdapter extends ArrayAdapter<UserTask> {
 	}
 
 	private class ViewHolder {
-		RelativeLayout taskLayout;
 		TextView time;
 		TextView fromAgent;
 		TextView description;

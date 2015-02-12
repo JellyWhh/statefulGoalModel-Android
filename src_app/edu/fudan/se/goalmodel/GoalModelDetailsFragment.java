@@ -9,6 +9,7 @@ import java.util.List;
 import edu.fudan.se.R;
 import edu.fudan.se.goalmachine.ElementMachine;
 import edu.fudan.se.goalmachine.GoalMachine;
+import edu.fudan.se.goalmachine.State;
 import edu.fudan.se.goalmodel.GoalModel;
 
 import android.content.Context;
@@ -134,8 +135,8 @@ class TreeViewAdapter extends ArrayAdapter<ElementMachine> {
 					.findViewById(R.id.tree_iv_goal_icon);
 			holder.name = (TextView) convertView
 					.findViewById(R.id.tree_tv_goal_name);
-			holder.state = (TextView) convertView
-					.findViewById(R.id.tree_tv_goal_state);
+			holder.state = (ImageView) convertView
+					.findViewById(R.id.tree_iv_goal_state);
 
 			convertView.setTag(holder);
 		} else {
@@ -178,8 +179,51 @@ class TreeViewAdapter extends ArrayAdapter<ElementMachine> {
 		}
 
 		holder.name.setText(treeElements.get(position).getName());
-		holder.state.setText(treeElements.get(position).getCurrentState()
-				.toString());
+
+		State currentState = treeElements.get(position).getCurrentState();
+		switch (currentState) {
+		case Initial:
+			holder.state.setImageDrawable(mContext.getResources().getDrawable(
+					R.drawable.state_initial));
+			break;
+		case Activated:
+			holder.state.setImageDrawable(mContext.getResources().getDrawable(
+					R.drawable.state_process));
+			break;
+		case Executing:
+			holder.state.setImageDrawable(mContext.getResources().getDrawable(
+					R.drawable.state_process));
+			break;
+		case Waiting:
+			holder.state.setImageDrawable(mContext.getResources().getDrawable(
+					R.drawable.state_process));
+			break;
+		case Suspended:
+			holder.state.setImageDrawable(mContext.getResources().getDrawable(
+					R.drawable.state_suspended));
+			break;
+		case Repairing:
+			holder.state.setImageDrawable(mContext.getResources().getDrawable(
+					R.drawable.state_process));
+			break;
+		case ProgressChecking:
+			holder.state.setImageDrawable(mContext.getResources().getDrawable(
+					R.drawable.state_process));
+			break;
+		case Achieved:
+			holder.state.setImageDrawable(mContext.getResources().getDrawable(
+					R.drawable.state_achieved));
+			break;
+		case Stop:
+			holder.state.setImageDrawable(mContext.getResources().getDrawable(
+					R.drawable.state_stop));
+			break;
+
+		case Failed:
+			holder.state.setImageDrawable(mContext.getResources().getDrawable(
+					R.drawable.state_failed));
+			break;
+		}
 
 		// 如果是root goal，不用显示图标
 		if (treeElements.get(position).getParentGoal() == null) {
@@ -205,7 +249,7 @@ class TreeViewAdapter extends ArrayAdapter<ElementMachine> {
 		RelativeLayout layout;
 		ImageView icon;
 		TextView name;
-		TextView state;
+		ImageView state;
 	}
 
 }

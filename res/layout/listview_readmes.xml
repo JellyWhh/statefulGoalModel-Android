@@ -19,37 +19,42 @@
             android:background="@drawable/border"
             android:orientation="vertical" >
 
-            <RelativeLayout
+             <RelativeLayout
+            android:id="@+id/ll_tasklayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="1dp"
+            android:layout_marginRight="1dp"
+            android:layout_marginTop="1dp"
+            android:background="@color/mes_header_bg_grey"
+            android:padding="5dp" >
+
+            <TextView
+                android:id="@+id/tv_taskTime_done"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_margin="1dp"
-                android:background="#eee"
-                android:padding="5dp" >
+                android:layout_alignParentLeft="true"
+                android:text="2015-01-23 23:14"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="@color/mes_header_tv_blue" />
 
-                <TextView
-                    android:id="@+id/tv_taskTime_done"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:text="2015-01-23 23:14"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
-
-                <TextView
-                    android:id="@+id/tv_taskFromName_done"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:text="From: agent"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
-            </RelativeLayout>
+            <TextView
+                android:id="@+id/tv_taskFromName_done"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:text="From: agent"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="@color/mes_header_tv_blue" />
+        </RelativeLayout>
 
             <ImageView
                 android:id="@+id/iv_task_line_done"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:scaleType="matrix"
-                android:src="#228fbd" />
+                android:src="#084f96" />
 
             <TextView
                 android:id="@+id/tv_taskDescription_done"
@@ -64,8 +69,8 @@
 
         <ImageView
             android:id="@+id/iv_task_delete"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_margin="5dp"

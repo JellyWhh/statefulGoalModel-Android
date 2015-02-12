@@ -13,11 +13,11 @@
 
         <ImageView
             android:id="@+id/iv_gmdetails_back"
-            android:layout_width="60dp"
-            android:layout_height="30dp"
+            android:layout_width="56dp"
+            android:layout_height="28dp"
             android:layout_gravity="left"
             android:contentDescription="@string/app_name"
-            android:src="@drawable/back" />
+            android:src="@drawable/back_sel" />
 
         <TextView
             android:id="@+id/tv_gmdetails_name"
@@ -25,17 +25,18 @@
             android:layout_height="30dp"
             android:layout_gravity="center"
             android:gravity="center_vertical"
+            android:text="my goal model"
             android:textAppearance="?android:textAppearanceMedium"
-            android:textColor="#333"
+            android:textColor="#1874CD"
             android:textStyle="bold" />
 
         <ImageView
             android:id="@+id/iv_gmdetails_refresh"
-            android:layout_width="60dp"
-            android:layout_height="30dp"
+            android:layout_width="56dp"
+            android:layout_height="28dp"
             android:layout_gravity="right"
             android:contentDescription="@string/app_name"
-            android:src="@drawable/refresh" />
+            android:src="@drawable/refresh_sel" />
     </FrameLayout>
 
     <android.support.v4.view.ViewPager
@@ -59,10 +60,10 @@
         <ImageView
             android:id="@+id/iv_gmdetails_orders"
             android:layout_width="60dp"
-            android:layout_height="30dp"
+            android:layout_height="24dp"
             android:layout_gravity="center"
             android:contentDescription="@string/app_name"
-            android:src="@drawable/order" />
+            android:src="@drawable/order_sel" />
     </GridLayout>
 
 </LinearLayout>

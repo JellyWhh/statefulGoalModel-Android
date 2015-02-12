@@ -32,9 +32,7 @@ public class MessageFragment extends Fragment {
 	Resources resources;
 	private ViewPager mPager;
 	private ArrayList<Fragment> fragmentsList;
-	private TextView tv_tab_unread, tv_tab_read;
-
-	public final static int num = 2;
+	private TextView tv_tab_new, tv_tab_history;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -45,32 +43,32 @@ public class MessageFragment extends Fragment {
 		initTextView(view);
 		initViewPager(view);
 		
-		tv_tab_unread.setTextColor(resources.getColor(R.color.focus_black));
+		tv_tab_new.setTextColor(resources.getColor(R.color.mes_tab_grey));
 		return view;
 	}
 
 	
 
 	private void initTextView(View parentView) {
-		tv_tab_unread = (TextView) parentView.findViewById(R.id.tv_tab_task);
-		tv_tab_read = (TextView) parentView
-				.findViewById(R.id.tv_tab_message);
+		tv_tab_new = (TextView) parentView.findViewById(R.id.tv_tab_new);
+		tv_tab_history = (TextView) parentView
+				.findViewById(R.id.tv_tab_history);
 
-		tv_tab_unread.setOnClickListener(new OnClickListener() {
+		tv_tab_new.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
-				tv_tab_unread.setTextColor(resources.getColor(R.color.focus_black));
-				tv_tab_read.setTextColor(resources.getColor(R.color.unfocus_grey));
+				tv_tab_new.setTextColor(resources.getColor(R.color.mes_tab_grey));
+				tv_tab_history.setTextColor(resources.getColor(R.color.mes_tab_blue));
 				mPager.setCurrentItem(0);
 			}
 		});
-		tv_tab_read.setOnClickListener(new OnClickListener() {
+		tv_tab_history.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
-				tv_tab_read.setTextColor(resources.getColor(R.color.focus_black));
-				tv_tab_unread.setTextColor(resources.getColor(R.color.unfocus_grey));
+				tv_tab_history.setTextColor(resources.getColor(R.color.mes_tab_grey));
+				tv_tab_new.setTextColor(resources.getColor(R.color.mes_tab_blue));
 				mPager.setCurrentItem(1);
 			}
 		});
@@ -111,17 +109,21 @@ public class MessageFragment extends Fragment {
 			// 设置按钮的显示
 			switch (arg0) {
 			case 0:
-				tv_tab_unread.setTextColor(resources.getColor(R.color.focus_black));
-				tv_tab_unread.setBackgroundColor(resources.getColor(R.color.mes_focus_yellow));
-				tv_tab_read.setTextColor(resources.getColor(R.color.unfocus_grey));
-				tv_tab_read.setBackgroundColor(resources.getColor(R.color.mes_unfocus_grey));
+				tv_tab_new.setTextColor(resources.getColor(R.color.mes_tab_grey));
+				tv_tab_new.setBackground(resources.getDrawable(R.drawable.mestab_bg_blue));
+//				tv_tab_new.setBackgroundColor(resources.getColor(R.color.mes_tab_blue));
+				tv_tab_history.setTextColor(resources.getColor(R.color.mes_tab_blue));
+				tv_tab_history.setBackground(resources.getDrawable(R.drawable.mestab_bg_white));
+//				tv_tab_history.setBackgroundColor(resources.getColor(R.color.mes_tab_grey));
 				break;
 
 			case 1:
-				tv_tab_read.setTextColor(resources.getColor(R.color.focus_black));
-				tv_tab_read.setBackgroundColor(resources.getColor(R.color.mes_focus_yellow));
-				tv_tab_unread.setTextColor(resources.getColor(R.color.unfocus_grey));
-				tv_tab_unread.setBackgroundColor(resources.getColor(R.color.mes_unfocus_grey));
+				tv_tab_history.setTextColor(resources.getColor(R.color.mes_tab_grey));
+				tv_tab_history.setBackground(resources.getDrawable(R.drawable.mestab_bg_blue));
+//				tv_tab_history.setBackgroundColor(resources.getColor(R.color.mes_tab_blue));
+				tv_tab_new.setTextColor(resources.getColor(R.color.mes_tab_blue));
+				tv_tab_new.setBackground(resources.getDrawable(R.drawable.mestab_bg_white));
+//				tv_tab_new.setBackgroundColor(resources.getColor(R.color.mes_tab_grey));
 				break;
 			}
 

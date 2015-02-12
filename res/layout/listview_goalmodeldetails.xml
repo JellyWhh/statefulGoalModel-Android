@@ -5,7 +5,7 @@
     android:layout_height="40dp"
     android:layout_gravity="left"
     android:background="#FFFFFF"
-    android:padding="3dp">
+    android:padding="3dp" >
 
     <ImageView
         android:id="@+id/tree_iv_goal_icon"
@@ -30,19 +30,15 @@
         android:textAppearance="?android:textAppearanceMedium"
         android:textColor="#000" />
 
-    <TextView
-        android:id="@+id/tree_tv_goal_state"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_gravity="center_vertical"
+    <ImageView
+        android:id="@+id/tree_iv_goal_state"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:background="@drawable/state_text_view_border"
-        android:gravity="center_vertical"
-        android:padding="3dp"
-        android:singleLine="true"
-        android:text="initial"
-        android:textAppearance="?android:textAppearanceSmall"
-        android:textColor="#2a5caa" />
+        android:layout_alignParentTop="true"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="5dp"
+        android:src="@drawable/state_initial" />
 
 </RelativeLayout>

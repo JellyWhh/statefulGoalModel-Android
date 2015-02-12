@@ -218,7 +218,7 @@ public class SGMApplication extends Application implements Serializable {
 		if (defaultHost.isEmpty() || defaultPort.isEmpty()) {
 			logger.log(Level.INFO, "Create default properties");
 			SharedPreferences.Editor editor = settings.edit();
-			editor.putString("defaultHost", "10.131.253.133"); // 改成jade平台的ip
+			editor.putString("defaultHost", "192.168.1.104"); // 改成jade平台的ip
 			editor.putString("defaultPort", "1099");
 			editor.commit();
 		}

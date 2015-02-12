@@ -7,46 +7,29 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical" >
+        android:orientation="horizontal" >
 
-        <LinearLayout
-            android:id="@+id/ll_message"
+        <TextView
+            android:id="@+id/tv_tab_new"
             android:layout_width="match_parent"
-            android:layout_height="38dp"
-            android:background="#eee" >
+            android:layout_height="40dp"
+            android:layout_weight="1.0"
+            android:background="@drawable/mestab_bg_blue"
+            android:gravity="center"
+            android:text="@string/tab_message_unread"
+            android:textColor="@color/mes_tab_grey"
+            android:textSize="18sp" />
 
-            <TextView
-                android:id="@+id/tv_tab_task"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1.0"
-                android:background="#ddffff"
-                android:gravity="center"
-                android:text="@string/tab_message_unread"
-                android:textColor="@color/focus_black"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <ImageView
-                android:id="@+id/iv_middle_line"
-                android:layout_width="2dp"
-                android:layout_height="match_parent"
-                android:paddingBottom="8dp"
-                android:paddingTop="8dp"
-                android:scaleType="matrix"
-                android:src="#222" />
-
-            <TextView
-                android:id="@+id/tv_tab_message"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1.0"
-                android:gravity="center"
-                android:text="@string/tab_message_read"
-                android:textColor="@color/unfocus_grey"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-        </LinearLayout>
+        <TextView
+            android:id="@+id/tv_tab_history"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_weight="1.0"
+            android:background="@drawable/mestab_bg_white"
+            android:gravity="center"
+            android:text="@string/tab_message_read"
+            android:textColor="@color/mes_tab_blue"
+            android:textSize="18sp" />
     </LinearLayout>
 
     <android.support.v4.view.ViewPager
