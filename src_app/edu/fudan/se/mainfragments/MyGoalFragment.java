@@ -200,39 +200,127 @@ class MyGoalListAdapter extends ArrayAdapter<GoalModel> {
 							}
 						});
 			} else {
-				Log.logCustomization(goalModel.getName(), "customization started!");
+				Log.logCustomization(goalModel.getName(),
+						"customization started!");
 				// 先找出or分解的子目标，让用户设定优先级
-				ArrayList<CustomItem> customItemList = new ArrayList<>();
+				if (!goalModel.getElementMachines().isEmpty()) {
 
-				for (ElementMachine elementMachine : goalModel
-						.getElementMachines()) {
-					// 是goal machine而且是or分解
-					if ((elementMachine instanceof GoalMachine)
-							&& (((GoalMachine) elementMachine)
-									.getDecomposition() == 1)) {
-						// 先将这个不需要定制的父目标加进来
-						customItemList.add(new CustomItem(elementMachine
-								.getName(), false));
-						for (ElementMachine sub : ((GoalMachine) elementMachine)
-								.getSubElements()) {
-							// 将需要定制的子目标加进来
-							customItemList.add(new CustomItem(sub.getName(),
-									true));
+					ArrayList<CustomItem> customItemList = new ArrayList<>();
+
+					for (ElementMachine elementMachine : goalModel
+							.getElementMachines()) {
+						// 是goal machine而且是or分解
+						if ((elementMachine instanceof GoalMachine)
+								&& (((GoalMachine) elementMachine)
+										.getDecomposition() == 1)) {
+							// 先将这个不需要定制的父目标加进来
+							customItemList.add(new CustomItem(elementMachine
+									.getName(), false));
+							for (ElementMachine sub : ((GoalMachine) elementMachine)
+									.getSubElements()) {
+								// 将需要定制的子目标加进来
+								customItemList.add(new CustomItem(
+										sub.getName(), true));
+							}
 						}
+					}
+
+					ListView listView = new ListView(mContext);
+					final CustomizationViewAdapter cvAdapter = new CustomizationViewAdapter(
+							mContext, R.layout.listview_customization,
+							customItemList);
+					listView.setAdapter(cvAdapter);
+
+					// 弹出对goal model做定制化的对话框
+					builder.setTitle("Set Priority");
+					builder.setIcon(android.R.drawable.btn_star);
+					builder.setView(listView);
+					builder.setPositiveButton("Save",
+							new DialogInterface.OnClickListener() {
+
+								@Override
+								public void onClick(DialogInterface dialog,
+										int which) {
+
+									HashMap<String, Integer> toCustom = new HashMap<>();
+
+									for (int i = 0; i < cvAdapter.getCount(); i++) {
+										CustomItem item = cvAdapter.getItem(i);
+										if (item.isNeedCustom()) {
+											toCustom.put(item.getName(),
+													item.getPriority());
+										}
+									}
+
+									// 将定制好的优先级写入文件
+									String sdCardDir = Environment
+											.getExternalStorageDirectory()
+											.getPath()
+											+ "/sgm/fxml/";
+									String filePath = sdCardDir
+											+ goalModel.getName() + ".xml";
+									GmXMLParser.editGoalModel(filePath,
+											toCustom);
+
+									// 然后再重新解析文件，替换goal model manager中的goal
+									// model
+									GmXMLParser parser = new GmXMLParser();
+									GoalModel newGoalModel = parser
+											.newGoalModel(filePath);
+									goalModelManager.getGoalModelList().remove(
+											goalModel.getName());
+									goalModelManager.addGoalModel(newGoalModel);
+									notifyDataSetChanged();
+
+									Log.logCustomization(goalModel.getName(),
+											"customization finished! reparse finished!");
+								}
+							});
+					builder.setNegativeButton("Cancel",
+							new DialogInterface.OnClickListener() {
+
+								@Override
+								public void onClick(DialogInterface dialog,
+										int which) {
+									dialog.dismiss();
+
+									Log.logCustomization(goalModel.getName(),
+											"customization canceled!");
+								}
+							});
+
+					AlertDialog dialog = builder.create();
+					dialog.setCanceledOnTouchOutside(false);// 使除了dialog以外的地方不能被点击
+					dialog.show();
+					dialog.getWindow().clearFlags(
+							WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+				}
+			}
+			// 下面是设置时间
+			if (!goalModel.getDeviceEventMapToExternalEventTable().isEmpty()) {
+
+				ArrayList<CustomItem> customTimeList = new ArrayList<>();
+				for (String timeKey : goalModel
+						.getDeviceEventMapToExternalEventTable().keySet()) {
+					if (timeKey.contains("Time")) {
+						customTimeList.add(new CustomItem(goalModel
+								.getDeviceEventMapToExternalEventTable()
+								.get(timeKey).toString(), true));
 					}
 				}
 
+				AlertDialog.Builder builder2 = new AlertDialog.Builder(mContext);
 				ListView listView = new ListView(mContext);
 				final CustomizationViewAdapter cvAdapter = new CustomizationViewAdapter(
 						mContext, R.layout.listview_customization,
-						customItemList);
+						customTimeList);
 				listView.setAdapter(cvAdapter);
 
 				// 弹出对goal model做定制化的对话框
-				builder.setTitle("Set Priority");
-				builder.setIcon(android.R.drawable.btn_star);
-				builder.setView(listView);
-				builder.setPositiveButton("Save",
+				builder2.setTitle("Set Time");
+				builder2.setIcon(android.R.drawable.btn_star);
+				builder2.setView(listView);
+				builder2.setPositiveButton("Save",
 						new DialogInterface.OnClickListener() {
 
 							@Override
@@ -249,16 +337,18 @@ class MyGoalListAdapter extends ArrayAdapter<GoalModel> {
 									}
 								}
 
-								// 将定制好的优先级写入文件
+								// 将定制好的时间写入文件
 								String sdCardDir = Environment
 										.getExternalStorageDirectory()
 										.getPath()
 										+ "/sgm/fxml/";
 								String filePath = sdCardDir
 										+ goalModel.getName() + ".xml";
-								GmXMLParser.editGoalModel(filePath, toCustom);
+								GmXMLParser.editGoalModelTime(filePath,
+										toCustom);
 
-								// 然后再重新解析文件，替换goal model manager中的goal model
+								// 然后再重新解析文件，替换goal model manager中的goal
+								// model
 								GmXMLParser parser = new GmXMLParser();
 								GoalModel newGoalModel = parser
 										.newGoalModel(filePath);
@@ -267,10 +357,11 @@ class MyGoalListAdapter extends ArrayAdapter<GoalModel> {
 								goalModelManager.addGoalModel(newGoalModel);
 								notifyDataSetChanged();
 
-								Log.logCustomization(goalModel.getName(), "customization finished! reparse finished!");
+								Log.logCustomization(goalModel.getName(),
+										"customization finished! reparse finished!");
 							}
 						});
-				builder.setNegativeButton("Cancel",
+				builder2.setNegativeButton("Cancel",
 						new DialogInterface.OnClickListener() {
 
 							@Override
@@ -278,17 +369,17 @@ class MyGoalListAdapter extends ArrayAdapter<GoalModel> {
 									int which) {
 								dialog.dismiss();
 
-								Log.logCustomization(goalModel.getName(), "customization canceled!");
+								Log.logCustomization(goalModel.getName(),
+										"customization canceled!");
 							}
 						});
+
+				AlertDialog dialog2 = builder2.create();
+				dialog2.setCanceledOnTouchOutside(false);// 使除了dialog以外的地方不能被点击
+				dialog2.show();
+				dialog2.getWindow().clearFlags(
+						WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
 			}
-
-			AlertDialog dialog = builder.create();
-			dialog.setCanceledOnTouchOutside(false);// 使除了dialog以外的地方不能被点击
-			dialog.show();
-			dialog.getWindow().clearFlags(
-					WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
-
 		}
 	}
 

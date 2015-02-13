@@ -14,7 +14,7 @@ public enum MesBody_Mes2Manager implements MesBody, Serializable {
 	StartGM, StopGM, SuspendGM, ResumeGM, ResetGM,EndTE, QuitTE, 
 	RequestService, DelegateToPeople,NoDelegatedAchieved,
 	NoDelegatedFailed, ServiceExecutingDone,ServiceExecutingFailed,
-	NewSMS;
+	NewSMS,Time1,Time12;
 
 //	public static MesBody getMesBody(String body) {
 //		switch (body) {

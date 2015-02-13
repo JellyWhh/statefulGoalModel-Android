@@ -577,4 +577,57 @@ public class GmXMLParser {
 		}
 	}
 
+	public static void editGoalModelTime(String filePath,
+			HashMap<String, Integer> toCustom) {
+		try {
+			// 得到DOM解析器的工厂实例
+			DocumentBuilderFactory domfac = DocumentBuilderFactory
+					.newInstance();
+			// 从DOM工厂获得DOM解析器
+			DocumentBuilder dombuilder = domfac.newDocumentBuilder();
+			// 把要解析的XML文档转化为输入流，以便DOM解析器解析它
+			InputStream is = new FileInputStream(filePath);
+			// 解析XML文档的输入流，得到一个Document
+			Document doc = dombuilder.parse(is);
+			// 得到XML文档的根节点(books)
+			Element root = doc.getDocumentElement();
+			// 获得根节点的所有属性名和值
+
+			// 得到根节点的所有子节点，也就是ElementMachine节点和RequestData节点
+			NodeList emNodeList = root.getChildNodes();
+			for (int i = 0; i < emNodeList.getLength(); i++) {
+
+				Node emNode = emNodeList.item(i);// 这个node是element machine节点
+				// 判断是不是子节点
+				if (emNode.getNodeType() == Node.ELEMENT_NODE) {
+
+					// ElementMachine elementMachine;
+					if (emNode.getNodeName().equals("EventBinding")) {
+						String name = emNode.getAttributes()
+								.getNamedItem("external").getNodeValue();
+
+						if (toCustom.get(name) != null) {
+							if(emNode.getAttributes().getNamedItem("device").getNodeValue().contains("Time")){
+								emNode.getAttributes().getNamedItem("device").setNodeValue("Time"+toCustom.get(name));
+							}
+						}
+
+					}
+				}
+
+			}
+
+			// 保存修改后的文件
+			TransformerFactory tFactory = TransformerFactory.newInstance();
+			Transformer transformer = tFactory.newTransformer();
+
+			DOMSource source = new DOMSource(doc);
+			StreamResult result = new StreamResult(new File(filePath));
+			transformer.transform(source, result);
+
+		} catch (Exception e) {
+			System.err.println("GmXMLParser edit goal model error!!!!");
+			e.printStackTrace();
+		}
+	}
 }
