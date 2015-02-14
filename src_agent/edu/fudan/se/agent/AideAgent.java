@@ -173,29 +173,29 @@ public class AideAgent extends Agent implements AideAgentInterface {
 			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			String logTime = df.format(new Date());
 
-			switch ((MesBody_Mes2Manager) msg.getBody()) {
+			switch (((MesBody_Mes2Manager) msg.getBody()).getBody()) {
 
-			case StartGM:
+			case "StartGM":
 				UserLog userLog1 = new UserLog(logTime, msg.getGoalModelName()
 						+ " started!");
 				userLogList.add(0, userLog1);
 				break;
-			case StopGM:
+			case "StopGM":
 				UserLog userLog2 = new UserLog(logTime, msg.getGoalModelName()
 						+ " stopped!");
 				userLogList.add(0, userLog2);
 				break;
-			case SuspendGM:
+			case "SuspendGM":
 				UserLog userLog3 = new UserLog(logTime, msg.getGoalModelName()
 						+ " suspended!");
 				userLogList.add(0, userLog3);
 				break;
-			case ResumeGM:
+			case "ResumeGM":
 				UserLog userLog4 = new UserLog(logTime, msg.getGoalModelName()
 						+ " resumed!");
 				userLogList.add(0, userLog4);
 				break;
-			case ResetGM:
+			case "ResetGM":
 				// 当用户点击reset按钮后要把和那个goal model相关的两个adaptationUtilList中储存的数据清空
 				AideAgentSupport.resetAdaptationUtilList(
 						msg.getGoalModelName(), taskExecutingAdaptionUtilList);
@@ -246,9 +246,9 @@ public class AideAgent extends Agent implements AideAgentInterface {
 			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 			String goalModelName = msg.getGoalModelName();
-			switch ((MesBody_Mes2Manager) msg.getBody()) {
+			switch (((MesBody_Mes2Manager) msg.getBody()).getBody()) {
 
-			case RequestService:
+			case "RequestService":
 
 				String elementName = msg.getFromElementName();
 				String abstractServiceName = msg.getAbstractServiceName();
@@ -277,14 +277,14 @@ public class AideAgent extends Agent implements AideAgentInterface {
 
 				break;
 
-			case NoDelegatedAchieved:
+			case "NoDelegatedAchieved":
 				String mesTime = df.format(new Date());
 				UserLog userLog1 = new UserLog(mesTime, goalModelName
 						+ " achieved!");
 				userLogList.add(0, userLog1);
 				break;
 
-			case NoDelegatedFailed:
+			case "NoDelegatedFailed":
 
 				String mesTime2 = df.format(new Date());
 				UserLog userLog2 = new UserLog(mesTime2, goalModelName
@@ -435,7 +435,8 @@ public class AideAgent extends Agent implements AideAgentInterface {
 			String logContent = "";
 
 			// 服务调用成功，直接把msg发送给manager，同时要把serviceInvocationUtilList里面储存的信息清空
-			if (msg.getBody().equals(MesBody_Mes2Manager.ServiceExecutingDone)) {
+//			if (msg.getBody().equals(MesBody_Mes2Manager.ServiceExecutingDone)) {
+			if (((MesBody_Mes2Manager)msg.getBody()).getBody().equals("ServiceExecutingDone")) {
 
 				// 清空serviceInvocationUtilList里面储存的相关信息清空
 				clearTaskExecuting(goalModelName, elementName);
@@ -454,8 +455,11 @@ public class AideAgent extends Agent implements AideAgentInterface {
 						+ "> ends.";
 			}
 			// 服务调用失败
-			else if (msg.getBody().equals(
-					MesBody_Mes2Manager.ServiceExecutingFailed)) {
+//			else if (msg.getBody().equals(
+//					MesBody_Mes2Manager.ServiceExecutingFailed)) {
+			
+			else if (((MesBody_Mes2Manager)msg.getBody()).getBody().equals(
+					"ServiceExecutingFailed")) {
 
 				// 继续调用服务，如果没有可选的，会自动跳入到委托执行
 				invokeServiceExecuting(goalModelName, elementName);
@@ -833,7 +837,7 @@ public class AideAgent extends Agent implements AideAgentInterface {
 
 		SGMMessage sgmMessage = new SGMMessage(
 				MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, goalModelName, null,
-				elementName, MesBody_Mes2Manager.QuitTE);
+				elementName, new MesBody_Mes2Manager("QuitTE"));
 
 		android.util.Log.i("MY_LOG", "Send mes to manager...");
 		if (goalModelManager.getMsgPool().offer(sgmMessage)) {
@@ -850,7 +854,7 @@ public class AideAgent extends Agent implements AideAgentInterface {
 
 		SGMMessage sgmMessage = new SGMMessage(
 				MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, goalModelName, null,
-				elementName, MesBody_Mes2Manager.QuitTE);
+				elementName, new MesBody_Mes2Manager("QuitTE"));
 
 		android.util.Log.i("MY_LOG", "Send mes to manager...");
 		if (goalModelManager.getMsgPool().offer(sgmMessage)) {
@@ -991,7 +995,7 @@ public class AideAgent extends Agent implements AideAgentInterface {
 
 			SGMMessage sgmMessage = new SGMMessage(
 					MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, goalModelName,
-					null, elementName, MesBody_Mes2Manager.EndTE);
+					null, elementName, new MesBody_Mes2Manager("EndTE"));
 			if (aclmc_DelegateTask.getRetRequestData() != null) {
 				sgmMessage
 						.setRetContent(aclmc_DelegateTask.getRetRequestData());

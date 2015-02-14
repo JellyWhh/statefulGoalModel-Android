@@ -335,7 +335,7 @@ class UnreadUserTaskAdapter extends ArrayAdapter<UserTask> {
 				aideAgentInterface.sendMesToManager(new SGMMessage(
 						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, userTask
 								.getGoalModelName(), null, userTask
-								.getElementName(), MesBody_Mes2Manager.QuitTE));
+								.getElementName(), new MesBody_Mes2Manager("QuitTE")));
 			} else {// 其余的都是委托任务
 				ACLMC_DelegateTask aclmc_DelegateTask = new ACLMC_DelegateTask(
 						ACLMC_DelegateTask.DTHeader.DTBACK, null,
@@ -512,7 +512,7 @@ class UnreadUserTaskAdapter extends ArrayAdapter<UserTask> {
 									MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE,
 									userTask.getGoalModelName(), null, userTask
 											.getElementName(),
-									MesBody_Mes2Manager.EndTE));
+									new MesBody_Mes2Manager("EndTE")));
 							userTask.setDone(true);
 							mObjects.remove(userTask);
 							doneTaskList.add(0, userTask);

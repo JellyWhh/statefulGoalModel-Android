@@ -92,36 +92,36 @@ public class SGMApplication extends Application implements Serializable {
 			}
 		}
 
-		/*
-		 * 读取服务器上的goal model xml文件列表，添加DownloadTask
-		 * 由于不能在主线程中直接进行网络连接，所以另外开一个线程连接网络
-		 */
-		ExecutorService executor = Executors.newCachedThreadPool();
-		GetServerFileListTask getServerFileListTask = new GetServerFileListTask();
-		Future<HashMap<String, String>> result = executor
-				.submit(getServerFileListTask);
-
-		// HashMap<String, String> serverFileList = getServerFileList();
-		HashMap<String, String> serverFileList = new HashMap<String, String>();
-		try {
-			serverFileList = result.get();
-		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
-		}
-		if (!serverFileList.isEmpty()) {
-			for (String fileName : serverFileList.keySet()) {
-				DownloadTask downloadTask = new DownloadTask(fileName,
-						serverFileList.get(fileName));
-				if (localFileList.containsKey(fileName)) { // 本地文件中有这个文件，说明这个是已经被下载的
-					// System.out.println("SGMApplication--localFileList.containsKey():"
-					// + fileName);
-					downloadTask.setAlreadyDownload(true);
-				} else {
-					downloadTask.setAlreadyDownload(false);
-				}
-				this.downloadTaskList.add(downloadTask);
-			}
-		}
+//		/*
+//		 * 读取服务器上的goal model xml文件列表，添加DownloadTask
+//		 * 由于不能在主线程中直接进行网络连接，所以另外开一个线程连接网络
+//		 */
+//		ExecutorService executor = Executors.newCachedThreadPool();
+//		GetServerFileListTask getServerFileListTask = new GetServerFileListTask();
+//		Future<HashMap<String, String>> result = executor
+//				.submit(getServerFileListTask);
+//
+//		// HashMap<String, String> serverFileList = getServerFileList();
+//		HashMap<String, String> serverFileList = new HashMap<String, String>();
+//		try {
+//			serverFileList = result.get();
+//		} catch (InterruptedException | ExecutionException e) {
+//			e.printStackTrace();
+//		}
+//		if (!serverFileList.isEmpty()) {
+//			for (String fileName : serverFileList.keySet()) {
+//				DownloadTask downloadTask = new DownloadTask(fileName,
+//						serverFileList.get(fileName));
+//				if (localFileList.containsKey(fileName)) { // 本地文件中有这个文件，说明这个是已经被下载的
+//					// System.out.println("SGMApplication--localFileList.containsKey():"
+//					// + fileName);
+//					downloadTask.setAlreadyDownload(true);
+//				} else {
+//					downloadTask.setAlreadyDownload(false);
+//				}
+//				this.downloadTaskList.add(downloadTask);
+//			}
+//		}
 
 		Thread gmm = new Thread(goalModelManager);
 		gmm.start();

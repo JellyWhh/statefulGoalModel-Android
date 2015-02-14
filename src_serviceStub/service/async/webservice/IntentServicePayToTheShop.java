@@ -60,7 +60,7 @@ public class IntentServicePayToTheShop extends IntentService {
 			// 服务执行成功，也就是图书馆有这本书
 			SGMMessage msg = new SGMMessage(
 					MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, goalModelName,
-					null, elementName, MesBody_Mes2Manager.ServiceExecutingDone);
+					null, elementName, new MesBody_Mes2Manager("ServiceExecutingDone"));
 
 			GetAgent.getAideAgentInterface((SGMApplication) getApplication())
 					.handleMesFromService(msg);
@@ -70,7 +70,7 @@ public class IntentServicePayToTheShop extends IntentService {
 			SGMMessage msg = new SGMMessage(
 					MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, goalModelName,
 					null, elementName,
-					MesBody_Mes2Manager.ServiceExecutingFailed);
+					new MesBody_Mes2Manager("ServiceExecutingFailed"));
 
 			GetAgent.getAideAgentInterface((SGMApplication) getApplication())
 					.handleMesFromService(msg);

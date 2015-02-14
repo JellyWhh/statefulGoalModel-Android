@@ -82,7 +82,7 @@ public class GoalModelManager implements Runnable {
 	 */
 	private void handleLocalAgentMessage(SGMMessage msg) {
 		Log.logGMMDebug("handleLocalAgentMessage()", "init, msg body is: "
-				+ msg.getBody());
+				+ msg.getBody().toString());
 
 		// Messager receiver = msg.getReceiver();
 		// String targetTaskName = receiver.getElementName();
@@ -224,15 +224,15 @@ public class GoalModelManager implements Runnable {
 			Log.logGMMDebug("handleElementMessage()", "init, msg body is: "
 					+ msg.getBody());
 
-			switch ((MesBody_Mes2Manager) msg.getBody()) {
+			switch (((MesBody_Mes2Manager) msg.getBody()).getBody()) {
 			// 都是把消息直接转发给agent，由agent根据消息body部分进行处理
 			// case RequestPersonIA: // 需要用户反馈是否完成task的消息
-			case NoDelegatedAchieved: // 告诉主人自己完成了任务
-			case NoDelegatedFailed: // 告诉主人自己没有完成任务
+			case "NoDelegatedAchieved": // 告诉主人自己完成了任务
+			case "NoDelegatedFailed": // 告诉主人自己没有完成任务
 				getAideAgentInterface().handleMesFromManager(msg);
 				break;
 
-			case RequestService: // 需要调用服务，要查询参数表
+			case "RequestService": // 需要调用服务，要查询参数表
 				// 先从数据传输路径表中看这个element是否需要别的element赋值过的数据
 				String requestElementName = goalModelList
 						.get(msg.getGoalModelName()).getParameterMapHashtable()

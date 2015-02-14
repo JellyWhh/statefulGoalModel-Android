@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<GoalModel name="Book Acquiring" description="This is a goal model about getting a book!">
+<GoalModel name="BookAcquiring" description="This is a goal model about getting a book!">
 
 	<ElementMachine id="0" type="GoalMachine" name="Book Acquiring Provided"
 		level="0" description="Book Acquiring Provided">
@@ -142,7 +142,8 @@
 	<RequestData name="second hand seller infos" from="Query in SHS" to="Select Seller" contentType="List"></RequestData>
 	<RequestData name="one seller" from="Select Seller" to="Face-to-face Trade" contentType="Text"></RequestData>
 	
-	<EventBinding device="Time12" external="startGM"></EventBinding>
+	<EventBinding device="Time12:00" external="startGM"></EventBinding>
 	<EventBinding device="NewSMS" external="quitTE" element="Get Book Name"></EventBinding>
+	<EventBinding device="Phone13827956766" external="quitTE" element="Get Book Name"></EventBinding>
 	
 </GoalModel>

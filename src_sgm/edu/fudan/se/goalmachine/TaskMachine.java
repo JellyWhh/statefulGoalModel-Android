@@ -97,7 +97,7 @@ public class TaskMachine extends ElementMachine {
 		SGMMessage msgToManager = new SGMMessage(
 				MesHeader_Mes2Manger.ELEMENT_MESSAGE, this.getGoalModel()
 						.getName(), this.getName(), null,
-				MesBody_Mes2Manager.RequestService);
+				new MesBody_Mes2Manager("RequestService"));
 		msgToManager.setAbstractServiceName(this.getExecutingAbstractServiceName());
 		if (this.getExecutingLocation()!=null) {
 			msgToManager.setTaskLocation(this.getExecutingLocation());

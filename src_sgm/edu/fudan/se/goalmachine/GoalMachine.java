@@ -374,7 +374,7 @@ public class GoalMachine extends ElementMachine {
 			SGMMessage msgToManager = new SGMMessage(
 					MesHeader_Mes2Manger.ELEMENT_MESSAGE, this.getGoalModel()
 							.getName(), this.getName(), null,
-					MesBody_Mes2Manager.NoDelegatedAchieved);
+					new MesBody_Mes2Manager("NoDelegatedAchieved"));
 			// SGMMessage msgToManager = new SGMMessage(
 			// MesHeader_Mes2Manger.ELEMENT_MESSAGE, null, this
 			// .getGoalModel().getName(), this.getName(),
@@ -412,7 +412,7 @@ public class GoalMachine extends ElementMachine {
 			SGMMessage msgToManager = new SGMMessage(
 					MesHeader_Mes2Manger.ELEMENT_MESSAGE, this.getGoalModel()
 							.getName(), this.getName(), null,
-					MesBody_Mes2Manager.NoDelegatedFailed);
+					new MesBody_Mes2Manager("NoDelegatedFailed"));
 			// SGMMessage msgToManager = new SGMMessage(
 			// MesHeader_Mes2Manger.ELEMENT_MESSAGE, null, this
 			// .getGoalModel().getName(), this.getName(),

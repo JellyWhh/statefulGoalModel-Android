@@ -223,7 +223,7 @@ public class GoalModelFragment extends Fragment {
 				aideAgentInterface.sendMesToManager(new SGMMessage(
 						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, goalModel
 								.getName(), null, null,
-						MesBody_Mes2Manager.StartGM));
+						new MesBody_Mes2Manager("StartGM")));
 				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				
 				//跳到消息界面
@@ -238,7 +238,7 @@ public class GoalModelFragment extends Fragment {
 				aideAgentInterface.sendMesToManager(new SGMMessage(
 						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, goalModel
 								.getName(), null, null,
-						MesBody_Mes2Manager.SuspendGM));
+						new MesBody_Mes2Manager("SuspendGM")));
 				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				break;
 
@@ -246,7 +246,7 @@ public class GoalModelFragment extends Fragment {
 				aideAgentInterface.sendMesToManager(new SGMMessage(
 						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, goalModel
 								.getName(), null, null,
-						MesBody_Mes2Manager.ResumeGM));
+						new MesBody_Mes2Manager("ResumeGM")));
 				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				break;
 
@@ -254,7 +254,7 @@ public class GoalModelFragment extends Fragment {
 				aideAgentInterface.sendMesToManager(new SGMMessage(
 						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, goalModel
 								.getName(), null, null,
-						MesBody_Mes2Manager.StopGM));
+						new MesBody_Mes2Manager("StopGM")));
 				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				break;
 
@@ -264,7 +264,7 @@ public class GoalModelFragment extends Fragment {
 				aideAgentInterface.sendMesToManager(new SGMMessage(
 						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, goalModel
 								.getName(), null, null,
-						MesBody_Mes2Manager.ResetGM));
+						new MesBody_Mes2Manager("ResetGM")));
 				mPager.getAdapter().notifyDataSetChanged(); // 更新数据显示
 				break;
 

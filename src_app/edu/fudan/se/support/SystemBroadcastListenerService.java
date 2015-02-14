@@ -77,7 +77,7 @@ public class SystemBroadcastListenerService extends Service {
 								"-------SystemBroadcastListenerService screen off!!!-------");
 				msgToMessage = new SGMMessage(
 						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null,
-						null, MesBody_Mes2Manager.NewSMS);
+						null, new MesBody_Mes2Manager("NewSMS"));
 				break;
 
 			case Intent.ACTION_HEADSET_PLUG: // 耳机的插入和拔出
@@ -97,144 +97,23 @@ public class SystemBroadcastListenerService extends Service {
 										"-------SystemBroadcastListenerService headset connected!!!-------");
 						msgToMessage = new SGMMessage(
 								MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
-								null, null, MesBody_Mes2Manager.NewSMS);
+								null, null, new MesBody_Mes2Manager("NewSMS"));
 
 					}
 				}
 				break;
 
-			case Intent.ACTION_TIME_TICK: // 时间流逝，1s触发一次
-				SimpleDateFormat formatter = new SimpleDateFormat("hh:mm:ss");
+			case Intent.ACTION_TIME_TICK: // 时间流逝，1分钟触发一次
+				SimpleDateFormat formatter = new SimpleDateFormat("hh:mm");
 				String nowTime = formatter.format(new Date(System
 						.currentTimeMillis()));
-				switch (nowTime) {
-				case "01:00:00":
-					msgToMessage = new SGMMessage(
-							MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
-							null, null, MesBody_Mes2Manager.Time1);
-					break;
-				case "02:00:00":
-					msgToMessage = new SGMMessage(
-							MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
-							null, null, MesBody_Mes2Manager.Time2);
-					break;
-				case "03:00:00":
-					msgToMessage = new SGMMessage(
-							MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
-							null, null, MesBody_Mes2Manager.Time3);
-					break;
-				case "04:00:00":
-					msgToMessage = new SGMMessage(
-							MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
-							null, null, MesBody_Mes2Manager.Time4);
-					break;
-				case "05:00:00":
-					msgToMessage = new SGMMessage(
-							MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
-							null, null, MesBody_Mes2Manager.Time5);
-					break;
-				case "06:00:00":
-					msgToMessage = new SGMMessage(
-							MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
-							null, null, MesBody_Mes2Manager.Time6);
-					break;
-				case "07:00:00":
-					msgToMessage = new SGMMessage(
-							MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
-							null, null, MesBody_Mes2Manager.Time7);
-					break;
-				case "08:00:00":
-					msgToMessage = new SGMMessage(
-							MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
-							null, null, MesBody_Mes2Manager.Time8);
-					break;
-				case "09:00:00":
-					msgToMessage = new SGMMessage(
-							MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
-							null, null, MesBody_Mes2Manager.Time9);
-					break;
-				case "10:00:00":
-					msgToMessage = new SGMMessage(
-							MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
-							null, null, MesBody_Mes2Manager.Time10);
-					break;
-				case "11:00:00":
-					msgToMessage = new SGMMessage(
-							MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
-							null, null, MesBody_Mes2Manager.Time11);
-					break;
-				case "12:00:00":
-					msgToMessage = new SGMMessage(
-							MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
-							null, null, MesBody_Mes2Manager.Time12);
-					break;
-				case "13:00:00":
-					msgToMessage = new SGMMessage(
-							MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
-							null, null, MesBody_Mes2Manager.Time13);
-					break;
-				case "14:00:00":
-					msgToMessage = new SGMMessage(
-							MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
-							null, null, MesBody_Mes2Manager.Time14);
-					break;
-				case "15:00:00":
-					msgToMessage = new SGMMessage(
-							MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
-							null, null, MesBody_Mes2Manager.Time15);
-					break;
-				case "16:00:00":
-					msgToMessage = new SGMMessage(
-							MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
-							null, null, MesBody_Mes2Manager.Time16);
-					break;
-				case "17:00:00":
-					msgToMessage = new SGMMessage(
-							MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
-							null, null, MesBody_Mes2Manager.Time17);
-					break;
-				case "18:00:00":
-					msgToMessage = new SGMMessage(
-							MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
-							null, null, MesBody_Mes2Manager.Time18);
-					break;
-				case "19:00:00":
-					msgToMessage = new SGMMessage(
-							MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
-							null, null, MesBody_Mes2Manager.Time19);
-					break;
-				case "20:00:00":
-					msgToMessage = new SGMMessage(
-							MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
-							null, null, MesBody_Mes2Manager.Time20);
-					break;
-				case "21:00:00":
-					msgToMessage = new SGMMessage(
-							MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
-							null, null, MesBody_Mes2Manager.Time21);
-					break;
-				case "22:00:00":
-					msgToMessage = new SGMMessage(
-							MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
-							null, null, MesBody_Mes2Manager.Time22);
-					break;
+				msgToMessage = new SGMMessage(
+						MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null, null,
+						null, new MesBody_Mes2Manager("Time" + nowTime));
 
-				case "23:00:00":
-					msgToMessage = new SGMMessage(
-							MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE, null,
-							null, null, MesBody_Mes2Manager.Time23);
-					break;
-
-				default:
-					android.util.Log.i("MY_LOG",
-							"-------ACTION_TIME_TICK time!!!! nowTime: "
-									+ nowTime + " -------");
-					break;
-				}
-
-				// android.util.Log
-				// .i("MY_LOG",
-				// "-------SystemBroadcastListenerService ACTION_TIME_TICK time!!!!-------");
+				android.util.Log.i("MY_LOG",
+						"-------ACTION_TIME_TICK time!!!! nowTime: " + nowTime
+								+ " -------");
 
 				break;
 

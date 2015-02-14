@@ -51,7 +51,7 @@ public class IntentServiceQueryBookFromShop extends IntentService {
 			SGMMessage msg = new SGMMessage(
 					MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE,
 					goalModelName, null, elementName,
-					MesBody_Mes2Manager.ServiceExecutingDone);
+					new MesBody_Mes2Manager("ServiceExecutingDone"));
 			
 			RequestData retRequestData = new RequestData("book price", "Text");
 			retRequestData.setContent(bookPrice.getBytes());
@@ -65,7 +65,7 @@ public class IntentServiceQueryBookFromShop extends IntentService {
 			SGMMessage msg = new SGMMessage(
 					MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE,
 					goalModelName, null, elementName,
-					MesBody_Mes2Manager.ServiceExecutingFailed);
+					new MesBody_Mes2Manager("ServiceExecutingFailed"));
 
 			GetAgent.getAideAgentInterface((SGMApplication) getApplication())
 					.handleMesFromService(msg);

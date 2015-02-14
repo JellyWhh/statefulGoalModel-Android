@@ -61,7 +61,7 @@ public class IntentServiceWeatherCandidate extends IntentService {
 		SGMMessage msg = new SGMMessage(
 				MesHeader_Mes2Manger.LOCAL_AGENT_MESSAGE,
 				goalModelName, null, elementName,
-				MesBody_Mes2Manager.ServiceExecutingFailed);
+				new MesBody_Mes2Manager("ServiceExecutingFailed"));
 
 
 		GetAgent.getAideAgentInterface((SGMApplication) getApplication())

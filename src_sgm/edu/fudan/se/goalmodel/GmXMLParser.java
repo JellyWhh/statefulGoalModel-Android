@@ -31,6 +31,7 @@ import edu.fudan.se.goalmachine.Condition;
 import edu.fudan.se.goalmachine.ElementMachine;
 import edu.fudan.se.goalmachine.GoalMachine;
 import edu.fudan.se.goalmachine.TaskMachine;
+import edu.fudan.se.support.BindingCustomItem;
 
 /**
  * 解析表示一个goal model的xml文件，返回一个<code>GoalModel</code>
@@ -454,15 +455,15 @@ public class GmXMLParser {
 						}
 						// 将对应的绑定注册添加到goal model相关的table中
 						EventBindingItem eventBindingItem = null;
-						if (element.equals("")) {
-							eventBindingItem = new EventBindingItem(
-									ExternalEvent.getExternalEvent(external),
-									null);
-						} else {
-							eventBindingItem = new EventBindingItem(
-									ExternalEvent.getExternalEvent(external),
-									element);
-						}
+						// if (element.equals("")) {
+						// eventBindingItem = new EventBindingItem(
+						// ExternalEvent.getExternalEvent(external),
+						// null);
+						// } else {
+						eventBindingItem = new EventBindingItem(
+								ExternalEvent.getExternalEvent(external),
+								element);
+						// }
 						goalModel.getDeviceEventMapToExternalEventTable().put(
 								device, eventBindingItem);
 
@@ -601,8 +602,8 @@ public class GmXMLParser {
 		}
 	}
 
-	public static void editGoalModelTime(String filePath,
-			HashMap<String, Integer> toCustom) {
+	public static void editGoalModelBinding(String filePath,
+			ArrayList<BindingCustomItem> bindingCustomList) {
 		try {
 			// 得到DOM解析器的工厂实例
 			DocumentBuilderFactory domfac = DocumentBuilderFactory
@@ -627,18 +628,45 @@ public class GmXMLParser {
 
 					// ElementMachine elementMachine;
 					if (emNode.getNodeName().equals("EventBinding")) {
-						String name = emNode.getAttributes()
+						String device = emNode.getAttributes()
+								.getNamedItem("device").getNodeValue();
+						String external = emNode.getAttributes()
 								.getNamedItem("external").getNodeValue();
-
-						if (toCustom.get(name) != null) {
-							if (emNode.getAttributes().getNamedItem("device")
-									.getNodeValue().contains("Time")) {
-								emNode.getAttributes()
-										.getNamedItem("device")
-										.setNodeValue(
-												"Time" + toCustom.get(name));
+						String element = "";
+						if (emNode.getAttributes().getNamedItem("element") != null) {
+							element = emNode.getAttributes()
+									.getNamedItem("element").getNodeValue();
+						}
+						if (device.contains("Time")) {
+							for (BindingCustomItem item : bindingCustomList) {
+								if (item.getExternal().equals(external)
+										&& item.getElement().equals(element)) {
+									emNode.getAttributes()
+											.getNamedItem("device")
+											.setNodeValue(
+													"Time" + item.getTime());
+								}
+							}
+						} else if (device.contains("Phone")) {
+							for (BindingCustomItem item : bindingCustomList) {
+								if (item.getExternal().equals(external)
+										&& item.getElement().equals(element)) {
+									emNode.getAttributes()
+											.getNamedItem("device")
+											.setNodeValue(
+													"Phone" + item.getPhone());
+								}
 							}
 						}
+						// if (toCustom.get(name) != null) {
+						// if (emNode.getAttributes().getNamedItem("device")
+						// .getNodeValue().contains("Time")) {
+						// emNode.getAttributes()
+						// .getNamedItem("device")
+						// .setNodeValue(
+						// "Time" + toCustom.get(name));
+						// }
+						// }
 
 					}
 				}

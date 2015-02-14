@@ -120,6 +120,8 @@ public class SGMMessage implements Serializable {
 	 * 
 	 */
 	public interface MesBody {
+		
+		public String toString();
 	}
 
 }

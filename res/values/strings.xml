@@ -40,6 +40,12 @@
     <!-- take picture界面的按钮内容 -->
     <string name="bt_save_pic">OK</string>
     <string name="bt_take_pic">Take picture</string>
+    
+    <!-- binding 定制化界面的内容 -->
+    <string name="tv_external">Event:</string>
+    <string name="tv_element">Element:</string>
+    <string name="tv_setTime">Set Time:</string>
+    <string name="tv_setPhone">Set Phone:</string>
 
     <!-- 下面是郑家欢代码中需要的string -->
     <string name="label_nick">Enter Nickname: (eg. alice)</string>
