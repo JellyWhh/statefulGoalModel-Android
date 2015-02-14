@@ -46,7 +46,7 @@ public class GoalModel {
 	/**
 	 * 将设备事件（定时器、点击按钮等）映射到goal machine的“外部事件”, key是MesBody_Mes2Manager.toString
 	 */
-	private Hashtable<String, ExternalEvent> deviceEventMapToExternalEventTable;
+	private Hashtable<String, EventBindingItem> deviceEventMapToExternalEventTable;
 
 	public GoalModel() {
 		this.elementMachines = new ArrayList<>();
@@ -124,7 +124,7 @@ public class GoalModel {
 		return parameterMapHashtable;
 	}
 
-	public Hashtable<String, ExternalEvent> getDeviceEventMapToExternalEventTable() {
+	public Hashtable<String, EventBindingItem> getDeviceEventMapToExternalEventTable() {
 		return deviceEventMapToExternalEventTable;
 	}
 

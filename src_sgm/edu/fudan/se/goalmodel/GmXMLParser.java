@@ -135,7 +135,7 @@ public class GmXMLParser {
 						String parentGoal = "";
 						int decomposition = 0, schedulerMethod = 0, priorityLevel = 0, waitingTimeLimit = 0, retryTimes = 0;
 
-						String executingRequestedServiceName = "",taskExecutingLocation="";
+						String executingRequestedServiceName = "", taskExecutingLocation = "";
 						Condition preCondition = null, postCondition = null, invariantCondition = null, commitmentCondition = null, contextCondition = null;
 
 						for (int j = 0; j < propertyNodeList.getLength(); j++) {
@@ -143,7 +143,7 @@ public class GmXMLParser {
 
 							String conditionType = "", conditionValueType = "", conditionLeftValue = "", conditionOperator = "", conditionRightValue = "";
 							boolean canRepairing = false;
-							String conditionDescription="";
+							String conditionDescription = "";
 
 							if (propertyNode.getNodeType() == Node.ELEMENT_NODE) {
 								// System.err.println(propertyNode.getNodeName());
@@ -242,8 +242,10 @@ public class GmXMLParser {
 														.parseBoolean(conditionNode
 																.getTextContent());
 											}
-											if (conditionNode.getNodeName().equals("description")) {
-												conditionDescription = conditionNode.getTextContent();
+											if (conditionNode.getNodeName()
+													.equals("description")) {
+												conditionDescription = conditionNode
+														.getTextContent();
 											}
 
 										}
@@ -260,7 +262,8 @@ public class GmXMLParser {
 												conditionRightValue);
 										contextCondition
 												.setContextHashtable(contextHashtable);
-										contextCondition.setDescription(conditionDescription);
+										contextCondition
+												.setDescription(conditionDescription);
 										break;
 									case "PRE":
 										preCondition = new Condition(
@@ -272,7 +275,8 @@ public class GmXMLParser {
 												canRepairing);
 										preCondition
 												.setContextHashtable(contextHashtable);
-										preCondition.setDescription(conditionDescription);
+										preCondition
+												.setDescription(conditionDescription);
 										break;
 									case "POST":
 										postCondition = new Condition(
@@ -283,7 +287,8 @@ public class GmXMLParser {
 												conditionRightValue);
 										postCondition
 												.setContextHashtable(contextHashtable);
-										postCondition.setDescription(conditionDescription);
+										postCondition
+												.setDescription(conditionDescription);
 										break;
 									case "COMMITMENT":
 										commitmentCondition = new Condition(
@@ -294,7 +299,8 @@ public class GmXMLParser {
 												conditionRightValue);
 										commitmentCondition
 												.setContextHashtable(contextHashtable);
-										commitmentCondition.setDescription(conditionDescription);
+										commitmentCondition
+												.setDescription(conditionDescription);
 										break;
 									case "INVARIANT":
 										invariantCondition = new Condition(
@@ -305,7 +311,8 @@ public class GmXMLParser {
 												conditionRightValue);
 										invariantCondition
 												.setContextHashtable(contextHashtable);
-										invariantCondition.setDescription(conditionDescription);
+										invariantCondition
+												.setDescription(conditionDescription);
 										break;
 
 									}
@@ -340,7 +347,8 @@ public class GmXMLParser {
 							// .setExecutingRequestedServiceName(executingRequestedServiceName);
 							// }
 							if (!taskExecutingLocation.equals("")) {
-								((TaskMachine) elementMachine).setExecutingLocation(taskExecutingLocation);
+								((TaskMachine) elementMachine)
+										.setExecutingLocation(taskExecutingLocation);
 							}
 						}
 
@@ -422,7 +430,7 @@ public class GmXMLParser {
 						android.util.Log.i("MY_LOG",
 								"-------GmXMLParser--EventBingding!!");
 						// 获得子节点的属性的名和值，也就是name, from, to,contentType等属性
-						String device = "", external = "";
+						String device = "", external = "", element = "";
 						if (emNode.getAttributes().getLength() > 0) {
 							for (int j = 0; j < emNode.getAttributes()
 									.getLength(); j++) {
@@ -436,14 +444,27 @@ public class GmXMLParser {
 									external = emNode.getAttributes().item(j)
 											.getNodeValue();
 									break;
+								case "element":
+									element = emNode.getAttributes().item(j)
+											.getNodeValue();
+									break;
 
 								}
 							}
 						}
 						// 将对应的绑定注册添加到goal model相关的table中
+						EventBindingItem eventBindingItem = null;
+						if (element.equals("")) {
+							eventBindingItem = new EventBindingItem(
+									ExternalEvent.getExternalEvent(external),
+									null);
+						} else {
+							eventBindingItem = new EventBindingItem(
+									ExternalEvent.getExternalEvent(external),
+									element);
+						}
 						goalModel.getDeviceEventMapToExternalEventTable().put(
-								device,
-								ExternalEvent.getExternalEvent(external));
+								device, eventBindingItem);
 
 					}
 
@@ -495,17 +516,20 @@ public class GmXMLParser {
 	 * @param table
 	 */
 	private void initialGoalModelMappingTable(
-			Hashtable<String, ExternalEvent> table) {
-		table.put("StartGM", ExternalEvent.startGM);
-		table.put("StopGM", ExternalEvent.stopGM);
-		table.put("SuspendGM", ExternalEvent.suspendGM);
-		table.put("ResumeGM", ExternalEvent.resumeGM);
-		table.put("ResetGM", ExternalEvent.resetGM);
-		table.put("EndTE", ExternalEvent.endTE);
-		table.put("QuitTE", ExternalEvent.quitTE);
-		table.put("ServiceExecutingDone", ExternalEvent.serviceExecutingDone);
-		table.put("ServiceExecutingFailed",
-				ExternalEvent.serviceExecutingFailed);
+			Hashtable<String, EventBindingItem> table) {
+		table.put("StartGM", new EventBindingItem(ExternalEvent.startGM, null));
+		table.put("StopGM", new EventBindingItem(ExternalEvent.stopGM, null));
+		table.put("SuspendGM", new EventBindingItem(ExternalEvent.suspendGM,
+				null));
+		table.put("ResumeGM",
+				new EventBindingItem(ExternalEvent.resumeGM, null));
+		table.put("ResetGM", new EventBindingItem(ExternalEvent.resetGM, null));
+		table.put("EndTE", new EventBindingItem(ExternalEvent.endTE, null));
+		table.put("QuitTE", new EventBindingItem(ExternalEvent.quitTE, null));
+		table.put("ServiceExecutingDone", new EventBindingItem(
+				ExternalEvent.serviceExecutingDone, null));
+		table.put("ServiceExecutingFailed", new EventBindingItem(
+				ExternalEvent.serviceExecutingFailed, null));
 	}
 
 	public static void editGoalModel(String filePath,
@@ -607,8 +631,12 @@ public class GmXMLParser {
 								.getNamedItem("external").getNodeValue();
 
 						if (toCustom.get(name) != null) {
-							if(emNode.getAttributes().getNamedItem("device").getNodeValue().contains("Time")){
-								emNode.getAttributes().getNamedItem("device").setNodeValue("Time"+toCustom.get(name));
+							if (emNode.getAttributes().getNamedItem("device")
+									.getNodeValue().contains("Time")) {
+								emNode.getAttributes()
+										.getNamedItem("device")
+										.setNodeValue(
+												"Time" + toCustom.get(name));
 							}
 						}
 

@@ -143,5 +143,6 @@
 	<RequestData name="one seller" from="Select Seller" to="Face-to-face Trade" contentType="Text"></RequestData>
 	
 	<EventBinding device="Time12" external="startGM"></EventBinding>
+	<EventBinding device="NewSMS" external="quitTE" element="Get Book Name"></EventBinding>
 	
 </GoalModel>

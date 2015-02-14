@@ -97,6 +97,10 @@ public class GoalModelManager implements Runnable {
 			if (goalModel.getDeviceEventMapToExternalEventTable().containsKey(
 					msg.getBody().toString())) {
 				relateGoalModels.add(goalModel);
+				android.util.Log.i("MY_LOG",
+						"---handleLocalAgentMessage() relateGoalModel: "
+								+ goalModel.getName() + "; msgBody: "
+								+ msg.getBody().toString());
 			}
 		}
 
@@ -118,9 +122,30 @@ public class GoalModelManager implements Runnable {
 
 			ElementMachine targetElementMachine = getEMFromGoalModelByName(
 					targetGoalModel, targetElementName);
+			android.util.Log.i("MY_LOG",
+					"---handleLocalAgentMessage() targetElementMachine is null? "
+							+ (targetElementMachine == null));
+			if (targetElementMachine == null) {
+				targetElementMachine = getEMFromGoalModelByName(
+						targetGoalModel,
+						targetGoalModel.getDeviceEventMapToExternalEventTable()
+								.get(originalSgmMessage.getBody().toString())
+								.getElementName());
+				android.util.Log.i("MY_LOG",
+						"---handleLocalAgentMessage() targetElementMachine is null? 222:"
+								+ (targetElementMachine == null));
+			}
 
+			android.util.Log.i(
+					"MY_LOG",
+					"---handleLocalAgentMessage() ExternalEvent:"
+							+ targetGoalModel
+									.getDeviceEventMapToExternalEventTable()
+									.get(originalSgmMessage.getBody()
+											.toString()).getExternalEvent());
 			switch (targetGoalModel.getDeviceEventMapToExternalEventTable()
-					.get(originalSgmMessage.getBody().toString())) {
+					.get(originalSgmMessage.getBody().toString())
+					.getExternalEvent()) {
 			case startGM:
 				start(targetGoalModel, originalSgmMessage);
 				break;
@@ -138,7 +163,7 @@ public class GoalModelManager implements Runnable {
 				break;
 			case quitTE:
 			case serviceExecutingFailed:
-				endTaskMachine((TaskMachine) targetElementMachine,
+				quitTaskMachine((TaskMachine) targetElementMachine,
 						originalSgmMessage);
 				break;
 
@@ -225,7 +250,8 @@ public class GoalModelManager implements Runnable {
 					// 拦截地址
 					if (msg.getTaskLocation() != null
 							&& msg.getTaskLocation().equals("needLocation")
-							&& needRequestData.getContentType().contains("Text")) {
+							&& needRequestData.getContentType()
+									.contains("Text")) {
 						String dataContent = EncodeDecodeRequestData
 								.decodeToText(needRequestData.getContent());
 
@@ -352,6 +378,31 @@ public class GoalModelManager implements Runnable {
 		}
 	}
 
+	private void quitTaskMachine(TaskMachine taskMachine, SGMMessage msg) {
+		Log.logGMMDebug("quitTaskMachine()",
+				"task machine: " + taskMachine.getName() + " quit!");
+		// SGMMessage msg = new SGMMessage("TOTASK", "UI",
+		// taskMachine.getName(),
+		// mes);
+
+		SGMMessage newMessage = copyMessage(msg);
+		newMessage.setBody(MesBody_Mes2Machine.TASK_FAILED);
+
+		if (taskMachine.getMsgPool().offer(newMessage)) {
+			Log.logMessage(newMessage, true);
+			Log.logEMDebug("GoalModelManager:" + taskMachine.getName(),
+					"endTaskMachine()",
+					"UI thread send a " + newMessage.getBody() + " msg to "
+							+ taskMachine.getName() + " succeed!");
+		} else {
+			Log.logMessage(newMessage, false);
+			Log.logError("GoalModelManager:" + taskMachine.getName(),
+					"endTaskMachine()",
+					"UI thread send a " + newMessage.getBody() + " msg to "
+							+ taskMachine.getName() + " error!");
+		}
+	}
+
 	/**
 	 * 给一个task
 	 * machine发送END或者QUIT消息，这个是在用户完成了某个需要他参与的任务后，在UI上点击这个task后面的end按钮时触发的操作
@@ -369,16 +420,8 @@ public class GoalModelManager implements Runnable {
 		// mes);
 
 		SGMMessage newMessage = copyMessage(msg);
+		newMessage.setBody(MesBody_Mes2Machine.TASK_DONE);
 
-		if (newMessage.getBody().equals(MesBody_Mes2Manager.EndTE)
-				|| newMessage.getBody().equals(
-						MesBody_Mes2Manager.ServiceExecutingDone)) {
-			newMessage.setBody(MesBody_Mes2Machine.TASK_DONE);
-		} else if (newMessage.getBody().equals(MesBody_Mes2Manager.QuitTE)
-				|| newMessage.getBody().equals(
-						MesBody_Mes2Manager.ServiceExecutingFailed)) {
-			newMessage.setBody(MesBody_Mes2Machine.TASK_FAILED);
-		}
 		if (taskMachine.getMsgPool().offer(newMessage)) {
 			Log.logMessage(newMessage, true);
 			Log.logEMDebug("GoalModelManager:" + taskMachine.getName(),
@@ -394,7 +437,6 @@ public class GoalModelManager implements Runnable {
 		}
 
 	}
-
 
 	/**
 	 * 发送一条消息给goal model中的root goal
