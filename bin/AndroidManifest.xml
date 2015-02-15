@@ -31,6 +31,9 @@
 
     <!-- 摄像头权限 -->
     <uses-permission android:name="android.permission.CAMERA" />
+    <!-- 电话权限 -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS"/>
 
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature
@@ -48,25 +51,21 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <service android:name="jade.android.MicroRuntimeService" />
-        
         <service android:name="service.async.webservice.IntentServiceInputText" >
             <intent-filter>
                 <action android:name="service.intentservice.inputText" />
             </intent-filter>
         </service>
-        
         <service android:name="service.async.webservice.IntentServiceTakePicture" >
             <intent-filter>
                 <action android:name="service.intentservice.takePicture" />
             </intent-filter>
         </service>
-        
         <service android:name="service.async.webservice.IntentServiceUserConfirm" >
             <intent-filter>
                 <action android:name="service.intentservice.userConfirm" />
             </intent-filter>
         </service>
-        
         <service android:name="service.async.webservice.IntentServiceQueryBookFromLibrary" >
             <intent-filter>
                 <action android:name="service.intentservice.queryBookFromLibrary" />
@@ -87,7 +86,7 @@
                 <action android:name="service.intentservice.pay" />
             </intent-filter>
         </service>
-         <service android:name="service.async.webservice.IntentServiceQuerySeller" >
+        <service android:name="service.async.webservice.IntentServiceQuerySeller" >
             <intent-filter>
                 <action android:name="service.intentservice.querySeller" />
             </intent-filter>
